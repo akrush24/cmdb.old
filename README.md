@@ -7,6 +7,6 @@
 
 ## DB
 * name: cmdb
-* user: root
+* user: cmdb
 * password: unix11
 * phpmyadmin: http://cmdb.at-consulting.ru/phpmyadmin
