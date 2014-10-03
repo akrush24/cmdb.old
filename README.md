@@ -9,3 +9,4 @@
 * name: cmdb
 * user: root
 * password: unix11
+* phpmyadmin: http://cmdb.at-consulting.ru/phpmyadmin
