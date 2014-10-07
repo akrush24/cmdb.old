@@ -26,3 +26,9 @@ $ git add -A
 $ git commit -am "Add DB folder" 
 $ git push -u origin master
 ```
+
+```
+No language indicated, so no syntax highlighting.
+s = "There is no highlighting for this."
+But let's throw in a <b>tag</b>.
+```
