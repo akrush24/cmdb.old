@@ -12,18 +12,18 @@
 * phpmyadmin: http://cmdb.at-consulting.ru/phpmyadmin
 
 ## GIT
-* First Setup
+### First Setup
 
 ```bash
 git config --global user.name "ФИО"
 git config --global user.email "login@mail.ru"
 git remote add origin git@gitlab.at-consulting.ru:it/cmdb.git
 ```
-* Working
+### Working
 
 ```bash
 $ git add -A
-$ git commit -am "Add DB folder" 
+$ git commit -am "comment"
 $ git push -u origin master
 ```
 

@@ -1,5 +1,5 @@
 #python
-
+# http://webonrails.ru/post/490/
 import mysql.connector
 
 cnx=mysql.connector.connect(user='cmdb',password='unix11',host='cmdb.at-consulting.ru',database='cmdb')
