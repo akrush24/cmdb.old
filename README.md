@@ -22,7 +22,7 @@ git remote add origin git@gitlab.at-consulting.ru:r/test01.git
 ```
 * Working
 
-```
+```bash
 $ git add -A
 $ git commit -am "Add DB folder" 
 $ git push -u origin master
