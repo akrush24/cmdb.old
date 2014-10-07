@@ -1,3 +1,5 @@
+#python
+
 import mysql.connector
 
 cnx=mysql.connector.connect(user='cmdb',password='unix11',host='cmdb.at-consulting.ru',database='cmdb')
