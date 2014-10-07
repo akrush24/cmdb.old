@@ -15,9 +15,9 @@
 * First Setup
 
 ```bash
-git config --global user.name "Крушельницкий Андрей Вячеславович"
-git config --global user.email "akrushelnitskiy@at-consulting.ru"
-git remote add origin git@gitlab.at-consulting.ru:r/test01.git
+git config --global user.name "ФИО"
+git config --global user.email "login@mail.ru"
+git remote add origin git@gitlab.at-consulting.ru:it/cmdb.git
 ```
 * Working
 
@@ -25,4 +25,11 @@ git remote add origin git@gitlab.at-consulting.ru:r/test01.git
 $ git add -A
 $ git commit -am "Add DB folder" 
 $ git push -u origin master
+```
+
+## Python
+```
+apt-get install python-pip
+pip install --allow-external mysql-connector-python mysql-connector-python
+sudo pip install --allow-external mysql-connector-python   mysql-connector-python
 ```
