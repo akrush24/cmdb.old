@@ -22,9 +22,9 @@ git remote add origin git@gitlab.at-consulting.ru:it/cmdb.git
 ### Working
 
 ```bash
-$ git add -A
-$ git commit -am "comment"
-$ git push -u origin master
+git add -A
+git commit -am "comment"
+git push -u origin master
 ```
 
 ## Python preinstall
