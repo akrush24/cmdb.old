@@ -5,7 +5,7 @@
 * hostname: `cmdb.at-consulting.ru (192.168.15.183)`
 * user: `cmdb`
 * password: `cmdb$4`
-* samba: \\cmdb.at-consulting.ru\cmdb\
+* samba: `\\cmdb.at-consulting.ru\cmdb\`
 
 ## DB
 * name: `cmdb`
