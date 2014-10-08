@@ -2,9 +2,10 @@
 * http://cmdb.at-consulting.ru/
 
 ## HOST
-* name: `cmdb.at-consulting.ru (192.168.15.183)`
-* user: `root`
+* hostname: `cmdb.at-consulting.ru (192.168.15.183)`
+* user: `cmdb`
 * password: `cmdb$4`
+* samba: \\cmdb.at-consulting.ru\cmdb\
 
 ## DB
 * name: `cmdb`
