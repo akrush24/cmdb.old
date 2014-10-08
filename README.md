@@ -1,6 +1,7 @@
 # CMDB
+http://cmdb.at-consulting.ru/
 
-## host
+## HOST
 * name: `cmdb.at-consulting.ru (192.168.15.183)`
 * user: `root`
 * password: `cmdb$4`
@@ -19,6 +20,7 @@ git config --global user.name "ФИО"
 git config --global user.email "login@mail.ru"
 git remote add origin git@gitlab.at-consulting.ru:it/cmdb.git
 ```
+
 ### Working
 
 ```bash
@@ -33,4 +35,3 @@ apt-get install python-pip
 pip install --allow-external mysql-connector-python mysql-connector-python
 sudo pip install --allow-external mysql-connector-python   mysql-connector-python
 ```
-
