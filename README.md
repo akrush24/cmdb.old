@@ -36,3 +36,6 @@ apt-get install python-pip
 pip install --allow-external mysql-connector-python mysql-connector-python
 sudo pip install --allow-external mysql-connector-python   mysql-connector-python
 ```
+
+## Parse Json
+http://hayageek.com/jquery-ajax-json-parsejson-post-getjson/
