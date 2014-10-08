@@ -23,10 +23,11 @@ DROP TABLE IF EXISTS `dictionary`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dictionary` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,6 +36,7 @@ CREATE TABLE `dictionary` (
 
 LOCK TABLES `dictionary` WRITE;
 /*!40000 ALTER TABLE `dictionary` DISABLE KEYS */;
+INSERT INTO `dictionary` VALUES (1,'RAM'),(2,'OperationSystem');
 /*!40000 ALTER TABLE `dictionary` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -46,11 +48,12 @@ DROP TABLE IF EXISTS `dictionary_values`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dictionary_values` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `dict_id` int(11) NOT NULL,
   `value` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,34 +62,8 @@ CREATE TABLE `dictionary_values` (
 
 LOCK TABLES `dictionary_values` WRITE;
 /*!40000 ALTER TABLE `dictionary_values` DISABLE KEYS */;
+INSERT INTO `dictionary_values` VALUES (1,2,'RHEL 5.5 x64'),(2,2,'RHEL 6.5 x64'),(3,2,'RHEL 7.0 x64'),(4,2,'CentOS Linux 6.5 x64'),(5,2,'CentOS Linux 7.0 x64'),(6,2,'Windos Server 2008 R2 x64');
 /*!40000 ALTER TABLE `dictionary_values` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `items`
---
-
-DROP TABLE IF EXISTS `items`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `items` (
-  `uuid` int(11) NOT NULL AUTO_INCREMENT,
-  `type_id` int(11) NOT NULL,
-  `cteate_date` datetime NOT NULL,
-  `update_date` datetime NOT NULL,
-  PRIMARY KEY (`uuid`),
-  UNIQUE KEY `uuid` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `items`
---
-
-LOCK TABLES `items` WRITE;
-/*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00'),(2,1,'0000-00-00 00:00:00','0000-00-00 00:00:00');
-/*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -117,6 +94,33 @@ INSERT INTO `properties` VALUES (1,1,'UUID',NULL),(2,1,'NAME',NULL),(3,1,'CPU',N
 UNLOCK TABLES;
 
 --
+-- Table structure for table `resources`
+--
+
+DROP TABLE IF EXISTS `resources`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `resources` (
+  `uuid` int(11) NOT NULL AUTO_INCREMENT,
+  `type_id` int(11) NOT NULL,
+  `cteate_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
+  PRIMARY KEY (`uuid`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `resources`
+--
+
+LOCK TABLES `resources` WRITE;
+/*!40000 ALTER TABLE `resources` DISABLE KEYS */;
+INSERT INTO `resources` VALUES (1,1,'2014-10-08 00:00:00','2014-10-08 00:00:00'),(2,1,'2014-10-09 00:00:00','2014-10-09 00:00:00');
+/*!40000 ALTER TABLE `resources` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `type`
 --
 
@@ -126,7 +130,6 @@ DROP TABLE IF EXISTS `type`;
 CREATE TABLE `type` (
   `type_id` int(11) NOT NULL AUTO_INCREMENT,
   `type_name` varchar(50) CHARACTER SET latin1 NOT NULL,
-  `prop_id` int(11) NOT NULL,
   `worker_id` int(11) NOT NULL,
   PRIMARY KEY (`type_id`),
   UNIQUE KEY `uuid` (`type_id`)
@@ -139,7 +142,7 @@ CREATE TABLE `type` (
 
 LOCK TABLES `type` WRITE;
 /*!40000 ALTER TABLE `type` DISABLE KEYS */;
-INSERT INTO `type` VALUES (1,'Virtual Mashin',1,0),(2,'ShareFolders',2,0);
+INSERT INTO `type` VALUES (1,'Virtual Mashin',0),(2,'ShareFolders',0);
 /*!40000 ALTER TABLE `type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -154,7 +157,8 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `pass` int(255) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -182,7 +186,8 @@ CREATE TABLE `values` (
   `last_user` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `up_date` datetime NOT NULL,
   `last_value` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`value_id`)
+  PRIMARY KEY (`value_id`),
+  UNIQUE KEY `value_id` (`value_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -207,7 +212,8 @@ CREATE TABLE `worker` (
   `worker_id` int(11) NOT NULL AUTO_INCREMENT,
   `worker_path` varchar(256) CHARACTER SET latin1 NOT NULL,
   `worker_values_id` int(11) NOT NULL,
-  PRIMARY KEY (`worker_id`)
+  PRIMARY KEY (`worker_id`),
+  UNIQUE KEY `worker_id` (`worker_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -253,4 +259,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-10-08  9:50:00
+-- Dump completed on 2014-10-08 11:03:13
