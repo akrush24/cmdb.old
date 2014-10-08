@@ -1,7 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
-# http://webonrails.ru/post/490/
+# enable debugging
+import cgitb
+cgitb.enable()
 import mysql.connector
+
+print "Content-Type: text/plain;charset=utf-8"
+print
 
 cnx=mysql.connector.connect(user='cmdb',password='unix11',host='cmdb.at-consulting.ru',database='cmdb')
 cursor=cnx.cursor()
@@ -9,4 +15,3 @@ query=('select cmdb.properties.prop_name, cmdb.values.value, cmdb.types.type_nam
 cursor.execute(query)
 for row in cursor:
     print row
-
