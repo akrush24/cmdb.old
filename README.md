@@ -1,5 +1,5 @@
 # CMDB
-http://cmdb.at-consulting.ru/
+* http://cmdb.at-consulting.ru/
 
 ## HOST
 * name: `cmdb.at-consulting.ru (192.168.15.183)`
