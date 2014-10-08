@@ -32,9 +32,8 @@ git push -u origin master
 
 ## Python preinstall
 ```bash
-apt-get install python-pip
-pip install --allow-external mysql-connector-python mysql-connector-python
-sudo pip install --allow-external mysql-connector-python   mysql-connector-python
+# apt-get install python-pip
+# sudo pip install --allow-external mysql-connector-python mysql-connector-python
 ```
 
 ## Parse Json
