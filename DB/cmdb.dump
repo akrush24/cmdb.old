@@ -16,6 +16,53 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `dictionary`
+--
+
+DROP TABLE IF EXISTS `dictionary`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dictionary` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dictionary`
+--
+
+LOCK TABLES `dictionary` WRITE;
+/*!40000 ALTER TABLE `dictionary` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dictionary` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dictionary_values`
+--
+
+DROP TABLE IF EXISTS `dictionary_values`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dictionary_values` (
+  `id` int(11) NOT NULL,
+  `dict_id` int(11) NOT NULL,
+  `value` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dictionary_values`
+--
+
+LOCK TABLES `dictionary_values` WRITE;
+/*!40000 ALTER TABLE `dictionary_values` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dictionary_values` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `items`
 --
 
@@ -25,6 +72,8 @@ DROP TABLE IF EXISTS `items`;
 CREATE TABLE `items` (
   `uuid` int(11) NOT NULL AUTO_INCREMENT,
   `type_id` int(11) NOT NULL,
+  `cteate_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
   PRIMARY KEY (`uuid`),
   UNIQUE KEY `uuid` (`uuid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -36,7 +85,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (1,1),(2,1);
+INSERT INTO `items` VALUES (1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00'),(2,1,'0000-00-00 00:00:00','0000-00-00 00:00:00');
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -51,6 +100,7 @@ CREATE TABLE `properties` (
   `prop_id` int(11) NOT NULL AUTO_INCREMENT,
   `type_id` int(11) NOT NULL,
   `prop_name` varchar(256) CHARACTER SET latin1 NOT NULL,
+  `dictionare_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`prop_id`),
   UNIQUE KEY `uuid` (`prop_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -62,7 +112,7 @@ CREATE TABLE `properties` (
 
 LOCK TABLES `properties` WRITE;
 /*!40000 ALTER TABLE `properties` DISABLE KEYS */;
-INSERT INTO `properties` VALUES (1,1,'UUID'),(2,1,'NAME'),(3,1,'CPU'),(4,1,'RAM'),(5,1,'HDD'),(6,1,'hostname'),(7,1,'MAC Address'),(8,1,'IP Address'),(9,1,'Owner');
+INSERT INTO `properties` VALUES (1,1,'UUID',NULL),(2,1,'NAME',NULL),(3,1,'CPU',NULL),(4,1,'RAM',NULL),(5,1,'HDD',NULL),(6,1,'hostname',NULL),(7,1,'MAC Address',NULL),(8,1,'IP Address',NULL),(9,1,'Owner',NULL);
 /*!40000 ALTER TABLE `properties` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -89,8 +139,32 @@ CREATE TABLE `type` (
 
 LOCK TABLES `type` WRITE;
 /*!40000 ALTER TABLE `type` DISABLE KEYS */;
-INSERT INTO `type` VALUES (1,'VPS',1,0),(2,'ShareFolders',2,0);
+INSERT INTO `type` VALUES (1,'Virtual Mashin',1,0),(2,'ShareFolders',2,0);
 /*!40000 ALTER TABLE `type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `pass` int(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -105,8 +179,11 @@ CREATE TABLE `values` (
   `prop_id` int(11) NOT NULL,
   `uuid` int(11) NOT NULL,
   `value` varchar(256) CHARACTER SET latin1 NOT NULL,
+  `last_user` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `up_date` datetime NOT NULL,
+  `last_value` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +192,7 @@ CREATE TABLE `values` (
 
 LOCK TABLES `values` WRITE;
 /*!40000 ALTER TABLE `values` DISABLE KEYS */;
-INSERT INTO `values` VALUES (1,1,1,'4232447b-b651-7fb6-0a65-a08c74773dcb'),(2,2,1,'CMDB'),(3,3,1,'1'),(4,4,1,'1024'),(5,6,1,'cmdb.at-consulting.ru'),(6,7,1,'00:50:56:b2:36:a3'),(7,8,1,'192.168.15.183'),(8,9,1,'kav@at-consulting.ru'),(9,9,1,'vkarmanov@at-consulting.ru');
+INSERT INTO `values` VALUES (1,1,1,'4232447b-b651-7fb6-0a65-a08c74773dcb','','2014-10-07 00:00:00',1),(2,2,1,'CMDB','','2014-10-07 00:00:00',1),(3,3,1,'1','','2014-10-07 00:00:00',1),(4,4,1,'1024','','2014-10-07 00:00:00',1),(5,6,1,'cmdb.at-consulting.ru','','2014-10-07 00:00:00',1),(6,7,1,'00:50:56:b2:36:a3','','2014-10-07 00:00:00',1),(7,8,1,'192.168.15.183','','2014-10-07 00:00:00',0),(8,9,1,'kav@at-consulting.ru','','2014-10-07 00:00:00',1),(9,9,1,'vkarmanov@at-consulting.ru','','2014-10-07 00:00:00',1),(10,8,1,'192.168.15.184','','2014-10-07 15:22:23',0),(11,8,1,'192.168.15.180','','2014-10-08 08:22:23',1);
 /*!40000 ALTER TABLE `values` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,4 +253,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-10-07 16:50:10
+-- Dump completed on 2014-10-08  9:50:00

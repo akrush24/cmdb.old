@@ -27,9 +27,10 @@ $ git commit -am "comment"
 $ git push -u origin master
 ```
 
-## Python
-```
+## Python preinstall
+```bash
 apt-get install python-pip
 pip install --allow-external mysql-connector-python mysql-connector-python
 sudo pip install --allow-external mysql-connector-python   mysql-connector-python
 ```
+
