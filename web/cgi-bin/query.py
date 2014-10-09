@@ -3,12 +3,9 @@
 
 import json
 import mysql.connector
-import MySQLdb
+import cgi
 
 import calendar, datetime
-
-form = cgi.FieldStorage()
-print form["username"]
 
 ## Функия для преобразования времени формата datetime.datetime(2014, 10, 8, 8, 22, 23) -> 2014-10-08 12:22:23
 def time_correct(obj):
@@ -23,13 +20,14 @@ def time_correct(obj):
     )
     return datetime.datetime.fromtimestamp( millis ).strftime('%Y-%m-%d %H:%M:%S')
 
-
 print "Content-Type: text/plain;charset=utf-8"
 print ""
 
+form = cgi.FieldStorage()
+print form
 
 # Select ALL
-mydb=MySQLdb.connect(user='cmdb',passwd='unix11',host='cmdb.at-consulting.ru',db='cmdb')
+mydb=mysql.connector.connect(user='cmdb',password='unix11',host='cmdb.at-consulting.ru',database='cmdb')
 
 cursor=mydb .cursor()
 query='select resources.uuid, properties.prop_name, values.value, types.type_name, values.up_date from cmdb.resources, cmdb.types, cmdb.properties, cmdb.values where cmdb.values.uuid = cmdb.resources.uuid and cmdb.types.type_id = cmdb.resources.type_id and cmdb.properties.prop_id = cmdb.values.prop_id and cmdb.values.last_value = 1'
