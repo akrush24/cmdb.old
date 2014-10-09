@@ -11,9 +11,9 @@ import Cookie
 # create the cookie
 c=Cookie.SimpleCookie()
 # assign a value
-c['cmdb.at-consulting.ru']='Hello world'
+c['cmdb']='Hello world'
 # set the xpires time
-c['cmdb.at-consulting.ru']['expires']=1*1*3*60*60
+c['cmdb']['expires']=1*1*3*60*60
 
 # print the header, starting with the cookie
 print c
