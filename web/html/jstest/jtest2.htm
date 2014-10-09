@@ -1,0 +1,32 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>html demo</title>
+</head>
+<body>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<table id="records_table"></table>
+<script>
+var response = [{
+      "rank":"9",
+      "content":"Alon",
+      "UID":"5"
+     },
+     {
+       "rank":"6",
+       "content":"Tala",
+       "UID":"6"
+    }];
+
+    $.each(response, function(i, item) {
+    $('<tr>').html(
+        "<td>" + response[i].rank + "</td><td>" + response[i].content + "</td><td>" + response[i].UID + "</td>").appendTo('#records_table');
+});
+</script>
+
+<-- http://stackoverflow.com/questions/17724017/using-jquery-to-build-table-rows-from-ajax-responsejson -->
+
+</body>
+</html>

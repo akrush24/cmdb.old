@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>html demo</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+</head>
+<body>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<table id="added-articles" class="table table-hover">
+            <tr>
+                <th>Title</th>
+                <th>Categories</th>
+                <th>Tags</th>
+            </tr>
+        </table>
+
+<script>
+	var articles = [
+    { 
+        "title":"Title 1",
+        "url":"URL 1",
+        "categories":["jQuery"],
+        "tags":["jquery","json","$.each"]
+    },
+    {
+        "title":"Title 2",
+        "url":"URL 2",
+        "categories":["Java"],
+        "tags":["java","json","jquery"]
+    }
+];
+
+// 1. remove all existing rows
+$("tr:has(td)").remove();
+
+// 2. get each article
+$.each(articles, function (index, article) {
+
+    // 2.2 Create table column for categories
+    var td_categories = $("<td/>");
+
+    // 2.3 get each category of this article
+    $.each(article.categories, function (i, category) {
+        var span = $("<span/>");
+        span.text(category);
+        td_categories.append(span);
+    });
+
+    // 2.4 Create table column for tags
+   var td_tags = $("<td/>");
+
+    // 2.5 get each tag of this article    
+    $.each(article.tags, function (i, tag) {
+        var span = $("<span/>");
+        span.text(tag);
+        td_tags.append(span);
+    });
+
+    // 2.6 Create a new row and append 3 columns (title+url, categories, tags)
+    $("#added-articles").append($('<tr/>')
+            .append($('<td/>').html("<a href='"+article.url+"'>"+article.title+"</a>"))
+            .append(td_categories)
+            .append(td_tags)
+    ); 
+});  
+
+</script>
+
+</body>
+</html>
