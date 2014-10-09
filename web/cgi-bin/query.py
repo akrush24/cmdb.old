@@ -7,6 +7,9 @@ import MySQLdb
 
 import calendar, datetime
 
+form = cgi.FieldStorage()
+print form["username"]
+
 ## Функия для преобразования времени формата datetime.datetime(2014, 10, 8, 8, 22, 23) -> 2014-10-08 12:22:23
 def time_correct(obj):
     """Default JSON serializer."""
