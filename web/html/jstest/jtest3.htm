@@ -10,7 +10,11 @@
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-<table id="added-articles" class="table table-hover">
+
+
+
+<div>
+<table id="added-articles" class="table table-bordered table-striped table-hover">
             <tr>
                 <th>Title</th>
                 <th>Categories</th>
@@ -21,13 +25,13 @@
 <script>
 	var articles = [
     { 
-        "title":"Title 1",
+        "title":"As important",
         "url":"URL 1",
         "categories":["jQuery"],
         "tags":["jquery","json","$.each"]
     },
     {
-        "title":"Title 2",
+        "title":"Do the best",
         "url":"URL 2",
         "categories":["Java"],
         "tags":["java","json","jquery"]
@@ -69,6 +73,22 @@ $.each(articles, function (index, article) {
 });  
 
 </script>
+</div>
 
+<div>
+   <table class="table table-bordered table-striped table-hover">
+   <tbody>
+     <tr>
+       <td class="search-header">Legend:</td>
+      <td>    
+       <div class="col-lg-12 input-group">
+         <input type="text" class="form-control" id="inputSmall">
+         <a class="input-group-addon" href="#"><span class="glyphicon glyphicon-question-sign"></span></a>
+      </div>
+      </td>
+      </tr>
+    </tbody>
+   </table>
+</div>
 </body>
 </html>
