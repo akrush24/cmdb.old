@@ -5,30 +5,13 @@ print "Content-Type: text/plain;charset=utf-8"
 print 
 
 print '''
-[
-    { 
-        "title":"As important",
-        "url":"URL 1",
-        "categories":"jq",
-        "tags":"jq"
-    },
+
     {
-        "title":"Do the best",
-        "url":"URL 2",
-        "categories":"Java",
-        "tags":"java"
+    "note":{
+        "to":"Tove",
+        "from":"Jani",
+        "heading":"Reminder",
+        "body":"Don't forget me this weekend!"
     }
-    {
-        "title":"Do the best",
-        "url":"URL 3",
-        "categories":"Java2",
-        "tags":"java"
-    }
-    {
-        "title":"Do the best",
-        "url":"URL 4",
-        "categories":"Java3",
-        "tags":"java"
-    }
-];
+}
 '''

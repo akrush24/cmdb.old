@@ -1,37 +1,24 @@
-﻿<!doctype html>
-<html lang="en">
+﻿<html>
 <head>
-  <meta charset="utf-8">
-  <title>html demo</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+  <script>
+  $(document).ready(function(){
+    $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?tags=food&tagmode=any&format=json&jsoncallback=?",
+        function(data){
+          $.each(data.items, function(i,item){
+            $("<img/>").attr("src", item.media.m).appendTo("#images");
+            if ( i == 40 ) return false;
+          });
+        });
+  });
+  </script>
+
+<style>img{ height: 200px; float: left; }</style>
 </head>
 <body>
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
-http://cmdb.at-consulting.ru/jstest/json.json
-      
-
-<script>
-$.getJSON("http://cmdb.at-consulting.ru/jstest/json.json",
-  function(data) {
-       var table = $('#display'), row = null, data = null;
-       $.each(data, function(id, obj){
-               row = $('<tr></tr>'); // build a row
-               $.each(obj, function(colIndex, property) {
-                   data = $('<td></td>', { //build a td element
-                       text : property[colIndex] // assign the value from the iterated json property
-                   }).appendTo(row); 
-               });
-           });
-           row.appendTo(table); //finally append the row to the table
-      });
-
-</script>
-<table id="display">
-</table>
-
-
+  <div id="images">
+  </div>
 </body>
+
 </html>
