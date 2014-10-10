@@ -10,85 +10,28 @@
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-
-
-
-<div>
-<table id="added-articles" class="table table-bordered table-striped table-hover">
-            <tr>
-                <th>Title</th>
-                <th>Categories</th>
-                <th>Tags</th>
-            </tr>
-        </table>
+http://cmdb.at-consulting.ru/jstest/json.json
+      
 
 <script>
-	var articles = [
-    { 
-        "title":"As important",
-        "url":"URL 1",
-        "categories":["jQuery"],
-        "tags":["jquery","json","$.each"]
-    },
-    {
-        "title":"Do the best",
-        "url":"URL 2",
-        "categories":["Java"],
-        "tags":["java","json","jquery"]
-    }
-];
-
-// 1. remove all existing rows
-$("tr:has(td)").remove();
-
-// 2. get each article
-$.each(articles, function (index, article) {
-
-    // 2.2 Create table column for categories
-    var td_categories = $("<td/>");
-
-    // 2.3 get each category of this article
-    $.each(article.categories, function (i, category) {
-        var span = $("<span/>");
-        span.text(category);
-        td_categories.append(span);
-    });
-
-    // 2.4 Create table column for tags
-   var td_tags = $("<td/>");
-
-    // 2.5 get each tag of this article    
-    $.each(article.tags, function (i, tag) {
-        var span = $("<span/>");
-        span.text(tag);
-        td_tags.append(span);
-    });
-
-    // 2.6 Create a new row and append 3 columns (title+url, categories, tags)
-    $("#added-articles").append($('<tr/>')
-            .append($('<td/>').html("<a href='"+article.url+"'>"+article.title+"</a>"))
-            .append(td_categories)
-            .append(td_tags)
-    ); 
-});  
+$.getJSON("http://cmdb.at-consulting.ru/jstest/json.json",
+  function(data) {
+       var table = $('#display'), row = null, data = null;
+       $.each(data, function(id, obj){
+               row = $('<tr></tr>'); // build a row
+               $.each(obj, function(colIndex, property) {
+                   data = $('<td></td>', { //build a td element
+                       text : property[colIndex] // assign the value from the iterated json property
+                   }).appendTo(row); 
+               });
+           });
+           row.appendTo(table); //finally append the row to the table
+      });
 
 </script>
-</div>
+<table id="display">
+</table>
 
-<div>
-   <table class="table table-bordered table-striped table-hover">
-   <tbody>
-     <tr>
-       <td class="search-header">Legend:</td>
-      <td>    
-       <div class="col-lg-12 input-group">
-         <input type="text" class="form-control" id="inputSmall">
-         <a class="input-group-addon" href="#"><span class="glyphicon glyphicon-question-sign"></span></a>
-      </div>
-      </td>
-      </tr>
-    </tbody>
-   </table>
-</div>
+
 </body>
 </html>
