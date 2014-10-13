@@ -20,14 +20,18 @@
                     <input style="border:0px" type=text size=30 name={{ keys[k] }} value="{{ cell }}">
                 </td>
             {% else %}
-                <td>{{ cell }}</td>
+                <td>
+                    <input style="border:0px" type=text name={{ keys[k] }} value="{{ cell }}" readonly>
+                </td>
             {% endif %}
             {% set k=k+1 %}
         {% endfor %}
         
         {% if session.logged_in %}
-            <!--<td><a href="/edit/{{ entry.id }}">Edit</a>-->
-            <input type=submit value=Edit></td>
+            <td>
+            <!--<a href="/edit/{{ entry.id }}">Edit</a>-->
+            <input type=submit value=Edit>
+            </td>
             <td><a href="/del/{{ entry.id }}">Del</a></td>
         {% endif %}
         </form>
