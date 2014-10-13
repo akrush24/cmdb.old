@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <form action="{{ url_for('update') }}" method=post class=add-entry>
+	<input type=text size=30 name=id value="{{ entries[0].id }}">
+      <dl>
+        <dt>Title:
+        <dd><input type=text size=30 name=title value="{{ entries[0].title }}">
+        <dt>Text:
+        <dd><textarea name=text rows=5 cols=40>{{ entries[0].text }}</textarea>
+        <dd><input type=submit value=Edit>
+      </dl>
+    </form>
+  {% endif %}
+{% endblock %}

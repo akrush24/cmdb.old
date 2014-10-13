@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+  <table class=entries>
+  {% for entry in entries %}
+    <tr>
+		<td>{{ entry.id }}</td>
+		<td>{{ entry.title }}</td>
+		<td>{{ entry.text }}</td>
+		<td><a href="/edit/{{ entry.id }}">Edit</a></td>
+		<td><a href="/del/{{ entry.id }}">Del</a></td>
+	</tr>
+  {% else %}
+    <tr><tr>Unbelievable.  No entries here so far</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

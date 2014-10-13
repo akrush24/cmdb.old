@@ -1,0 +1,31 @@
+thml	{ width: 100%; height:100%; padding:0px; margin:0px;}
+body            { font-family: sans-serif; background: #eee; width: 100%; height:100%; padding:0px; margin:0px;}
+a, h1, h2       { color: #377ba8; }
+h1, h2          { font-family: 'Georgia', serif; margin: 0; }
+h1              { border-bottom: 2px solid #eee; }
+h2              { font-size: 1.2em; }
+
+.page           { margin: 0em auto; width: 100%; border: 0px solid #ccc;
+                  padding: 0em; background: white; }
+.entries td        {border: 1px solid #ccc; margin: 0; padding: 0;}
+.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+.add-entry dl   { font-weight: bold; }
+.metanav        { text-align: right; font-size: 0.8em; padding: 0em;
+                  margin-right: 0.5em; background: #fafafa; }
+.head {
+	text-align: center;
+	font-size: 1em;
+	font-weight: bold;
+	border: 2px solid #ccc;
+	background: #fafafa;
+	font-family: 'Georgia';
+	color: #377ba8;
+	width: 100%;
+}
+
+.flash          { 
+background: #cee5F5; 
+padding: 0.5em;
+border: 1px solid #aacbe2; 
+}
+.error          { background: #f0d6d6; padding: 0.5em; }
