@@ -5,13 +5,29 @@ h1, h2          { font-family: 'Georgia', serif; margin: 0; }
 h1              { border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
-.page           { margin: 0em auto; width: 100%; border: 0px solid #ccc;
-                  padding: 0em; background: white; }
-.entries td        {border: 1px solid #ccc; margin: 0; padding: 0;}
+.page { 
+	margin: 0em auto; 
+	width: 100%;
+	height: 100%;
+	border: 0px solid #ccc;
+	padding: 0.2em; 
+	background: white; 
+}
+
+.entries td        {border: 1px solid #ccc; margin: 0; padding-left: 5px; padding-right: 5px;}
 .add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
 .add-entry dl   { font-weight: bold; }
-.metanav        { text-align: right; font-size: 0.8em; padding: 0em;
-                  margin-right: 0.5em; background: #fafafa; }
+.metanav  { 
+	text-align: right; 
+	font-size: 1em; 
+	padding: 0em;
+	margin-right: 0.5em; 
+	background: #fafafa; 
+	margin-bottom: 5px;
+	border-bottom: 1px solid #ccc;
+	font-family: 'Georgia';
+}
+
 .head {
 	text-align: center;
 	font-size: 1em;
@@ -21,6 +37,19 @@ h2              { font-size: 1.2em; }
 	font-family: 'Georgia';
 	color: #377ba8;
 	width: 100%;
+	margin-bottom: 5px;
+}
+
+.tail {
+	text-align: center;
+	font-size: 1em;
+	font-weight: bold;
+	border: 2px solid #ccc;
+	background: #fafafa;
+	font-family: 'Georgia';
+	color: #377ba8;
+	width: 100%;
+	margin-top: 5px;
 }
 
 .flash          { 

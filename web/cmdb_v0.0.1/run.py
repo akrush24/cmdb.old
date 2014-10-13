@@ -24,7 +24,7 @@ def index():
     cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
     return render_template('index.html', entries=entries)
-	
+
 @app.route('/add', methods=['POST'])
 def add():
     if not session.get('logged_in'):
