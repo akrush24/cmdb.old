@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-<title>Flaskr</title>
+<title>CMDB</title>
 <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='signin.css') }}">
@@ -10,27 +10,24 @@
 
 <body>
 
-<a href="{{ url_for('index') }}"><div class="head">CMDB</div></a>
-  <div class=metanav>
-  | <a href="{{ url_for('index') }}">index</a> | 
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a> | 
-  {% else %}
-	<a href="{{ url_for('control') }}">control</a> |
-    <a href="{{ url_for('logout') }}">log out</a> |
-  {% endif %}
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('index') }}">Домашняя</a> </li>
+            <li><a href="{{ url_for('control') }}">Control</a></li>
+            <li><a href="{{ url_for('logout') }}">Выйти</a> </li>
+        </ul>
+    </div>
+  </nav>
   </div>
   
 <div class=page>
-
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
-</div>
-
-<div class="tail">
-....
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-success" role="alert">
+        <a href="#" class="alert-link">{{ message }}</a>
+    </div>
+    {% endfor %}
+    {% block body %}{% endblock %}
 </div>
 
 </body>

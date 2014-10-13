@@ -20,10 +20,13 @@ app.config.from_object(__name__)
 # Декораторы
 @app.route('/')
 def index():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     db = get_db()
     cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
-    return render_template('index.html', entries=entries)
+    keys=entries[0].keys()
+    return render_template('index.html', entries=entries, keys=keys)
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -54,7 +57,8 @@ def edit(entry_id):
     db = get_db()
     cur = db.execute('select * from entries where id=?', [entry_id])
     entries = cur.fetchall()
-    return render_template('edit.html', entries=entries)
+    keys=entries[0].keys()
+    return render_template('edit.html', entries=entries, keys=keys)
 
 
 @app.route('/del/<int:entry_id>', methods=['GET'])
@@ -66,7 +70,7 @@ def delete(entry_id):
     db.commit()
     flash('Entry ? deleted', [entry_id])
     return redirect(url_for('index'))
-	
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -90,6 +94,8 @@ def logout():
 
 @app.route('/control/')
 def control():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     return render_template('control.html')
 
 def connect_db():
@@ -118,11 +124,7 @@ def close_db(error):
     '''Closes the database again at the end of the request.'''
     if hasattr(g, app.config['DATABASE']):
         g.sqlite_db.close()
-		
+
 # Запуск 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], debug=app.config['DEBUG'])
-
-
-
-	
