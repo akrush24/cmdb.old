@@ -1,4 +1,4 @@
-﻿#!flask/bin/python
+#! /usr/bin/env python
 
 # All Imports
 from __future__ import unicode_literals
@@ -132,17 +132,15 @@ def control():
 
 
 #############################################################
-# Работа с Базой Данных
+# DB 
 #
 def connect_db():
-    '''Соединяет с указанной базой данных'''
+    # DB connect
     rv = sqlite3.connect(app.config['DATABASE'])
     rv.row_factory = sqlite3.Row
     return rv
 def get_db():
-    '''Если ещё нет соединения с базой данных, открыть новое - для
-    текущего контекста приложения
-    '''
+    #
     if not hasattr(g, app.config['DATABASE']):
         g.sqlite_db = connect_db()
     return g.sqlite_db
@@ -160,7 +158,7 @@ def close_db(error):
 
 
 #############################################
-# Запуск
+# App RUN
 #
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], debug=app.config['DEBUG'])
