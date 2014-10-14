@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # All Imports
 from __future__ import unicode_literals
@@ -76,7 +77,7 @@ def update():
     q='update entries set '
     set_cols_name=cols_name('entries')
 
-    return('%s, %s' % set_cols_name[0], set_cols_name[1])
+    return( '%(f)s, %(f)s' % {'f': str(set_cols_name[0]), 's': str(set_cols_name[1])} )
     #return redirect(url_for('index'))
 
 @app.route('/edit/<int:entry_id>')
