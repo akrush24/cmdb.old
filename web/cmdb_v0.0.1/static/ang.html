@@ -21,7 +21,7 @@
 
 function PostsAnAjax($scope, $http)
 {
-$http({method: 'POST', url: 'http://cmdb.at-consulting.ru:5000/json/'}).success(function(data) {
+$http({method: 'POST', url: 'http://cmdb.at-consulting.ru/json/'}).success(function(data) {
 $scope.posts = data;
 });
 }

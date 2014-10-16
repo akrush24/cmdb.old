@@ -7,15 +7,36 @@ import sqlite3
 import os
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import text
 import simplejson
+
+
 
 
 app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-import models
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
 
+import models
+from models import *
+
+def init_db():
+    # Здесь нужно импортировать все модули, где могут быть определены модели,
+    # которые необходимым образом могут зарегистрироваться в метаданных.
+    # В противном случае их нужно будет импортировать до вызова init_db()
+    Base.metadata.create_all(bind=engine)
+
+ 
 def cols_name(table_name):
     db = get_db()
     cur = db.execute('PRAGMA table_info(%s)' % table_name)
@@ -28,6 +49,23 @@ def cols_name(table_name):
 ##############################################
 # Decoration
 #
+@app.route('/t/')
+def t():
+    #row = engine.execute( text('select title from entries where id=5') );
+    #return( row )
+    u = Users(request.form['ip'], request.form['mac'])
+    db_session.add( u )
+    db_session.commit()
+
+
+@app.route('/test/', methods=['GET', 'POST'])
+def test():
+    u = Users(request.form['ip'], request.form['mac'])
+    db_session.add( u )
+    db_session.commit()
+    return render_template('control.html')
+
+
 @app.route('/')
 def index():
     if not session.get('logged_in'):
@@ -36,6 +74,7 @@ def index():
     cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
     return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
+
 
 @app.route('/json/')
 def json():
@@ -48,11 +87,6 @@ def json():
     #return jsonify(table=json_row)
     return simplejson.dumps(json_row)
     #return json.dumps(dict(entries[0]),dict(entries[1]),dict(entries[2]),dict(entries[3]),dict(entries[4]))
-
-@app.route('/ang/')
-def ang():
-    return app.send_static_file('ang.html')
-
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -178,6 +212,10 @@ def close_db(error):
     '''Closes the database again at the end of the request.'''
     if hasattr(g, app.config['DATABASE']):
         g.sqlite_db.close()
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 #############################################

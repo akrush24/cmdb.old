@@ -1,20 +1,32 @@
-from app import db
+from app import db, Base
+from sqlalchemy import Column, Integer, String
+
 
 ROLE_USER = 0
 ROLE_ADMIN = 1
 
-class entries(db.Model):
+class Entries(db.Model):
+    __tablename__ = 'entries'
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(64), index = True, unique = False)
     text = db.Column(db.String(250), index = True, unique = False)
     addtext = db.Column(db.String(250), index = True, unique = False)
 
-class users(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(24), index = True, unique = True)
-    passwd = db.Column(db.String(64), index = True, unique = False)
+class Users(db.Model):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    email = Column(String(120), unique=True)
     
+    def __init__(self, name=None, email=None):
+        self.name = name
+        self.email = email
 
+    def __repr__(self):
+        return '<User %r>' % (self.name)
+        
+        
 class Type(db.Model):
+    __tablename__ = 'type'
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(24), index = True, unique = True)

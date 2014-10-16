@@ -2,6 +2,8 @@
 <html>
 <title>CMDB</title>
 <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script src="{{ url_for('static', filename='sendform.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='signin.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
@@ -16,13 +18,14 @@
         </ul>
         <div class="container-fluid">        
         <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('test') }}">test</a> </li>
             <li><a href="{{ url_for('json') }}">json</a> </li>
             <li><a href="{{ url_for('control') }}">Control</a></li>
             <li><a href="{{ url_for('logout') }}">Выйти</a> </li>
         </ul>
     </div>
   </nav>
-[TYPE]
+ 
 <div class=page>
     {% for message in get_flashed_messages() %}
     <div class="alert alert-success" role="alert">
