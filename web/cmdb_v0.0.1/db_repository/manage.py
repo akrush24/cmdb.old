@@ -2,4 +2,4 @@
 from migrate.versioning.shell import main
 
 if __name__ == '__main__':
-    main(six='<module 'six' from '/home/cmdb/web/cmdb_v0.0.1/flask/lib/python2.7/site-packages/six.pyc'>')
+    main(six='<module 'six' from '/home/cmdb/web/flask/local/lib/python2.7/site-packages/six.pyc'>')

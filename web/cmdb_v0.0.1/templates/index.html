@@ -4,8 +4,8 @@
     <table class=entries>
 
     <tr>
-    {% for key in keys %}
-        <th>{{ key }}</th>
+    {% for cols_name in cols_names %}
+        <th>{{ cols_name }}</th>
     {% endfor %}
     </tr>
         
@@ -17,11 +17,11 @@
         {% for cell in entry %}
             {% if k > 0 %}
                 <td>
-                    <input style="border:0px" type=text size=30 name={{ keys[k] }} value="{{ cell }}">
+                    <input style="border:0px" type=text size=30 name={{ cols_names[k] }} value="{{ cell }}">
                 </td>
             {% else %}
                 <td>
-                    <input style="border:0px" type=text name={{ keys[k] }} value="{{ cell }}" readonly>
+                    <input style="border:0px" type=text name={{ cols_names[k] }} value="{{ cell }}" readonly>
                 </td>
             {% endif %}
             {% set k=k+1 %}
@@ -42,11 +42,11 @@
     <tr>
     <form action="{{ url_for('add') }}" method=post class=add-entry>
         {% set k=0 %}
-        {% for cell in entries[0] %}
+        {% for cols_name in cols_names %}
             {% if k > 0 %}
-                <td><input style="border:0px" type=text size=30 name={{ keys[k] }} value=""></td>
+                <td><input style="border:0px" type=text size=30 name={{ cols_name[k] }} value=""></td>
             {% else %}
-                <td><input style="border:0px" type=hidden size=30 name={{ keys[k] }} value="" type="hidden"></td>
+                <td><input style="border:0px" type=hidden size=30 name={{ cols_name[k] }} value="" type="hidden"></td>
             {% endif %}
             {% set k=k+1 %}
         {% endfor %}

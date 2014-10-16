@@ -34,9 +34,7 @@ def index():
     db = get_db()
     cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
-    keys=entries[0].keys()
-  
-    return render_template('index.html', entries=entries, keys=cols_name('entries'))
+    return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
 
 @app.route('/json/')
 def json():
@@ -70,13 +68,37 @@ def add():
 def update():
     if not session.get('logged_in'):
         abort(401)
-    #db = get_db()
-    #db.execute('update entries set title=?, text=? where id=?',[request.form['title'], request.form['text'], request.form['id']])
-    #db.commit()
-    q='update entries set '
-    set_cols_name=cols_name('entries')
 
-    return('%s, %s' % set_cols_name[0], set_cols_name[1])
+    
+    f = request.form
+    query = 'update entries set '
+    i=0
+    keys=[]
+    value=[]
+    for key in f.keys():
+        if key != 'id':
+            if len(f.keys())-1 > i:
+                query = query+key+', '
+                keys.append(key)
+                value.append(f[key])
+            else:
+                query = query+'%s=? '
+                keys.append(key)
+                value.append(f[key])
+            i = i+1
+
+    query = query+'where id='+f.getlist('id')[0]
+    #return (query)
+    
+    query = 'update entries set {0}={2}, {1}=?, {2}=? where id=4'
+    #return ( query  % f.keys()[0], f.keys()[1], f.keys()[2] )
+    #keys = ['wr','ret','qwqw']
+    return ( query.format(*keys) )
+    db = get_db()
+    #db.execute( ('update entries set %s=?' % f.keys()[1] ),[ f[f.keys()[1]] ])
+    #db.execute( (query % f.keys()[0], f.keys()[1], f.keys()[2]) , [ f[f.keys()[0]], f[f.keys()[1]], f[f.keys()[2]] ])
+    db.commit()
+    
     #return redirect(url_for('index'))
 
 @app.route('/edit/<int:entry_id>')
