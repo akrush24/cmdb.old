@@ -69,8 +69,6 @@ def add():
 def update():
     if not session.get('logged_in'):
         abort(401)
-
-<<<<<<< HEAD
     
     f = request.form
     query = 'update entries set '
@@ -101,9 +99,7 @@ def update():
     #db.execute( (query % f.keys()[0], f.keys()[1], f.keys()[2]) , [ f[f.keys()[0]], f[f.keys()[1]], f[f.keys()[2]] ])
     db.commit()
     
-=======
-    return( '%(f)s, %(f)s' % {'f': str(set_cols_name[0]), 's': str(set_cols_name[1])} )
->>>>>>> f612b700e75202fc6f1e694f5890eab82ecc7539
+
     #return redirect(url_for('index'))
 
 @app.route('/edit/<int:entry_id>')
