@@ -1,12 +1,21 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if session.logged_in %}
-<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-  + Add item
+  
+<div class="panel panel-primary">
+    <div class="panel-heading">Задачи</div>
+  <div class="panel-body"> 
+    <div class="container-fluid">
+<button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
+<span class="glyphicon glyphicon-plus"></span> Тип
+</button>
+
+<button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
+  <span class="glyphicon glyphicon-plus"></span> Ресурс
 </button>
 
 <!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -18,13 +27,9 @@
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				
-				<form id="myForm" action="{{ url_for('test') }}" method="post">
-				    <label> Ip: </label><input type="text" name="ip" /> <br>
-				    <label> Mac: </label><input type="text" name="mac"> 
-				    
+				<form id="addtypeform" action="{{ url_for('new_tip') }}" method="post">
+				    <label> name </label><input type="text" name="name" /> <br>
 				</form>
-
-
 			</div>
 			
     	</div> 
@@ -32,11 +37,67 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit"  class="btn btn-primary" onClick="document.forms['myForm'].submit();" >Save changes</button>
+        <button type="submit"  class="btn btn-primary" onClick="document.forms['addtypeform'].submit();" >Save changes</button>
       </div>
     </div>
   </div>
 </div>
+    </div>
+  </div>
+</div>
+
+    <table class=entries>
+    <tr>
+    {% for cols_name in cols_names %}
+        <th>{{ cols_name }}</th>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in entries %}
+        <tr>
+        {% set k=0 %}
+        <form action="{{ url_for('update') }}" method=post class=add-entry>
+        {% for cell in entry %}
+            {% if k > 0 %}
+                <td>
+                    <input style="border:0px" type=text size=30 name={{ cols_names[k] }} value="{{ cell }}">
+                </td>
+            {% else %}
+                <td>
+                    <input style="border:0px" type=text name={{ cols_names[k] }} value="{{ cell }}" readonly>
+                </td>
+            {% endif %}
+            {% set k=k+1 %}
+        {% endfor %}
+        
+        {% if session.logged_in %}
+            <td>
+            <!--<a href="/edit/{{ entry.id }}">Edit</a>-->
+            <input type=submit value=Edit>
+            </td>
+            <td><a href="/del/{{ entry.id }}">Del</a></td>
+        {% endif %}
+        </form>
+    </tr>
+    {% else %}
+    <tr><tr>Unbelievable.  No entries here so far</td></tr>
+    {% endfor %}
+    <tr>
+    <form action="{{ url_for('add') }}" method=post class=add-entry>
+        {% set k=0 %}
+        {% for cols_name in cols_names %}
+            {% if k > 0 %}
+                <td><input style="border:0px" type=text size=30 name={{ cols_name[k] }} value=""></td>
+            {% else %}
+                <td><input style="border:0px" type=hidden size=30 name={{ cols_name[k] }} value="" type="hidden"></td>
+            {% endif %}
+            {% set k=k+1 %}
+        {% endfor %}
+        <td><input type=submit value=Add></td>
+    </form>
+    </tr>
+    </table>
+
 
 </body>
   {% endif %}

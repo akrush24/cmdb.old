@@ -12,7 +12,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import text
 import simplejson
-
+from sqlalchemy.sql import select
 
 
 
@@ -29,6 +29,7 @@ Base.query = db_session.query_property()
 
 import models
 from models import *
+import actions
 
 def init_db():
     # Здесь нужно импортировать все модули, где могут быть определены модели,
@@ -51,19 +52,18 @@ def cols_name(table_name):
 #
 @app.route('/t/')
 def t():
-    #row = engine.execute( text('select title from entries where id=5') );
-    #return( row )
-    u = Users(request.form['ip'], request.form['mac'])
-    db_session.add( u )
-    db_session.commit()
+    return render_template('test.html',entries=conn.execute(select([users])))
 
 
-@app.route('/test/', methods=['GET', 'POST'])
-def test():
-    u = Users(request.form['ip'], request.form['mac'])
-    db_session.add( u )
-    db_session.commit()
-    return render_template('control.html')
+@app.route('/new_tip/', methods=['GET', 'POST'])
+def new_tip():
+    if not request.form['name']: pass
+    else:
+        u = Types(request.form['name'])
+        db_session.add( u )
+        db_session.commit()
+    
+    return redirect(url_for('control'))
 
 
 @app.route('/')
@@ -180,11 +180,16 @@ def logout():
     #flash('You were logged out')
     return redirect(url_for('index'))
 
-@app.route('/control/')
-def control():
+
+@app.route('/control/', defaults={'action': "0"})
+@app.route('/control/<action>')
+def control(action):
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('control.html')
+        return redirect(url_for('login'))   
+    db = get_db()
+    cur = db.execute('select * from types order by id desc')
+    entries = cur.fetchall()
+    return render_template('control.html', entries=entries, cols_names=cols_name('types'))
 
 
 

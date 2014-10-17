@@ -26,7 +26,10 @@ class Users(db.Model):
         return '<User %r>' % (self.name)
         
         
-class Type(db.Model):
-    __tablename__ = 'type'
+class Types(db.Model):
+    __tablename__ = 'types'
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(24), index = True, unique = True)
+    name = db.Column(db.String(24), unique = True)
+    
+    def __init__(self, name=None):
+        self.name = name 
