@@ -37,7 +37,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit"  class="btn btn-primary" onClick="document.forms['addtypeform'].submit();" >Save changes</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Save changes</button>
       </div>
     </div>
   </div>
@@ -58,21 +58,21 @@
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				
-				<form id="addtypeform" action="{{ url_for('new_option') }}" method="post">
-                    <label> Name </label><input type="text" name="name" /> <br>
+				<form id="addOptionsForm" action="{{ url_for('new_option') }}" method="post">
                     <select id="type_id" name="type_id">
                         <option disabled>Тип</option>
-                    </select>
-                    <br>
+                    </select><br>
+                    <label> Опция </label><input type="text" name="name" /> 
                     <button type="submit" class="btn btn-default">Add option</button>
 
 <script type="text/javascript">
 $(function(){
     $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(data) {
-                
+              var i = -1;
                 $.each(data, function(id, name) { 
-                    $('#type_id').append('<option value="' + id + '">' + name+ '</option>');
-                });
+                   i=i+1;
+                    $('#type_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                });  
     });
 });
 </script>
@@ -85,7 +85,7 @@ $(function(){
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit"  class="btn btn-primary" onClick="document.forms['addOptions'].submit();" >Save changes</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionsForm').submit();"> Save changes</button>
       </div>
     </div>
   </div>
