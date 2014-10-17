@@ -10,11 +10,11 @@
 <span class="glyphicon glyphicon-plus"></span> Тип
 </button>
 
-<button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
-  <span class="glyphicon glyphicon-plus"></span> Ресурс
+<button class="btn btn btn-default" data-toggle="modal" data-target="#addOptions">
+  <span class="glyphicon glyphicon-plus"></span> Опции
 </button>
 
-<!-- Modal -->
+    <!-- Modal addType -->
 <div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -27,7 +27,7 @@
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				
-				<form id="addtypeform" action="{{ url_for('new_tip') }}" method="post">
+				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
 				    <label> name </label><input type="text" name="name" /> <br>
 				</form>
 			</div>
@@ -42,61 +42,107 @@
     </div>
   </div>
 </div>
+    <!-- Modal addType -->
+    
+    
+    <!-- Modal addOptions -->
+    <div class="modal fade" id="addOptions" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+         			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				
+				<form id="addtypeform" action="{{ url_for('new_option') }}" method="post">
+				    <label> TypeID </label><input type="text" name="type_id" /> <br>
+                    <label> Name </label><input type="text" name="name" /> <br>
+                    <button type="submit" class="btn btn-default">Add option</button>
+				</form>
+			</div>
+			
+    	</div> 
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit"  class="btn btn-primary" onClick="document.forms['addOptions'].submit();" >Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addType -->
+    
     </div>
   </div>
 </div>
 
+
+
     <table class=entries>
+    <th>Типы</th>
     <tr>
-    {% for cols_name in cols_names %}
-        <th>{{ cols_name }}</th>
+    {% for cols_name in type_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
     </tr>
         
-    {% for entry in entries %}
+    {% for entry in type_cols %}
         <tr>
         {% set k=0 %}
-        <form action="{{ url_for('update') }}" method=post class=add-entry>
+
         {% for cell in entry %}
-            {% if k > 0 %}
+
                 <td>
-                    <input style="border:0px" type=text size=30 name={{ cols_names[k] }} value="{{ cell }}">
+                    {{ cell }}
                 </td>
-            {% else %}
-                <td>
-                    <input style="border:0px" type=text name={{ cols_names[k] }} value="{{ cell }}" readonly>
-                </td>
-            {% endif %}
-            {% set k=k+1 %}
+
         {% endfor %}
         
         {% if session.logged_in %}
-            <td>
-            <!--<a href="/edit/{{ entry.id }}">Edit</a>-->
-            <input type=submit value=Edit>
-            </td>
-            <td><a href="/del/{{ entry.id }}">Del</a></td>
+        
+            <td><a href="/del_type/{{ entry.id }}">Del</a></td>
         {% endif %}
-        </form>
+
     </tr>
-    {% else %}
-    <tr><tr>Unbelievable.  No entries here so far</td></tr>
     {% endfor %}
-    <tr>
-    <form action="{{ url_for('add') }}" method=post class=add-entry>
-        {% set k=0 %}
-        {% for cols_name in cols_names %}
-            {% if k > 0 %}
-                <td><input style="border:0px" type=text size=30 name={{ cols_name[k] }} value=""></td>
-            {% else %}
-                <td><input style="border:0px" type=hidden size=30 name={{ cols_name[k] }} value="" type="hidden"></td>
-            {% endif %}
-            {% set k=k+1 %}
-        {% endfor %}
-        <td><input type=submit value=Add></td>
-    </form>
-    </tr>
     </table>
+
+
+
+    <table class=entries>
+    <th>Свойства</th>
+    <tr>
+    {% for cols_name in option_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in option_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a href="/del_option/{{ entry.id }}">Del</a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+
 
 
 </body>

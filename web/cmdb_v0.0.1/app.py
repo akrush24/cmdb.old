@@ -54,16 +54,51 @@ def cols_name(table_name):
 def t():
     return render_template('test.html',entries=conn.execute(select([users])))
 
+# Обработка Типов
+@app.route('/new_type/', methods=['GET', 'POST'])
+def new_type():
+    if not session.get('logged_in'):
+        abort(401)
 
-@app.route('/new_tip/', methods=['GET', 'POST'])
-def new_tip():
-    if not request.form['name']: pass
-    else:
-        u = Types(request.form['name'])
-        db_session.add( u )
-        db_session.commit()
+    db = get_db()
+    db.execute('insert into types (name) values (?)',
+                [request.form['name']])
+    db.commit()
     
     return redirect(url_for('control'))
+
+@app.route('/del_type/<int:id>', methods=['GET'])
+def del_type(id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('delete from types where id=?', [id])
+    db.commit()
+
+    return redirect(url_for('control'))
+
+# Обработка свойств
+@app.route('/new_option/', methods=['GET', 'POST'])
+def new_option():
+    if not session.get('logged_in'):
+        abort(401)
+        
+    db = get_db()
+    db.execute('insert into options (name, type_id) values (?, ?)', [request.form['name'], request.form['type_id']])
+    db.commit()
+    
+    return redirect(url_for('control'))
+
+@app.route('/del_option/<int:id>', methods=['GET'])
+def del_option(id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('delete from options where id=?', [id])
+    db.commit()
+
 
 
 @app.route('/')
@@ -79,14 +114,14 @@ def index():
 @app.route('/json/')
 def json():
     db = get_db()
-    cur = db.execute('select * from entries order by id desc')
+    cur = db.execute('select * from types order by id desc')
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
-    #return jsonify(table=json_row)
     return simplejson.dumps(json_row)
-    #return json.dumps(dict(entries[0]),dict(entries[1]),dict(entries[2]),dict(entries[3]),dict(entries[4]))
+
+
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -98,6 +133,7 @@ def add():
     db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('index'))
+
 
 @app.route('/update', methods=['POST'])
 def update():
@@ -188,8 +224,11 @@ def control(action):
         return redirect(url_for('login'))   
     db = get_db()
     cur = db.execute('select * from types order by id desc')
-    entries = cur.fetchall()
-    return render_template('control.html', entries=entries, cols_names=cols_name('types'))
+    type_cols = cur.fetchall()
+    db = get_db()
+    cur = db.execute('select * from options order by id desc')
+    option_cols = cur.fetchall()
+    return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
 
 

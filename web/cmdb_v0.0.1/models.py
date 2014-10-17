@@ -1,7 +1,6 @@
 from app import db, Base
 from sqlalchemy import Column, Integer, String
 
-
 ROLE_USER = 0
 ROLE_ADMIN = 1
 
@@ -33,3 +32,9 @@ class Types(db.Model):
     
     def __init__(self, name=None):
         self.name = name 
+        
+class Options(db.Model):
+    __tablename__ = 'options'
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(24), unique = False)
+    type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
