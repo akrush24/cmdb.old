@@ -28,7 +28,7 @@
       	 	<div class="col-lg-6" >
 				
 				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
-				    <label> name </label><input type="text" name="name" /> <br>
+				    <label> Новый тип </label><input type="text" name="name" /> <br>
 				</form>
 			</div>
 			
@@ -60,10 +60,9 @@
 				
 				<form id="addOptionsForm" action="{{ url_for('new_option') }}" method="post">
                     <select id="type_id" name="type_id">
-                        <option disabled>Тип</option>
+                    <option disabled>Тип</option>
                     </select><br>
-                    <label> Опция </label><input type="text" name="name" /> 
-                    <button type="submit" class="btn btn-default">Add option</button>
+                    <label> Новая опция </label><input type="text" name="name" /> 
 
 <script type="text/javascript">
 $(function(){
@@ -90,7 +89,7 @@ $(function(){
     </div>
   </div>
 </div>
-    <!-- Modal addType -->
+    <!-- Modal addoptions -->
     
     </div>
   </div>

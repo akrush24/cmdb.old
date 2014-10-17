@@ -118,9 +118,11 @@ def index():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     db = get_db()
-    cur = db.execute('select * from entries order by id desc')
+    cur = db.execute('select name from options where type_id=1')
+    #cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
-    return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
+    #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
+    return render_template('index.html', entries='', cols_names=entries)
 
 
 @app.route('/json/')
