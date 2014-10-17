@@ -13,8 +13,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import text
 import simplejson
 from sqlalchemy.sql import select
+import re
 
-
+import actions
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -29,8 +30,7 @@ Base.query = db_session.query_property()
 
 import models
 from models import *
-import actions
-
+    
 def init_db():
     # Здесь нужно импортировать все модули, где могут быть определены модели,
     # которые необходимым образом могут зарегистрироваться в метаданных.
@@ -50,9 +50,7 @@ def cols_name(table_name):
 ##############################################
 # Decoration
 #
-@app.route('/t/')
-def t():
-    return render_template('test.html',entries=conn.execute(select([users])))
+
 
 # Обработка Типов
 @app.route('/new_type/', methods=['GET', 'POST'])
@@ -78,6 +76,17 @@ def del_type(id):
 
     return redirect(url_for('control'))
 
+@app.route('/get_list_type/')
+def get_list_type():
+    db = get_db()
+    cur = db.execute('select * from types order by id desc')
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+    
+    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
 # Обработка свойств
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
@@ -98,9 +107,11 @@ def del_option(id):
     db = get_db()
     db.execute('delete from options where id=?', [id])
     db.commit()
+    
+    return redirect(url_for('control'))
 
 
-
+# Главная страница
 @app.route('/')
 def index():
     if not session.get('logged_in'):
