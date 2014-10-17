@@ -4,7 +4,9 @@ inotifywait -mrq -e close_write -e moved_to -e create --format "%w%f" "$1" | whi
 do
 if [ -d "$FILE" ]; then
 chmod -R g+xw "$FILE"
+chgrp cmdb "$FILE"
 elif [ -f "$FILE" ]; then
 chmod g+w "$FILE"
+chgrp cmdb "$FILE"
 fi
 done

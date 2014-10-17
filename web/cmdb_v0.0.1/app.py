@@ -86,6 +86,7 @@ def get_list_type():
         json_row.append(dict(en))
     
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
+    
 
 # Обработка свойств
 @app.route('/new_option/', methods=['GET', 'POST'])

@@ -31,7 +31,7 @@
             <!--<a href="/edit/{{ entry.id }}">Edit</a>-->
             <input type=submit value=Edit>
             </td>
-            <td><a href="/del/{{ entry.id }}">Del</a></td>
+            <td><a href="/del/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
         {% endif %}
         </form>
     </tr>

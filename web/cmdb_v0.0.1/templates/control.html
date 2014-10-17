@@ -69,9 +69,9 @@
 <script type="text/javascript">
 $(function(){
     $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(data) {
-                 
-                $.each(eval(data), function(id, name) {
-                    $('#type_id').append('<option value="' + id + '">' + id + '</option>');
+                
+                $.each(data, function(id, name) { 
+                    $('#type_id').append('<option value="' + id + '">' + name+ '</option>');
                 });
     });
 });
@@ -120,7 +120,7 @@ $(function(){
         
         {% if session.logged_in %}
         
-            <td><a href="/del_type/{{ entry.id }}">Del</a></td>
+            <td><a href="/del_type/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
         {% endif %}
 
     </tr>
@@ -151,7 +151,7 @@ $(function(){
         
         {% if session.logged_in %}
         
-            <td><a href="/del_option/{{ entry.id }}">Del</a></td>
+            <td><a href="/del_option/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
         {% endif %}
 
     </tr>
