@@ -112,6 +112,29 @@ def del_option(id):
     return redirect(url_for('control'))
 
 
+@app.route('/new_user/', methods=['GET', 'POST'])
+def new_user():
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('insert into users (name) values (?)',
+                [request.form['name']])
+    db.commit()
+    
+    return redirect(url_for('control'))
+
+@app.route('/del_user/<int:id>', methods=['GET'])
+def del_user(id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('delete from users where id=?', [id])
+    db.commit()
+
+    return redirect(url_for('control'))
+
 # Главная страница
 @app.route('/')
 def index():
@@ -237,13 +260,24 @@ def control(action):
     if not session.get('logged_in'):
         return redirect(url_for('login'))   
     db = get_db()
-    cur = db.execute('select * from types order by id desc')
-    type_cols = cur.fetchall()
-    db = get_db()
-    cur = db.execute('select options.id, options.name, types.name from options, types where options.type_id = types.id')
+
+    type_cols = db.execute('select * from types order by id desc').fetchall()
+	
     #cur = db.execute('select * from options order by id desc')
-    option_cols = cur.fetchall()
-    return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
+    option_cols = db.execute('select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id').fetchall()
+
+    user_cols = db.execute('select * from users order by id desc').fetchall()
+
+    return render_template('control.html', 
+        type_cols=type_cols, type_cols_names=cols_name('types'), 
+        option_cols=option_cols, option_cols_names = ['id', 'name','Type', 'FrontPage', 'Del'],
+        user_cols = user_cols, user_cols_names=cols_name('users')
+    )
+
+	#cur = db.execute('select * from users order by id desc')
+	#user_cols = cur.fetchall()
+    #return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
+
 
 
 

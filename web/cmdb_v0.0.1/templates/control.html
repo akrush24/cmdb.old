@@ -149,6 +149,37 @@
     </tr>
     {% endfor %}
     </table>
+
+
+    <table class=entries>
+    <th>Пользователи</th>
+    <tr>
+    {% for cols_name in user_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in user_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a href="/del_user/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+
 <!-- отрисовываем табличку-->
 
 </body>

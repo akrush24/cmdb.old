@@ -47,7 +47,7 @@ class Options(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(100), unique = False)
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
-
+    front_page = db.Column(db.Integer)
 
 class Dict(db.Model):
     __tablename__ = 'dict'
