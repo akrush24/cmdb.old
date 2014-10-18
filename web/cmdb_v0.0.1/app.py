@@ -240,7 +240,8 @@ def control(action):
     cur = db.execute('select * from types order by id desc')
     type_cols = cur.fetchall()
     db = get_db()
-    cur = db.execute('select * from options order by id desc')
+    cur = db.execute('select options.id, options.name, types.name from options, types where options.type_id = types.id')
+    #cur = db.execute('select * from options order by id desc')
     option_cols = cur.fetchall()
     return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
