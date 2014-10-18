@@ -38,13 +38,10 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
  
-def cols_name(table_name):
+def cols_name(query):
     db = get_db()
-    cur = db.execute('PRAGMA table_info(%s)' % table_name)
-    col = cur.fetchall()
-    keyst=[]
-    for c in col:
-        keyst.append(c[1])    
+    cur = db.execute(query)
+    keyst = list(map(lambda x: x[0], cur.description))  
     return keyst
 
 ##############################################
@@ -163,7 +160,8 @@ def index():
     entries = cur.fetchall()
     #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
     #return render_template('index.html', entries='', cols_names=entries)
-    return entries.keys()
+    names = list(map(lambda x: x[0], cur.description))
+    return names[1]
 
 
 @app.route('/json/')
@@ -287,9 +285,9 @@ def control(action):
     user_cols = db.execute('select * from users order by id desc').fetchall()
 
     return render_template('control.html', 
-        type_cols=type_cols, type_cols_names=cols_name('types'), 
-        option_cols=option_cols, option_cols_names = ['id', 'name','Type', 'FrontPage', 'Del'],
-        user_cols = user_cols, user_cols_names=cols_name('users')
+        type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
+        option_cols=option_cols, option_cols_names = ['select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id],
+        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc'')
     )
 
 	#cur = db.execute('select * from users order by id desc')
