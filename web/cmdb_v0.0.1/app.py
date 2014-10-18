@@ -155,13 +155,11 @@ def index():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     db = get_db()
-    cur = db.execute('select * from options where type_id=1')
+    cur = db.execute('select name from options where type_id=1')
     #cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
     #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
-    #return render_template('index.html', entries='', cols_names=entries)
-    names = list(map(lambda x: x[0], cur.description))
-    return names[1]
+    return render_template('index.html', entries='', cols_names=entries )
 
 
 @app.route('/json/')
@@ -286,8 +284,8 @@ def control(action):
 
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
-        option_cols=option_cols, option_cols_names = ['select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id],
-        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc'')
+        option_cols=option_cols, option_cols_names = cols_name('select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id'),
+        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc')
     )
 
 	#cur = db.execute('select * from users order by id desc')
