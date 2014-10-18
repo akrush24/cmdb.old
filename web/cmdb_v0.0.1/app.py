@@ -135,9 +135,11 @@ def del_user(id):
 
     return redirect(url_for('control'))
 
-@app.route('/get_list_user/<username>')
-@app.route('/get_list_user/', defaults={'username': None})
-def get_list_user(username):
+#@app.route('/get_list_user/<username>')
+#@app.route('/get_list_user/', defaults={'username': None})
+@app.route('/get_list_user/', methods=['GET'])
+def get_list_user():
+    username = request.args.get('term')
     db = get_db()
     if username is not None:
         cur = db.execute('select * from users WHERE name like "%'+username  +'%" order by id desc')
@@ -156,11 +158,12 @@ def index():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     db = get_db()
-    cur = db.execute('select name from options where type_id=1')
+    cur = db.execute('select * from options where type_id=1')
     #cur = db.execute('select * from entries order by id desc')
     entries = cur.fetchall()
     #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
-    return render_template('index.html', entries='', cols_names=entries)
+    #return render_template('index.html', entries='', cols_names=entries)
+    return entries.keys()
 
 
 @app.route('/json/')

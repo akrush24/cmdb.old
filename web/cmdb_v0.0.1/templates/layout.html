@@ -1,29 +1,27 @@
 <!doctype html>
 <html lang="ru">
 <title>CMDB</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" ">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" "> <!-- Адаптация для мобильных -->
 <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
-<script src="http://malsup.github.com/jquery.form.js"></script>
-<script src="{{ url_for('static', filename='sendform.js') }}"></script>
-<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='signin.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-theme.min.css') }}">
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
+<script src="{{ url_for('static', filename='js/emailautocomplite.js') }}"></script> <!-- Автодополнение e-mail -->
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script> <!-- Тема bootstrap -->
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-theme.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='signin.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> <!-- Кастомный стиль -->
+
 <body>
 
-  <nav class="navbar navbar-default" role="navigation">
+  <nav class="navbar navbar-default" role="navigation"> 
         <ul class="nav navbar-nav navbar-left">
             <li><a href="{{ url_for('index') }}"><b>cmdb.at-consulting.ru</b></a></li>
         </ul>
         <div class="container-fluid">        
         <ul class="nav navbar-nav navbar-right">
             <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="{{ url_for('json') }}">json</a> </li>
             <li><a href="{{ url_for('control') }}">Control</a></li>
             <li><a href="{{ url_for('logout') }}">Выйти</a> </li>
         </ul>
