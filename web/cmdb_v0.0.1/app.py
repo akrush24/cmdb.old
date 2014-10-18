@@ -135,6 +135,21 @@ def del_user(id):
 
     return redirect(url_for('control'))
 
+@app.route('/get_list_user/<username>')
+@app.route('/get_list_user/', defaults={'username': None})
+def get_list_user(username):
+    db = get_db()
+    if username is not None:
+        cur = db.execute('select * from users WHERE name like "%'+username  +'%" order by id desc')
+    else:
+        cur = db.execute('select * from users order by id desc')
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+    
+    return simplejson.dumps(json_row)
+
 # Главная страница
 @app.route('/')
 def index():

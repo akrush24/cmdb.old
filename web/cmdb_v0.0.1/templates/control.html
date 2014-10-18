@@ -14,6 +14,37 @@
 		<span class="glyphicon glyphicon-plus"></span> Опции
 	</button>
 
+<div id="livesearchjson"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
+	<input type="text" id="name">
+	<input type="text" id="emailid">
+<script> var data=[
+             {"value":"123@example.com","label":"User 123","mail":"123@example.com"},
+             {"value":"456","label":"User 456","mail":"456@example.com"},
+             {"value":"789","label":"User 789","mail":"789@example.com"},
+         ]
+$("#name").autocomplete({
+        source: "http://cmdb.at-consulting.ru:5000/get_list_user/",
+        width: 300,
+        max: 20,
+        delay: 100,
+        minLength: 1,
+        autoFocus: true,
+        cacheLength: 1,
+        scroll: true,
+        highlight: false,
+        select: function(event, ui) {
+			$("#emailid").val(ui.item.mail);
+          var name = ui.item.mail;
+          var label=ui.item.label;
+		  /*
+		  $("#emailid").val(ui.item.mail);
+          var name = ui.item.mail;
+          var label=ui.item.label; */
+         }
+    });
+	
+	</script>
+	</div>
     <!-- Modal addType -->
 <div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -32,7 +63,7 @@
     	</div> 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
         <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Добавить и сохранить</button>
       </div>
     </div>
