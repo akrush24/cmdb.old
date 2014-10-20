@@ -109,14 +109,30 @@ def del_option(id):
     return redirect(url_for('control'))
 
 
+@app.route('/get_list_option/', methods=['GET'])
+def get_list_option():
+    option = request.args.get('email_list')
+    db = get_db()
+    if option is not None:
+        cur = db.execute('select * from options where type_id = ? order by id desc', [option])
+    else:
+        cur = db.execute('select * from options order by id desc')
+        
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+    
+    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
     if not session.get('logged_in'):
         abort(401)
 
     db = get_db()
-    db.execute('insert into users (name) values (?)',
-                [request.form['name']])
+    db.execute('insert into users (login, full_name, email, password) values (?, ?, ?, ?)',
+                [request.form['login'], request.form['full_name'], request.form['email'], request.form['password']] )
     db.commit()
     
     return redirect(url_for('control'))
@@ -132,16 +148,15 @@ def del_user(id):
 
     return redirect(url_for('control'))
 
-#@app.route('/get_list_user/<username>')
-#@app.route('/get_list_user/', defaults={'username': None})
 @app.route('/get_list_user/', methods=['GET'])
 def get_list_user():
-    username = request.args.get('term')
+    username = request.args.get('email_list')
     db = get_db()
     if username is not None:
-        cur = db.execute('select * from users WHERE name like "%'+username  +'%" order by id desc')
+        cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+username+'%") order by id desc' )
+        #cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
     else:
-        cur = db.execute('select * from users order by id desc')
+        cur = db.execute('select * from users order by id desc limit 10')
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
@@ -248,16 +263,23 @@ def delete(entry_id):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+ 
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            #flash('You were logged in')
-            g.user = request.form['username']
-            return redirect(url_for('index'))
+        g.user=None
+        db = get_db()
+        entries = db.execute('select * from users where login=? limit 1', [request.form['login']] ).fetchall()
+        
+        for password in entries:
+            user_password = entries[0][2]
+            if request.form['password'] == user_password:
+                session['logged_in'] = True
+                #flash('You were logged in')
+                #g.user = request.form['login']
+                return redirect(url_for('index'))
+
+        if g.user is None:
+            error = "Invalid User or Password"
+
     return render_template('login.html', error=error)
 
 
@@ -293,6 +315,24 @@ def control(action):
     #return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
 
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    return render_template('test.html')
+
+@app.route('/test-json', methods=['GET', 'POST'])
+def testjson():
+    db = get_db()
+    cur = db.execute('select * from types order by id desc')
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+    return simplejson.dumps(json_row)
+
+@app.route('/testval', methods=['GET', 'POST'])
+def testval():
+    val = request.POST.getall('someinput[]')
+    return val[0]
 
 
 #############################################################

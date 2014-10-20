@@ -13,6 +13,11 @@
 	<button class="btn btn btn-default" data-toggle="modal" data-target="#addOptions">
 		<span class="glyphicon glyphicon-plus"></span> Опции
 	</button>
+ 
+	<button class="btn btn btn-default" data-toggle="modal" data-target="#addUser">
+		<span class="glyphicon glyphicon-plus"></span> Пользователь
+	</button> 
+    
 
 <div id="livesearchjson"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
 	<input type="text" id="name" autocomplete="off">
@@ -33,7 +38,7 @@
             // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
             response($.map(data, function(item){
               return{
-                label: item.name , // label это надпись в списке, ей присваиваем параметр из name.
+                label: item.full_name , // label это надпись в списке, ей присваиваем параметр из name.
                 value: item.email  // value значение которое присвоится полю ввода из ключа EMAIL в json.
               }
 			  
@@ -45,6 +50,7 @@
     }); 
 		</script>
 	</div>
+    
     <!-- Modal addType -->
 <div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -111,6 +117,39 @@
   </div>
 </div>
     <!-- Modal addoptions -->
+    
+    
+        <!-- Modal addUser -->
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addUserForm" action="{{ url_for('new_user') }}" method="post">
+                    <input type="text" class="form-control" placeholder="Введите login" name="login" autocomplete="off" /> 
+                    <input type="text" class="form-control" placeholder="Введите ФИО" name="full_name" autocomplete="off" /> 
+                    <input type="email" class="form-control" placeholder="Введите e-mail" name="email" autocomplete="off" /> 
+                    <input type="password" class="form-control" placeholder="Введите пароль" name="password" autocomplete="off" />
+                    <button type="submit"  class="btn hide">
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addUserForm').submit();"> Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addUser -->
+    
+    
 			</div> 
 		</div>
     </div>
@@ -212,6 +251,13 @@
     </table>
 
 <!-- отрисовываем табличку-->
+
+<form action="{{ url_for('testval') }}" method="post">
+<input type="text" name="someinput[1]" value="1" />
+<input type="text" name="someinput[2]" value="2" />
+<input type="text" name="someinput[3]" value="3" />
+<input type=submit>
+</form>
 
 </body>
   {% endif %}

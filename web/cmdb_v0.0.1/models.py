@@ -66,7 +66,8 @@ class Dict_Val(db.Model):
 class Users(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
+    login = Column(String(50), unique=True)
+    full_name = Column(String(150), unique=True)
     email = Column(String(120), unique=True)
     password = Column(String(255))
     

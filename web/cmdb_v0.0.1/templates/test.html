@@ -1,8 +1,55 @@
 {% extends "layout.html" %}
 {% block body %}
+    
+    <button class="btn btn btn-default" data-toggle="modal" data-target="#addItem">
+		<span class="glyphicon glyphicon-plus"></span> Пользователь
+	</button>
+    
 
-    { for entry in entries %}
-        <li>{{ entry }}</li>
-    { endfor %}
+   <!-- Modal addUser -->
+<div class="modal fade" id="addItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новый Item</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addItemForm" action="{{ url_for('new_option') }}" method="post">
+                    <select class="form-control" id="type_id" name="type_id">
+						<option disabled>Тип</option>
+                    </select><br>
+                    <div id="inputs">
+                    <script type="text/javascript">
+							$(function(){
+								$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(data) {
+								  var i = -1;
+									$.each(data, function(id, name) { 
+									   i=i+1;
+										$('#inputs').append('<div><input type="text" class="form-control" name="' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'"/></div>');
+
+										});  
+							});
+						});
+					</script>
+                    </div>
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addItemForm').submit();"> Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addUser -->
+
+
+
+
 
 {% endblock %}

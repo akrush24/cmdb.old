@@ -2,56 +2,27 @@
 <b>Тим</b>
 {% block body %}
 
+<h1>VPS</h1>
     <table class=entries>
     <tr>
     {% for cols_name in cols_names %}
-        <th>{{ cols_name[0] }}</th>
+        <td><b>{{ cols_name[0] }}</b></td>
     {% endfor %}
     </tr>
         
     {% for entry in entries %}
-        <tr>
-        {% set k=0 %}
-        <form action="{{ url_for('update') }}" method=post class=add-entry>
+    <tr>
+
         {% for cell in entry %}
-            {% if k > 0 %}
-                <td>
-                    <input style="border:0px" type=text size=30 name={{ cols_names[k] }} value="{{ cell }}">
-                </td>
-            {% else %}
-                <td>
-                    <input style="border:0px" type=text name={{ cols_names[k] }} value="{{ cell }}" readonly>
-                </td>
-            {% endif %}
-            {% set k=k+1 %}
+
+                <td>{{ cell }}</td>
+
         {% endfor %}
         
-        {% if session.logged_in %}
-            <td>
-            <!--<a href="/edit/{{ entry.id }}">Edit</a>-->
-            <input type=submit value=Edit>
-            </td>
-            <td><a href="/del/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
-        {% endif %}
-        </form>
     </tr>
-    {% else %}
-    <tr><tr>Unbelievable.  No entries here so far</td></tr>
+
     {% endfor %}
-    <tr>
-    <form action="{{ url_for('add') }}" method=post class=add-entry>
-        {% set k=0 %}
-        {% for cols_name in cols_names %}
-            {% if k > 0 %}
-                <td><input style="border:0px" type=text size=30 name={{ cols_name[k] }} value=""></td>
-            {% else %}
-                <td><input style="border:0px" type=hidden size=30 name={{ cols_name[k] }} value="" type="hidden"></td>
-            {% endif %}
-            {% set k=k+1 %}
-        {% endfor %}
-        <td><input type=submit value=Add></td>
-    </form>
-    </tr>
+
     </table>
   
 {% endblock %}
