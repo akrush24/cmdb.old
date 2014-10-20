@@ -19,14 +19,15 @@ class Resources(db.Model):
     __tablename__ = 'resources'
     id = db.Column(db.Integer, primary_key = True)
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
+    hash = db.Column(db.String(10))
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
     
     #create_date = db.Column(db.DateTime, default=_get_date())
     #update_date = db.Column(db.DateTime, onupdate=_get_date())
 
-class Values(db.Model):
-    __tablename__ = 'values'
+class Value(db.Model):
+    __tablename__ = 'value'
     id = db.Column(db.Integer, primary_key = True)
     option_id = db.Column(db.Integer, db.ForeignKey('options.id'))
     res_id = db.Column(db.Integer, db.ForeignKey('resources.id'))

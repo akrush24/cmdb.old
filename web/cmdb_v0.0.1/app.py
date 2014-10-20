@@ -14,8 +14,10 @@ from sqlalchemy import text
 import simplejson
 from sqlalchemy.sql import select
 import re
+import peppercorn
 
 import actions
+import hashlib
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -111,10 +113,10 @@ def del_option(id):
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
-    option = request.args.get('email_list')
+    type = request.args.get('type')
     db = get_db()
-    if option is not None:
-        cur = db.execute('select * from options where type_id = ? order by id desc', [option])
+    if type is not None:
+        cur = db.execute('select * from options where type_id = ? order by id desc', [type])
     else:
         cur = db.execute('select * from options order by id desc')
         
@@ -123,7 +125,7 @@ def get_list_option():
     for en in entries:
         json_row.append(dict(en))
     
-    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+    return simplejson.dumps(json_row)
 
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
@@ -329,10 +331,39 @@ def testjson():
         json_row.append(dict(en))
     return simplejson.dumps(json_row)
 
+#from pylons import url, request, response, session, tmpl_context as c
+#from pylons.controllers.util import abort, redirect
+#from pylons.decorators.secure import authenticate_form
+
 @app.route('/testval', methods=['GET', 'POST'])
 def testval():
-    val = request.POST.getall('someinput[]')
-    return val[0]
+    #data = request.data
+    #val=dict()
+    #test=""
+    #q=""
+    db = get_db()
+    '''
+    for data in request.form.keys():
+        if data != "type_id":
+            option_id = data[2:]
+            value=request.form[data]
+            res_id="99"
+            cur = db.execute('insert into value (option_id, value, res_id) values (?, ?, ?)', [option_id, value, res_id])
+            db.commit()
+            #val[data[2:]] = request.form[data]
+            #test=test+data[2:]+' = '+val[data[2:]]+'; '
+            #q="insert into value (option_id, value, res_id) values ("+option_id+", "+value+", "+res_id+"); "+q
+            
+    db.commit()
+    
+    
+    return render_template('test.html')
+    '''
+    return str(hashlib.new('ripemd160'))
+    #test = test+"type_id = "+request.form["type_id"]
+    #return q
+    #return test
+    #return request.form.keys()[1][2:]+" = "+request.form[request.form.keys()[1]]
 
 
 #############################################################
