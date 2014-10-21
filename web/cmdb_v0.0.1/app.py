@@ -172,11 +172,42 @@ def index():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     db = get_db()
-    cur = db.execute('select name from options where type_id=1')
-    #cur = db.execute('select * from entries order by id desc')
-    entries = cur.fetchall()
+    query = 'select options.name, value.value from resources, value, options where value.res_id=resources.id and options.type_id=resources.type_id and value.option_id=options.id'
+    cur = db.execute(query)
+    entries1 = cur.fetchall()
+    
+    #query = 'select options.name value, options where type_id=1'
+    #cur = db.execute(query)
+    #entries2 = cur.fetchall()
+    
     #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
-    return render_template('index.html', entries='', cols_names=entries )
+    count_o=0
+    count_r=0
+    count=0
+    key=[]
+    val=[]
+    val2=[]
+    count_options=db.execute('select count(id) from options where type_id=1').fetchall()[0][0]
+    count_resources=db.execute('select count(id) from resources where type_id=1').fetchall()[0][0]
+    
+    while (count_r < count_resources):
+        key=[]
+        val=[]
+        count_o=0
+        while (count_o < count_options):
+
+            key.append(entries1[count][0])
+            val.append(entries1[count][1])
+            count=count+1
+            count_o=count_o+1
+            
+        val2.append(val)
+        
+        count_r = count_r + 1
+        
+    return render_template('index.html', entries=val2, cols_names=key )
+    #return entries1[35][0]+";"+str(count)
+
 
 
 @app.route('/json/')
@@ -335,19 +366,30 @@ def testjson():
 #from pylons.controllers.util import abort, redirect
 #from pylons.decorators.secure import authenticate_form
 
+import string
+import random
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
 @app.route('/testval', methods=['GET', 'POST'])
 def testval():
     #data = request.data
     #val=dict()
     #test=""
     #q=""
+    UUID = id_generator(6,"abcdefghijklmnopqrstuvwxyz0123456789")
+    
     db = get_db()
-    '''
+    db.execute('insert into resources (hash, type_id) values (?, ?)', [UUID, request.form['type_id']])
+    db.commit()
+    
+    entries=db.execute('select id from resources where hash=? limit 1', [UUID]).fetchall()
+    res_id = entries[0][0]
+
     for data in request.form.keys():
         if data != "type_id":
             option_id = data[2:]
             value=request.form[data]
-            res_id="99"
             cur = db.execute('insert into value (option_id, value, res_id) values (?, ?, ?)', [option_id, value, res_id])
             db.commit()
             #val[data[2:]] = request.form[data]
@@ -358,8 +400,8 @@ def testval():
     
     
     return render_template('test.html')
-    '''
-    return str(hashlib.new('ripemd160'))
+    
+    
     #test = test+"type_id = "+request.form["type_id"]
     #return q
     #return test

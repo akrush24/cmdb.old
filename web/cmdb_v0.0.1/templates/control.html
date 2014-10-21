@@ -22,34 +22,10 @@
 <div id="livesearchjson"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
 	<input type="text" id="name" autocomplete="off">
 	<input type="text" id="emailid">
-		<script>
-	$( "#name" ).autocomplete({
-      source: function(request, response){
-        // Запрос 
-        $.ajax({
-          url: "http://cmdb.at-consulting.ru:5000/get_list_user/",
-          dataType: "json",
-          // параметры запроса, передаваемые на сервер (последний - подстрока для поиска):
-          data:{
-            email_list: request.term
-          },
-          // обработка успешного выполнения запроса
-          success: function(data){
-            // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
-            response($.map(data, function(item){
-              return{
-                label: item.full_name , // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.email  // value значение которое присвоится полю ввода из ключа EMAIL в json.
-              }
-			  
-            }));
-          }
-        });
-      },
-      minLength: 1 // минимальная длина запроса для выполнения поиска.
-    }); 
-		</script>
-	</div>
+</div>
+
+
+
     
     <!-- Modal addType -->
 <div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -252,12 +228,6 @@
 
 <!-- отрисовываем табличку-->
 
-<form action="{{ url_for('testval') }}" method="post">
-<input type="text" name="id1" value="Поле1" />
-<input type="text" name="id2" value="Поле2" />
-<input type="text" name="id3" value="Поле 3" />
-<input type=submit>
-</form>
 
 </body>
   {% endif %}

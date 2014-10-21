@@ -4,6 +4,10 @@
     <button class="btn btn btn-default" data-toggle="modal" data-target="#addItem">
 		<span class="glyphicon glyphicon-plus"></span> Новый ресурс
 	</button>
+	
+	<div id="inputTest"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
+	<input type="text" id="input5" autocomplete="off">
+</div>
     
 
    <!-- Modal addUser -->
@@ -36,7 +40,7 @@
 
                                     $('#type_id').change(function(){                                //подгрузка опций для типа
                                           var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
-                                            $( "#inputs" ).empty();
+                                            $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
                                             $(function(){                                           //сама функция подгрузки опций
                                                 $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_option/?type='+sellectedtype+'', function(data) {
                                                     var i = -1;
@@ -65,9 +69,6 @@
 </div>
     <!-- Modal addUser -->
 
-<div id="dynTable">
-
-</div>
 
 
 

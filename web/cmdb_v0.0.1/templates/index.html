@@ -3,26 +3,23 @@
 {% block body %}
 
 <h1>VPS</h1>
+&nbsp;
     <table class=entries>
     <tr>
     {% for cols_name in cols_names %}
-        <td><b>{{ cols_name[0] }}</b></td>
+        <td><b>{{ cols_name }}</b></td>
     {% endfor %}
     </tr>
-        
-    {% for entry in entries %}
-    <tr>
-
-        {% for cell in entry %}
-
-                <td>{{ cell }}</td>
-
-        {% endfor %}
-        
-    </tr>
-
+    
+{% for entrie in entries %}
+<tr>
+    {% for cell in entrie %}
+    <td>&nbsp;{{ cell }}</td>
     {% endfor %}
+</tr>
+{% endfor %}
 
     </table>
+&nbsp;
   
 {% endblock %}

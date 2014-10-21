@@ -18,6 +18,7 @@ class Entries(db.Model): # For Test
 class Resources(db.Model):
     __tablename__ = 'resources'
     id = db.Column(db.Integer, primary_key = True)
+    hash = db.Column(db.String(6))
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
     hash = db.Column(db.String(10))
     create_date = db.Column(db.DateTime)
@@ -48,6 +49,9 @@ class Options(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(100), unique = False)
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
+    description = db.Column(db.String(100), unique = False)
+    opttype = db.Column(db.String(10), unique = False)
+    user_visible = db.Column(db.Integer)
     front_page = db.Column(db.Integer)
 
 class Dict(db.Model):
