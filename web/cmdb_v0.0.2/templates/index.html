@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1><a href={{ url_for('index', typename='VPS') }}>VPS</a>&nbsp;|&nbsp;<a href={{ url_for('index', typename='Ticket') }}>Ticket</a>&nbsp;|&nbsp;<a href={{ url_for('index', typename='Phone') }}>Phone</a></h1>
+&nbsp;
+    <table class=entries>
+    <tr>
+    {% for cols_name in cols_names %}
+        <td><b>{{ cols_name }}</b></td>
+    {% endfor %}
+    </tr>
+    
+{% for entrie in entries %}
+<tr>
+    {% for cell in entrie %}
+    <td>{{ cell }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+
+    </table>
+&nbsp;
+  
+{% endblock %}

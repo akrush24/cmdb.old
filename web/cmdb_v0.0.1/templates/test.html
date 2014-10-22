@@ -1,24 +1,33 @@
 {% extends "layout.html" %}
 {% block body %}
-
-<table id="my-ajax-table">
+<div>
+<table id="my-table" class="table table-bordered">
   <thead>
-    <th>Some Attribute</th>
-    <th>Some Other Attribute</th>
+    <th data-dynatable-sorts="">login</th>
+    <th>password</th>
+    <th>id</th>
+    <th>full_name</th>
+    <th>email</th>
   </thead>
   <tbody>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
   </tbody>
 </table>
 
 <script>
 
-$.getJSON('http://cmdb.at-consulting.ru:5000/test-json', function(data) {
-      $('#my-ajax-table').dynatable({
-      dataset: {
-        records: data
-      });
-    });
+$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_user/', function (response) {     
+  $('#my-table').dynatable({
+  dataset: {
+    records: response
+  },
+});
 
-
-
+});
+</script>
+</div>
 {% endblock %}

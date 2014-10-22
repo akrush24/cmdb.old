@@ -1,0 +1,254 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+<div class="container-fluid">
+	<div class="row"> <div class="col-xs-12 col-sm-6 col-md-8">
+
+	<button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
+		<span class="glyphicon glyphicon-plus"></span> Тип
+	</button>
+
+	<button class="btn btn btn-default" data-toggle="modal" data-target="#addOptions">
+		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
+	</button>
+ 
+	<button class="btn btn btn-default" data-toggle="modal" data-target="#addUser">
+		<span class="glyphicon glyphicon-plus"></span> Пользователь
+	</button> 
+    
+
+    
+    <!-- Modal addType -->
+<div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавление нового типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
+				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" /> <br>
+				</form>
+			</div>	
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addType -->
+    
+    
+    <!-- Modal addOptions -->
+<div class="modal fade" id="addOptions" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addOptionsForm" action="{{ url_for('new_option') }}" method="post">
+                    <select class="form-control" id="type_id" name="type_id">
+						<option disabled>Тип</option>
+                    </select><br>
+                    <div id="inputNewOption">
+                    
+						<script type="text/javascript">
+							$(function(){
+								$.getJSON('{{ url_for('get_list_type') }}', function(data) {
+								  var i = -1;
+									$.each(data, function(id, name) { 
+									   i=i+1;
+										$('#type_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+										});  
+                                            });
+                                        });
+
+                                    $('#type_id').change(function(){                                //подгрузка опций для типа
+                                          var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
+                                            $( "#inputNewOption" ).empty();                                 //очищаем контейнер от предыдущих объектов
+                                            $(function(){                                           //сама функция подгрузки опций
+                                                $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_option/?type='+sellectedtype+'', function(data) {
+                                                    var i = -1;
+                                                $.each(data, function(id, name) { 
+                                                    i=i+1;
+                                                        $('#inputNewOption').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="' + data[i].name + '" required=""/></div>');
+
+                                                          });  
+                                                        });
+                                                       });
+                                           }); //Конец функции выбора типа
+                                           
+                                           //добавить поле ввода
+                                                 $(function() { 
+                                                        var iditer=1; // Итератор для нового newid
+                                                    $('#addbtn').click(function() {
+                                                        $('#inputNewOption').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новую опцию" required="" autocomplete="off" /></div>')
+                                                        iditer=iditer+1;
+                                                    });
+                                                    });
+					</script>
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionsForm').submit();"> Сохранить</button>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+    <!-- Modal addoptions -->
+    
+    
+        <!-- Modal addUser -->
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addUserForm" action="{{ url_for('new_user') }}" method="post">
+                    <input type="text" class="form-control" placeholder="Введите login" name="login" autocomplete="off" /> 
+                    <input type="text" class="form-control" placeholder="Введите ФИО" name="full_name" autocomplete="off" /> 
+                    <input type="email" class="form-control" placeholder="Введите e-mail" name="email" autocomplete="off" /> 
+                    <input type="password" class="form-control" placeholder="Введите пароль" name="password" autocomplete="off" />
+                    <button type="submit"  class="btn hide" />
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addUserForm').submit();"> Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addUser -->
+
+
+  </div>
+</div>
+
+
+
+
+ 
+ 
+
+
+<!-- отрисовываем табличку-->
+    <table class=entries>
+    <th>Типы</th>
+    <tr>
+    {% for cols_name in type_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in type_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a href="/del_type/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+
+
+
+    <table class=entries>
+    <th>Свойства</th>
+    <tr>
+    {% for cols_name in option_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in option_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a href="/del_option/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+
+
+    <table class=entries>
+    <th>Пользователи</th>
+    <tr>
+    {% for cols_name in user_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
+    </tr>
+        
+    {% for entry in user_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a href="/del_user/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+
+<!-- отрисовываем табличку-->
+
+
+</body>
+  {% endif %}
+{% endblock %}
