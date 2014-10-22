@@ -1,7 +1,7 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'mysql://cmdb:unix11@localhost/cmdb_v.0.0.2'
+SQLALCHEMY_DATABASE_URI = 'mysql://cmdb:unix11@localhost/cmdb_v.0.0.2?charset=utf8&use_unicode=0'
 
 #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'cmdb.sqlite')
 

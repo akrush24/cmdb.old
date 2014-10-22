@@ -21,10 +21,23 @@ from flaskext.mysql import MySQL
 import actions
 import hashlib
 
-MySQLdb = MySQL()
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
+
+mysql = MySQL()
 
 app = Flask(__name__)
 app.config.from_object('config')
+
+app.config['MYSQL_DATABASE_USER'] = 'cmdb'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'unix11'
+app.config['MYSQL_DATABASE_DB'] = 'cmdb_v.0.0.2'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+mysql.init_app(app)
+
 db = SQLAlchemy(app)
 
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -48,8 +61,8 @@ from models import *
 def cols_name(query):
     db = get_db()
     cur = db.execute(query)
-    keyst = list(map(lambda x: x[0], cur.description))  
-    return keyst
+    #keyst = list(map(lambda x: x[0], cur.description))  
+    return ""
 
 ##############################################
 # Decoration
@@ -63,9 +76,7 @@ def new_type():
         abort(401)
 
     db = get_db()
-    db.execute('insert into types (name) values (?)',
-                [request.form['name']])
-    db.commit()
+    db.execute('''insert into types (name) values (%s)''', request.form['name'])
     
     return redirect(url_for('control'))
 
@@ -75,8 +86,8 @@ def del_type(id):
         abort(401)
 
     db = get_db()
-    db.execute('delete from types where id=?', [id])
-    db.commit()
+    db.execute('delete from types where id=%s', [id])
+
 
     return redirect(url_for('control'))
 
@@ -107,17 +118,14 @@ def new_option():
         if data != "type_id" and data[:5] != "newid" and value != "":
             option_id = data[2:]
             
-            cur = db.execute('update options set name=? where id=?', [value, option_id])
+            cur = db.execute('update options set name=%s where id=%s', value, option_id)
 
             test=test+option_id+' = '+value+'; '
-            #q="insert into value (option_id, value, res_id) values ("+option_id+", "+value+", "+res_id+"); "+q
             
         if data[:5] == "newid" and value != "":
-            db.execute('insert into options (name, type_id) values (?, ?)', [value, request.form['type_id']])
-            #db.commit()
+            db.execute('insert into options (name, type_id) values (%s, %s)', [value, request.form['type_id']])
             test=test+'NEWID: '+data[:5]+'='+value+'; '
 
-    db.commit()
     
     #return test
     return redirect(url_for('control'))
@@ -128,8 +136,7 @@ def del_option(id):
         abort(401)
 
     db = get_db()
-    db.execute('delete from options where id=?', [id])
-    db.commit()
+    db.execute('delete from options where id=%s', [id])
     
     return redirect(url_for('control'))
 
@@ -138,7 +145,7 @@ def get_list_option():
     type = request.args.get('type')
     db = get_db()
     if type is not None:
-        cur = db.execute('select * from options where type_id = ? order by id desc', [type])
+        cur = db.execute('select * from options where type_id = %s order by id desc', [type])
     else:
         cur = db.execute('select * from options order by id desc')
         
@@ -158,9 +165,8 @@ def new_user():
         abort(401)
 
     db = get_db()
-    db.execute('insert into users (login, full_name, email, password) values (?, ?, ?, ?)',
+    db.execute('insert into users (login, full_name, email, password) values (%s, %s, %s, %s)',
                 [request.form['login'], request.form['full_name'], request.form['email'], request.form['password']] )
-    db.commit()
     
     return redirect(url_for('control'))
 
@@ -170,8 +176,7 @@ def del_user(id):
         abort(401)
 
     db = get_db()
-    db.execute('delete from users where id=?', [id])
-    db.commit()
+    db.execute('delete from users where id=%s', [id])
 
     return redirect(url_for('control'))
 
@@ -180,7 +185,7 @@ def get_list_user():
     username = request.args.get('email_list')
     db = get_db()
     if username is not None:
-        cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+username+'%") order by id desc' )
+        cur = db.execute( 'select * from users WHERE upper(full_name) like '+username+' order by id desc' )
         #cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
     else:
         cur = db.execute('select * from users order by id desc limit 10')
@@ -199,102 +204,30 @@ def get_list_user():
 def index(typename):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-
-    val2=[]
-    if typename is not None:
-
-        db = get_db()
-        
-        try:
-            typeid=db.execute('select id from types where name=?',[typename]).fetchall()[0][0]
-        except IndexError:
-            typeid=None
-
-        count_resources=db.execute('select resources.id, hash from resources where resources.type_id=?',[typeid]).fetchall()
-
-        
-        for res_id, hash in count_resources:
-
-            entries=db.execute('select id,name from options where type_id=?',[typeid]).fetchall()
-            key=['UUID']
-            val=[hash]
-            for opt_id, v in entries:
-                try:
-                    key.append(v)
-                except:
-                    key.append("")
-                    
-                entries=db.execute('select value from value where res_id=? and option_id=?', [res_id, opt_id]).fetchall()
-                        
-                try:
-                    val.append(entries[0][0])
-                except:
-                    val.append("")
-                    
-            val2.append(val)
-        try:
-            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
-        except:
-            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+    db=get_db()
     
+    u = db.execute('select * from users')
+    #return u
    
-    return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+    return render_template( 'index.html', entries=u, cols_names="", user=session['login'] )
 
 @app.route('/add', methods=['POST'])
 def add():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('insert into entries (title, text) values (?, ?)',
-                [request.form['title'], request.form['text']])
-    db.commit()
+    db.execute('insert into entries (title, text) values (%s, %s)', [request.form['title'], request.form['text']])
+
     flash('New entry was successfully posted')
     return redirect(url_for('index'))
 
-
-@app.route('/update', methods=['POST'])
-def update():
-    if not session.get('logged_in'):
-        abort(401)
-    
-    f = request.form
-    query = 'update entries set '
-    i=0
-    keys=[]
-    value=[]
-    for key in f.keys():
-        if key != 'id':
-            if len(f.keys())-1 > i:
-                query = query+key+', '
-                keys.append(key)
-                value.append(f[key])
-            else:
-                query = query+'%s=? '
-                keys.append(key)
-                value.append(f[key])
-            i = i+1
-
-    query = query+'where id='+f.getlist('id')[0]
-    #return (query)
-    
-    query = 'update entries set {0}={2}, {1}=?, {2}=? where id=4'
-    #return ( query  % f.keys()[0], f.keys()[1], f.keys()[2] )
-    #keys = ['wr','ret','qwqw']
-    return ( query.format(*keys) )
-    db = get_db()
-    #db.execute( ('update entries set %s=?' % f.keys()[1] ),[ f[f.keys()[1]] ])
-    #db.execute( (query % f.keys()[0], f.keys()[1], f.keys()[2]) , [ f[f.keys()[0]], f[f.keys()[1]], f[f.keys()[2]] ])
-    db.commit()
-    
-
-    #return redirect(url_for('index'))
 
 @app.route('/edit/<int:entry_id>')
 def edit(entry_id):
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    cur = db.execute('select * from entries where id=?', [entry_id])
+    cur = db.execute('select * from entries where id=%s', [entry_id])
     entries = cur.fetchall()
     keys=entries[0].keys()
     return render_template('edit.html', entries=entries, keys=keys, user=session['login'])
@@ -305,8 +238,7 @@ def delete(entry_id):
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('delete from entries where id=?', [entry_id])
-    db.commit()
+
     flash('Entry ? deleted', [entry_id])
     return redirect(url_for('index'))
 
@@ -317,7 +249,7 @@ def login():
  
     if request.method == 'POST':
         db = get_db()
-        entries = db.execute('select * from users where login=? limit 1', [request.form['login']] ).fetchall()
+        entries = db.execute('select * from users where login=%s limit 1', [request.form['login']] ).fetchall()
         
         for password in entries:
             user_password = entries[0][2]
@@ -349,8 +281,6 @@ def control(action):
 
     type_cols = db.execute('select * from types order by id desc').fetchall()
 
-    #cur = db.execute('select * from options order by id desc')
-    #query = 'select options.id, options.name, types.name, options.front_page, options.opttype, options.description, options.user_visible, options.required from options, types where options.type_id = types.id'
     query = 'select * from options'
     option_cols = db.execute(query).fetchall()
 
@@ -362,10 +292,6 @@ def control(action):
         user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc'),
         user=session['login']
     )
-
-    #cur = db.execute('select * from users order by id desc')
-    #user_cols = cur.fetchall()
-    #return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
 
 
@@ -397,7 +323,7 @@ def newres():
     try:
         db = get_db()
         db.execute('insert into resources (hash, type_id) values (?, ?)', [UUID, request.form['type_id']])
-        db.commit()
+        
     
         res_id=db.execute('select id from resources where hash=? limit 1', [UUID]).fetchall()[0][0]
         #res_id = entries
@@ -408,7 +334,6 @@ def newres():
                 value=request.form[data]
                 cur = db.execute('insert into value (option_id, value, res_id) values (?, ?, ?)', [option_id, value, res_id])
 
-        db.commit()
         
     except:
         flash('Unexpected ERROR')
@@ -422,9 +347,10 @@ def newres():
 
 #############################################################
 # DB 
-#
+#\
+'''
 def connect_db():
-    db_conn = MySQLdb.connect(host='localhost',user='cmdb',passwd='unix11',db='cmdb_v.0.0.2')
+    db_conn = MySQL.connect(host='localhost',user='cmdb',passwd='unix11',db='cmdb_v.0.0.2')
     return db_conn
     # DB connect
     #rv = sqlite3.connect(app.config['DATABASE'])
@@ -436,26 +362,27 @@ def db_connect():
     g.db = connect_db()
     return g.db
 '''
+
 def get_db():
     #
-    if not hasattr(g, app.config['DATABASE']):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
-'''
+    #if not hasattr(g, app.config['DATABASE']):
+    #    g.sqlite_db = connect_db()
+    return engine
+
 
 def init_db():
     with app.app_context():
         db = get_db()
         with app.open_resource(app.config['DATABASE'], mode='r') as f:
             db.cursor().executescript(f.read())
-        db.commit()
 
-
+'''
 @app.teardown_appcontext
 def close_db(error):
-    '''Closes the database again at the end of the request.'''
-    g.db.close()
 
+    g.db.close()
+'''
+    
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()

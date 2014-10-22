@@ -51,7 +51,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
+        <h4 class="modal-title" id="myModalLabel">Редактирование и добавление опций</h4>
       </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
@@ -156,12 +156,17 @@
 
 
 <!-- отрисовываем табличку-->
-    <table class=entries>
+<div class="container-fluid">
+    <div class="row">
+    <div class="col-md-6">
+    
+    <table class=table>
     <th>Типы</th>
     <tr>
     {% for cols_name in type_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
+        <td><center><b>delete</b></center></td>
     </tr>
         
     {% for entry in type_cols %}
@@ -187,12 +192,13 @@
 
 
 
-    <table class=entries>
+    <table class=table>
     <th>Свойства</th>
     <tr>
     {% for cols_name in option_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
+     <td><center><b>Delete</b></center></td>
     </tr>
         
     {% for entry in option_cols %}
@@ -217,12 +223,13 @@
     </table>
 
 
-    <table class=entries>
+    <table class=table>
     <th>Пользователи</th>
     <tr>
     {% for cols_name in user_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
+        <td><center><b>Delete</b></center></td>
     </tr>
         
     {% for entry in user_cols %}
@@ -245,7 +252,9 @@
     </tr>
     {% endfor %}
     </table>
-
+        </div>
+    </div>
+</div>
 <!-- отрисовываем табличку-->
 
 

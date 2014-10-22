@@ -7,8 +7,8 @@
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
-<script src="{{ url_for('static', filename='dynatable/jquery.dynatable.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='dynatable/jquery.dynatable.css') }}">
+<script src="{{ url_for('static', filename='dynatable/jquery.dynatable.js') }}"></script> <!-- Отрисовка таблиц -->
+<link rel="stylesheet" href="{{ url_for('static', filename='dynatable/jquery.dynatable.css') }}"> <!-- Отрисовка таблиц стилей -->
 
 <script src="{{ url_for('static', filename='js/emailautocomplite.js') }}"></script> <!-- Автодополнение e-mail -->
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script> <!-- Тема bootstrap -->
@@ -60,7 +60,7 @@
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form id="addTicket" action="{{ url_for('newres') }}" method="post">
+				<form name="Ticketform" id="addTicket" action="{{ url_for('newres') }}" method="post">
                     <select class="form-control" id="type_id_ticket" name="type_id">
 						<option disabled>Тип</option>
                     </select><br>
@@ -101,29 +101,38 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addTicket').submit();"> Добавить и сохранить</button>
+        <button type="submit" id="addticketsubmit" class="btn btn-primary" > Добавить и сохранить</button>
+        <script> 
+
+        $("#addticketsubmit").click(function()
+    {
+        $("form[name='Ticketform']").submit();
+});
+
+        </script>
       </div>
     </div>
   </div>
 </div>
     <!-- Modal addTicket -->
- 
- 
- 
-<div class=page>
-    {% for message in get_flashed_messages() %}
+
+<div>
+{% block body %}{% endblock %}
+</div>
+
+
+  <nav class="navbar navbar-default navbar-fixed-bottom " role="navigation"> 
+  <div class="container-fluid"> 
+        {% for message in get_flashed_messages() %}
     <div class="alert alert-success" role="alert">
         <a href="#" class="alert-link">{{ message }}</a>
     </div>
     {% endfor %}
-    {% block body %}{% endblock %}
-</div>
-
-  <nav class="navbar navbar-default " role="navigation"> 
-  <div class="container-fluid"> 
-
   </div>
   </nav>
+  
+
+  
   
 </body>
 </html>
