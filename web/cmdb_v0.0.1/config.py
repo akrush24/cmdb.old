@@ -9,7 +9,7 @@ SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
 DATABASE = os.path.join(basedir, 'cmdb.sqlite')
 DEBUG = True
-SECRET_KEY = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
+SECRET_KEY = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT$WERWER'
 USERNAME = 'admin'
 PASSWORD = 'default'
 HOST='0.0.0.0'

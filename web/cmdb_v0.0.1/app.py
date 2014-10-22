@@ -159,6 +159,8 @@ def get_list_option():
 
 #......................................................#
 #### Обработка пользователей ####
+
+import hashlib, uuid
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
     if not session.get('logged_in'):
@@ -166,7 +168,7 @@ def new_user():
 
     db = get_db()
     db.execute('insert into users (login, full_name, email, password) values (%s, %s, %s, %s)',
-                [request.form['login'], request.form['full_name'], request.form['email'], request.form['password']] )
+                [request.form['login'], request.form['full_name'], request.form['email'], hashlib.sha512(request.form['password']).hexdigest()]  )
     
     return redirect(url_for('control'))
 
@@ -284,11 +286,10 @@ def login():
  
     if request.method == 'POST':
         db = get_db()
-        entries = db.execute('select * from users where login=%s limit 1', [request.form['login']] ).fetchall()
+        entries = db.execute('select login, password from users where login=%s limit 1', [request.form['login']] ).fetchall()
         
-        for password in entries:
-            user_password = entries[0][2]
-            if request.form['password'] == user_password:
+        for login, user_password in entries:
+            if hashlib.sha512(request.form['password']).hexdigest() == user_password:
                 session['logged_in'] = True
                 session['login']=request.form['login']
                 flash('You were logged in')
@@ -346,8 +347,6 @@ def testjson():
         json_row.append(dict(en))
     return simplejson.dumps(json_row)
 
-
-
 import string
 import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -355,10 +354,22 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 @app.route('/newres', methods=['GET', 'POST'])
 def newres():
-    UUID = id_generator(6,"abcdefghijklmnopqrstuvwxyz0123456789")
+    UUID = id_generator(4,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     
     try:
         db = get_db()
+        
+        ALL_HASH=db.execute('select hash from resources').fetchall()
+        hashs=[]
+        
+        for h in ALL_HASH:
+            hashs.append(h)
+        
+        if UUID is not hashs:
+            pass
+        else:
+            UUID = id_generator(6,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+        
         db.execute('insert into resources (hash, type_id) values (%s, %s)', [UUID, request.form['type_id']])
         
     
