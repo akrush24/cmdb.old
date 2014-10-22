@@ -65,8 +65,7 @@
 						<option disabled>Тип</option>
                     </select><br>
                     <div id="inputs">
-                    
-                    <script type="text/javascript">
+                    <script>
                     $(function(){
 								$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(data) {
 								  var i = -1;
@@ -77,7 +76,7 @@
                                             });
                                         });
 
-                                    $('#type_id_ticket').change(function(){                                //подгрузка опций для типа
+                    $('#type_id_ticket').change(function(){                                //подгрузка опций для типа
                                           var sellectedtype = $('#type_id_ticket option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
                                             $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
                                             $(function(){                                           //сама функция подгрузки опций

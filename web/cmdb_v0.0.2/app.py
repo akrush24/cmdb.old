@@ -185,7 +185,7 @@ def get_list_user():
     username = request.args.get('email_list')
     db = get_db()
     if username is not None:
-        cur = db.execute( 'select * from users WHERE upper(full_name) like '+username+' order by id desc' )
+        cur = db.execute( 'select * from users WHERE upper(full_name) like upper(%s) order by id desc', username+'%' )
         #cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
     else:
         cur = db.execute('select * from users order by id desc limit 10')
@@ -204,12 +204,47 @@ def get_list_user():
 def index(typename):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    db=get_db()
+
+    val2=[]
+    if typename is not None:
+
+        db = get_db()
+        
+        try:
+            typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
+        except IndexError:
+            typeid=None
+
+        count_resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
+
+        
+        for res_id, hash in count_resources:
+
+            entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
+            key=['UUID']
+            val=[hash]
+            for opt_id, v in entries:
+                try:
+                    key.append(v)
+                except:
+                    key.append("")
+                    
+                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                        
+                try:
+                    val.append(entries[0][0])
+                except:
+                    val.append("")
+                    
+            val2.append(val)
+        try:
+            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
+        except:
+            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
     
-    u = db.execute('select * from users')
-    #return u
    
-    return render_template( 'index.html', entries=u, cols_names="", user=session['login'] )
+    return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+    
 
 @app.route('/add', methods=['POST'])
 def add():
