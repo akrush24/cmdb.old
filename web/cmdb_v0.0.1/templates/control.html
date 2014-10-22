@@ -77,7 +77,7 @@
                                           var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
                                             $( "#inputNewOption" ).empty();                                 //очищаем контейнер от предыдущих объектов
                                             $(function(){                                           //сама функция подгрузки опций
-                                                $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_option/?type='+sellectedtype+'', function(data) {
+                                                $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
                                                     var i = -1;
                                                 $.each(data, function(id, name) { 
                                                     i=i+1;

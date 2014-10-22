@@ -11,7 +11,7 @@ class Resources(db.Model):
     __tablename__ = 'resources'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     hash = db.Column(db.String(6))
-    type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
     hash = db.Column(db.String(10), unique = True)
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
@@ -40,7 +40,7 @@ class Options(db.Model):
     __tablename__ = 'options'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(100), unique = False)
-    type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
     description = db.Column(db.String(100), unique = False)
     opttype = db.Column(db.String(10), unique = False)
     user_visible = db.Column(db.Integer)
