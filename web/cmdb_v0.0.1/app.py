@@ -50,8 +50,8 @@ def cols_name(query):
 # Decoration
 #
 
-
-# Обработка Типов
+#......................................................#
+#### Обработка Типов ####
 @app.route('/new_type/', methods=['GET', 'POST'])
 def new_type():
     if not session.get('logged_in'):
@@ -86,17 +86,35 @@ def get_list_type():
     
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
     
+#......................................................#
+#### Обработка свойств\опций ####
 
-# Обработка свойств
+# 1. Добавление
+# 2. Редактирование
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
     if not session.get('logged_in'):
         abort(401)
-        
+    test=""
     db = get_db()
-    db.execute('insert into options (name, type_id) values (?, ?)', [request.form['name'], request.form['type_id']])
+    for data in request.form.keys():
+        value=request.form[data]
+        if data != "type_id" and data[:5] != "newid" and value != "":
+            option_id = data[2:]
+            
+            cur = db.execute('update options set name=? where id=?', [value, option_id])
+
+            test=test+option_id+' = '+value+'; '
+            #q="insert into value (option_id, value, res_id) values ("+option_id+", "+value+", "+res_id+"); "+q
+            
+        if data[:5] == "newid" and value != "":
+            db.execute('insert into options (name, type_id) values (?, ?)', [value, request.form['type_id']])
+            #db.commit()
+            test=test+'NEWID: '+data[:5]+'='+value+'; '
+
     db.commit()
     
+    #return test
     return redirect(url_for('control'))
 
 @app.route('/del_option/<int:id>', methods=['GET'])
@@ -109,7 +127,6 @@ def del_option(id):
     db.commit()
     
     return redirect(url_for('control'))
-
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
@@ -127,6 +144,9 @@ def get_list_option():
     
     return simplejson.dumps(json_row)
 
+
+#......................................................#
+#### Обработка пользователей ####
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
     if not session.get('logged_in'):
@@ -166,61 +186,54 @@ def get_list_user():
     
     return simplejson.dumps(json_row)
 
-# Главная страница
-@app.route('/')
-def index():
+
+########################################################################
+##### Главная страница #################################################
+@app.route('/list/<typename>/')
+@app.route('/', defaults={'typename': None})
+def index(typename):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    db = get_db()
-    query = 'select options.name, value.value from resources, value, options where value.res_id=resources.id and options.type_id=resources.type_id and value.option_id=options.id'
-    cur = db.execute(query)
-    entries1 = cur.fetchall()
-    
-    #query = 'select options.name value, options where type_id=1'
-    #cur = db.execute(query)
-    #entries2 = cur.fetchall()
-    
-    #return render_template('index.html', entries=entries, cols_names=cols_name('entries'))
-    count_o=0
-    count_r=0
-    count=0
-    key=[]
-    val=[]
+
     val2=[]
-    count_options=db.execute('select count(id) from options where type_id=1').fetchall()[0][0]
-    count_resources=db.execute('select count(id) from resources where type_id=1').fetchall()[0][0]
+    if typename is not None:
+
+        db = get_db()
+        
+        try:
+            typeid=db.execute('select id from types where name=?',[typename]).fetchall()[0][0]
+        except IndexError:
+            typeid=None
+
+        count_resources=db.execute('select resources.id, hash from resources where resources.type_id=?',[typeid]).fetchall()
+
+        
+        for res_id, hash in count_resources:
+
+            entries=db.execute('select id,name from options where type_id=?',[typeid]).fetchall()
+            key=['UUID']
+            val=[hash]
+            for opt_id, v in entries:
+                try:
+                    key.append(v)
+                except:
+                    key.append("")
+                    
+                entries=db.execute('select value from value where res_id=? and option_id=?', [res_id, opt_id]).fetchall()
+                        
+                try:
+                    val.append(entries[0][0])
+                except:
+                    val.append("")
+                    
+            val2.append(val)
+        try:
+            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
+        except:
+            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
     
-    while (count_r < count_resources):
-        key=[]
-        val=[]
-        count_o=0
-        while (count_o < count_options):
-
-            key.append(entries1[count][0])
-            val.append(entries1[count][1])
-            count=count+1
-            count_o=count_o+1
-            
-        val2.append(val)
-        
-        count_r = count_r + 1
-        
-    return render_template('index.html', entries=val2, cols_names=key )
-    #return entries1[35][0]+";"+str(count)
-
-
-
-@app.route('/json/')
-def json():
-    db = get_db()
-    cur = db.execute('select * from types order by id desc')
-    entries = cur.fetchall()
-    json_row=[]
-    for en in entries:
-        json_row.append(dict(en))
-    return simplejson.dumps(json_row)
-
-
+   
+    return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -279,7 +292,7 @@ def edit(entry_id):
     cur = db.execute('select * from entries where id=?', [entry_id])
     entries = cur.fetchall()
     keys=entries[0].keys()
-    return render_template('edit.html', entries=entries, keys=keys)
+    return render_template('edit.html', entries=entries, keys=keys, user=session['login'])
 
 
 @app.route('/del/<int:entry_id>', methods=['GET'])
@@ -298,7 +311,6 @@ def login():
     error = None
  
     if request.method == 'POST':
-        g.user=None
         db = get_db()
         entries = db.execute('select * from users where login=? limit 1', [request.form['login']] ).fetchall()
         
@@ -306,8 +318,8 @@ def login():
             user_password = entries[0][2]
             if request.form['password'] == user_password:
                 session['logged_in'] = True
-                #flash('You were logged in')
-                #g.user = request.form['login']
+                session['login']=request.form['login']
+                flash('You were logged in')
                 return redirect(url_for('index'))
 
         if g.user is None:
@@ -315,10 +327,10 @@ def login():
 
     return render_template('login.html', error=error)
 
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('login', None)
     #flash('You were logged out')
     return redirect(url_for('index'))
 
@@ -331,26 +343,29 @@ def control(action):
     db = get_db()
 
     type_cols = db.execute('select * from types order by id desc').fetchall()
-	
+
     #cur = db.execute('select * from options order by id desc')
-    option_cols = db.execute('select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id').fetchall()
+    #query = 'select options.id, options.name, types.name, options.front_page, options.opttype, options.description, options.user_visible, options.required from options, types where options.type_id = types.id'
+    query = 'select * from options'
+    option_cols = db.execute(query).fetchall()
 
     user_cols = db.execute('select * from users order by id desc').fetchall()
 
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
-        option_cols=option_cols, option_cols_names = cols_name('select options.id, options.name, types.name, front_page from options, types where options.type_id = types.id'),
-        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc')
+        option_cols=option_cols, option_cols_names = cols_name(query),
+        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc'),
+        user=session['login']
     )
 
-	#cur = db.execute('select * from users order by id desc')
-	#user_cols = cur.fetchall()
+    #cur = db.execute('select * from users order by id desc')
+    #user_cols = cur.fetchall()
     #return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    return render_template('test.html')
+    return render_template('test.html', user=session['login'])
 
 @app.route('/test-json', methods=['GET', 'POST'])
 def testjson():
@@ -362,50 +377,41 @@ def testjson():
         json_row.append(dict(en))
     return simplejson.dumps(json_row)
 
-#from pylons import url, request, response, session, tmpl_context as c
-#from pylons.controllers.util import abort, redirect
-#from pylons.decorators.secure import authenticate_form
+
 
 import string
 import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-@app.route('/testval', methods=['GET', 'POST'])
-def testval():
-    #data = request.data
-    #val=dict()
-    #test=""
-    #q=""
+@app.route('/newres', methods=['GET', 'POST'])
+def newres():
     UUID = id_generator(6,"abcdefghijklmnopqrstuvwxyz0123456789")
     
-    db = get_db()
-    db.execute('insert into resources (hash, type_id) values (?, ?)', [UUID, request.form['type_id']])
-    db.commit()
+    try:
+        db = get_db()
+        db.execute('insert into resources (hash, type_id) values (?, ?)', [UUID, request.form['type_id']])
+        db.commit()
     
-    entries=db.execute('select id from resources where hash=? limit 1', [UUID]).fetchall()
-    res_id = entries[0][0]
+        res_id=db.execute('select id from resources where hash=? limit 1', [UUID]).fetchall()[0][0]
+        #res_id = entries
 
-    for data in request.form.keys():
-        if data != "type_id":
-            option_id = data[2:]
-            value=request.form[data]
-            cur = db.execute('insert into value (option_id, value, res_id) values (?, ?, ?)', [option_id, value, res_id])
-            db.commit()
-            #val[data[2:]] = request.form[data]
-            #test=test+data[2:]+' = '+val[data[2:]]+'; '
-            #q="insert into value (option_id, value, res_id) values ("+option_id+", "+value+", "+res_id+"); "+q
-            
-    db.commit()
-    
-    
-    return render_template('test.html')
-    
-    
-    #test = test+"type_id = "+request.form["type_id"]
-    #return q
-    #return test
-    #return request.form.keys()[1][2:]+" = "+request.form[request.form.keys()[1]]
+        for data in request.form.keys():
+            if data != "type_id":
+                option_id = data[2:]
+                value=request.form[data]
+                cur = db.execute('insert into value (option_id, value, res_id) values (?, ?, ?)', [option_id, value, res_id])
+
+        db.commit()
+        
+    except:
+        flash('Unexpected ERROR')
+
+    return redirect(url_for('index'))
+
+
+
+
 
 
 #############################################################

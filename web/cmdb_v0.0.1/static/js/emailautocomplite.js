@@ -1,4 +1,4 @@
-var autocomplite = $(document).ready(function () {    
+$(document).ready(function () {    
 
 $( "#name" ).autocomplete({
       source: function(request, response){

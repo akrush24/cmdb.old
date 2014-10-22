@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ru">
 <title>CMDB</title>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" "> <!-- Адаптация для мобильных -->
 <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
@@ -18,19 +19,82 @@
 
 <body>
 
-  <nav class="navbar navbar-default" role="navigation"> 
+  <nav class="navbar navbar-default " role="navigation"> 
+  <div class="container-fluid"> 
         <ul class="nav navbar-nav navbar-left">
             <li><a href="{{ url_for('index') }}"><b>cmdb.at-consulting.ru</b></a></li>
         </ul>
-        <div class="container-fluid">        
+               
         <ul class="nav navbar-nav navbar-right">
-            <li><a href="{{ url_for('test') }}"><b>test</b></a></li>        
-            <li><a href="{{ url_for('index') }}"><b>Home</b></a></li>
-            <li><a href="{{ url_for('control') }}"><b>Control</b></a></li>
-            <li><a href="{{ url_for('logout') }}"><b>Выйти</b></a> </li>
+            <a  class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новая заявка</a>
+            <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ user }}</a>
         </ul>
     </div>
   </nav>
+ 
+ 
+ 
+ <!-- Modal addTicket -->
+<div class="modal fade" id="addTicket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новый ресурс</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addTicket" action="{{ url_for('newres') }}" method="post">
+                    <select class="form-control" id="type_id_ticket" name="type_id">
+						<option disabled>Тип</option>
+                    </select><br>
+                    <div id="inputs">
+                    
+                    <script type="text/javascript">
+                    $(function(){
+								$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(data) {
+								  var i = -1;
+									$.each(data, function(id, name) { 
+									   i=i+1;
+										$('#type_id_ticket').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+										});  
+                                            });
+                                        });
+
+                                    $('#type_id_ticket').change(function(){                                //подгрузка опций для типа
+                                          var sellectedtype = $('#type_id_ticket option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
+                                            $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
+                                            $(function(){                                           //сама функция подгрузки опций
+                                                $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
+                                                    var i = -1;
+                                                $.each(data, function(id, name) { 
+                                                    i=i+1;
+                                                        $('#inputs').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'" required=""/></div>');
+
+                                                          });  
+                                                        });
+                                                       });
+                                           }); //Конец функции выбора типа
+					</script>
+                    
+                    </div>
+                    <button type="submit"  class="btn hide">
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addTicket').submit();"> Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addTicket -->
+ 
+ 
  
 <div class=page>
     {% for message in get_flashed_messages() %}
@@ -41,5 +105,11 @@
     {% block body %}{% endblock %}
 </div>
 
+  <nav class="navbar navbar-default " role="navigation"> 
+  <div class="container-fluid"> 
+
+  </div>
+  </nav>
+  
 </body>
 </html>

@@ -1,4 +1,4 @@
-from app import db, Base
+﻿from app import db, Base
 from sqlalchemy import Column, Integer, String
 
 ROLE_USER = 0
@@ -53,6 +53,7 @@ class Options(db.Model):
     opttype = db.Column(db.String(10), unique = False)
     user_visible = db.Column(db.Integer)
     front_page = db.Column(db.Integer)
+    required = db.Column(db.Integer)
 
 class Dict(db.Model):
     __tablename__ = 'dict'

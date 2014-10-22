@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
-<b>Тим</b>
 {% block body %}
 
-<h1>VPS</h1>
+<h1><a href={{ url_for('index', typename='VPS') }}>VPS</a>&nbsp;|&nbsp;<a href={{ url_for('index', typename='Ticket') }}>Ticket</a>&nbsp;|&nbsp;<a href={{ url_for('index', typename='Phone') }}>Phone</a></h1>
 &nbsp;
     <table class=entries>
     <tr>
@@ -14,7 +13,7 @@
 {% for entrie in entries %}
 <tr>
     {% for cell in entrie %}
-    <td>&nbsp;{{ cell }}</td>
+    <td>    {{ cell }}</td>
     {% endfor %}
 </tr>
 {% endfor %}
