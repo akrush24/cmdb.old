@@ -1,7 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<table id="my-ajax-table">
+  <thead>
+    <th>Some Attribute</th>
+    <th>Some Other Attribute</th>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
 
+<script>
+
+$.getJSON('http://cmdb.at-consulting.ru:5000/test-json', function(data) {
+      $('#my-ajax-table').dynatable({
+      dataset: {
+        records: data
+      });
+    });
 
 
 

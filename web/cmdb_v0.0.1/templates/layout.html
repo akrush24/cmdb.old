@@ -24,9 +24,14 @@
         <ul class="nav navbar-nav navbar-left">
             <li><a href="{{ url_for('index') }}"><b>cmdb.at-consulting.ru</b></a></li>
         </ul>
-               
+        <form class="navbar-form navbar-left" role="search">
+            <div class="form-group">
+              <input id="name" type="text" class="form-control" placeholder="Поиск"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
+            </div>
+        <button type="submit" class="btn hide"></button>
+        </form>       
         <ul class="nav navbar-nav navbar-right">
-            <a  class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новая заявка</a>
+            <a class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новая заявка</a>
             <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
             <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ user }}</a>
         </ul>

@@ -7,20 +7,12 @@ ROLE_ADMIN = 1
 def _get_date():
     return datetime.datetime.now()
 
-
-class Entries(db.Model): # For Test
-    __tablename__ = 'entries'
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(64), index = True, unique = False)
-    text = db.Column(db.String(250), index = True, unique = False)
-    addtext = db.Column(db.String(250), index = True, unique = False)
-
 class Resources(db.Model):
     __tablename__ = 'resources'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     hash = db.Column(db.String(6))
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
-    hash = db.Column(db.String(10))
+    hash = db.Column(db.String(10), unique = True)
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
     
@@ -29,16 +21,16 @@ class Resources(db.Model):
 
 class Value(db.Model):
     __tablename__ = 'value'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     option_id = db.Column(db.Integer, db.ForeignKey('options.id'))
     res_id = db.Column(db.Integer, db.ForeignKey('resources.id'))
     value = db.Column(db.String(250), index = True, unique = False)
     update_date = db.Column(db.DateTime)
-    #lase = db.Column(db.tinyint(1))
+    #lase = db.Column(db.tinyint(1), )
 
 class Types(db.Model):
     __tablename__ = 'types'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(24), unique = True)
     
     def __init__(self, name=None):
@@ -46,7 +38,7 @@ class Types(db.Model):
 
 class Options(db.Model):
     __tablename__ = 'options'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(100), unique = False)
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
     description = db.Column(db.String(100), unique = False)
@@ -57,12 +49,12 @@ class Options(db.Model):
 
 class Dict(db.Model):
     __tablename__ = 'dict'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(100), unique = False)
 
 class Dict_Val(db.Model):
     __tablename__ = 'dict_val'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
     name = db.Column(db.String(255), unique = False)
     

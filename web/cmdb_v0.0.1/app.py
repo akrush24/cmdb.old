@@ -363,6 +363,7 @@ def control(action):
     #return render_template('control.html', type_cols=type_cols, type_cols_names=cols_name('types'), option_cols=option_cols, option_cols_names = cols_name('options'))
 
 
+
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     return render_template('test.html', user=session['login'])
