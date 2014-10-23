@@ -33,7 +33,7 @@ mysql = MySQL()
 app = Flask(__name__)
 app.config.from_object('config')
 
-LDAP_SERVER = "at-consulting.ru"
+LDAP_SERVER = "192.168.10.2"
 LDAP_PORT = 389 # your port
 
 mysql.init_app(app)
@@ -78,11 +78,13 @@ def new_type():
 def del_type(id):
     if not session.get('logged_in'):
         abort(401)
-
-    db = get_db()
-    db.execute('delete from types where id=%s', [id])
-
-
+    
+    try:
+        db = get_db()
+        db.execute('delete from types where id=%s', [id])
+    except:
+       flash('This parameter is used!') 
+        
     return redirect(url_for('control'))
 
 @app.route('/get_list_type/')
@@ -129,9 +131,12 @@ def del_option(id):
     if not session.get('logged_in'):
         abort(401)
 
-    db = get_db()
-    db.execute('delete from options where id=%s', [id])
-    
+    try:
+        db = get_db()
+        db.execute('delete from options where id=%s', [id])
+    except:
+       flash('This parameter is used!', 'error') 
+            
     return redirect(url_for('control'))
 
 @app.route('/get_list_option/', methods=['GET'])
@@ -214,7 +219,6 @@ def del_dict(id):
     db = get_db()
     db.execute('delete from dict where id=%s', [id])
 
-
     return redirect(url_for('control'))
 
 @app.route('/get_list_dict/')
@@ -234,6 +238,18 @@ def get_list_dict():
     
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
+
+@app.route('/del/<typename>/<hash>', methods=['GET'])
+def del_res(hash, typename):
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    
+    db.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s)', [hash])
+    db.execute('delete from resources where hash=%s', [hash])
+    
+    return redirect(url_for('index', typename=typename))
 
 
 ########################################################################
@@ -288,17 +304,15 @@ def index(typename):
                 
             json_row.append( dict( zip(key_id, val) ) )
    
-            
             val2.append(val)
-
 
     if request.args.get('json') is not None:
         return simplejson.dumps(json_row)
     else:
         try:
-            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
+            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'], typename=typename )
         except:
-            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+            return render_template( 'index.html', entries="", cols_names="", user=session['login'], typename=typename )
 
 @app.route('/t/list/<typename>/')
 @app.route('/t/', defaults={'typename': None})
@@ -309,7 +323,7 @@ def indext(typename):
     val2=[]
     json_row=[]
     json_col=[]
-    
+
     if typename is not None:
         
         uuid = request.args.get('uuid')
@@ -369,37 +383,9 @@ def indext(typename):
 
 
 
-@app.route('/add', methods=['POST'])
-def add():
-    if not session.get('logged_in'):
-        abort(401)
-    db = get_db()
-    db.execute('insert into entries (title, text) values (%s, %s)', [request.form['title'], request.form['text']])
-
-    flash('New entry was successfully posted')
-    return redirect(url_for('index'))
-
-
-@app.route('/edit/<int:entry_id>')
-def edit(entry_id):
-    if not session.get('logged_in'):
-        abort(401)
-    db = get_db()
-    cur = db.execute('select * from entries where id=%s', [entry_id])
-    entries = cur.fetchall()
-    keys=entries[0].keys()
-    return render_template('edit.html', entries=entries, keys=keys, user=session['login'])
-
-
-@app.route('/del/<int:entry_id>', methods=['GET'])
-def delete(entry_id):
-    if not session.get('logged_in'):
-        abort(401)
-    db = get_db()
-
-    flash('Entry ? deleted', [entry_id])
-    return redirect(url_for('index'))
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+###        Authorization        ###
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 def loginLDAP(email, password):
     ld = ldap.open(LDAP_SERVER, LDAP_PORT)
     try:
@@ -421,7 +407,7 @@ def login():
         entries = db.execute('select login, password from users where login=%s limit 1', [reqlogin] ).fetchall()
 
         for login, user_password in entries:
-            if hashlib.sha512(r).hexdigest() == user_password:
+            if hashlib.sha512(reqpass).hexdigest() == user_password:
                 session['logged_in'] = True
                 session['login']=reqlogin
                 flash('You were logged in')
@@ -436,13 +422,14 @@ def login():
                 
             if loginLDAP(reqlogin, reqpass):
                 session['logged_in'] = True
-                #match = re.search(r'*@', reqlogin)
+                reqlogin=reqlogin.lower().replace('@at-consulting.ru','').replace('at-consulting\\','')
+
                 session['login']=reqlogin
                 flash('You were logged in')
+                #return reqlogin
                 return redirect(url_for('index'))                
             else:
                 error = "Invalid User or Password"
-
 
     return render_template('login.html', error=error)
 

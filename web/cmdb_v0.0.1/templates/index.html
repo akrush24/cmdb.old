@@ -14,6 +14,7 @@
     {% for cell in entrie %}
     <td>{{ cell }}</td>
     {% endfor %}
+    <td><a href="/del/{{typename}}/{{ entrie[0] }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
 </tr>
 {% endfor %}
 
