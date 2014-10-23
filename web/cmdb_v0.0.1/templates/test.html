@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-<div>
-<table id="my-table" class="table table-bordered">
+<div class="container-fluid">
+  <div class="row">
+  <div class="col-xs-12 col-md-8">
+<table id="my-table" class="table">
   <thead>
     <th data-dynatable-sorts="">login</th>
     <th>password</th>
@@ -29,5 +31,7 @@ $.getJSON('http://cmdb.at-consulting.ru:5000/get_list_user/', function (response
 
 });
 </script>
+</div>
+</div>
 </div>
 {% endblock %}

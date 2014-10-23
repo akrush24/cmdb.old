@@ -60,9 +60,10 @@ from models import *
  
 def cols_name(query):
     db = get_db()
-    cur = db.execute(query)
+    cursor = db.execute(query)
+    desc[0] for desc in cursor.description
     #keyst = list(map(lambda x: x[0], cur.description))  
-    return ""
+    return desc
 
 ##############################################
 # Decoration
