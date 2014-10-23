@@ -207,6 +207,8 @@ def index(typename):
         return redirect(url_for('login'))
 
     val2=[]
+    json_row=[]
+    
     if typename is not None:
 
         db = get_db()
@@ -218,7 +220,6 @@ def index(typename):
 
         count_resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
 
-        
         for res_id, hash in count_resources:
 
             entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
@@ -229,23 +230,34 @@ def index(typename):
                     key.append(v)
                 except:
                     key.append("")
-                    
+
                 entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
-                        
+
                 try:
                     val.append(entries[0][0])
                 except:
                     val.append("")
-                    
+                
+                json_row.append( dict(v='1',v2='2') )
+                
             val2.append(val)
+            
+            
+
+    if request.args.get('json') is not None:
+        return simplejson.dumps(json_row)
+    else:
         try:
             return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
         except:
             return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
-    
-   
-    return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
-    
+
+
+'''
+    for en in entries:
+        json_row.append(dict(en))
+    return simplejson.dumps(json_row)
+'''
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -416,14 +428,14 @@ def get_db():
     #    g.sqlite_db = connect_db()
     return engine
 
-
+'''
 def init_db():
     with app.app_context():
         db = get_db()
         with app.open_resource(app.config['DATABASE'], mode='r') as f:
             db.cursor().executescript(f.read())
 
-'''
+
 @app.teardown_appcontext
 def close_db(error):
 
