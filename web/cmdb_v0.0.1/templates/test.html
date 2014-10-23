@@ -1,37 +1,59 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="container-fluid">
-  <div class="row">
-  <div class="col-xs-12 col-md-8">
-<table id="my-table" class="table">
-  <thead>
-    <th data-dynatable-sorts="">login</th>
-    <th>password</th>
-    <th>id</th>
-    <th>full_name</th>
-    <th>email</th>
-  </thead>
-  <tbody>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  </tbody>
-</table>
 
-<script>
 
-$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_user/', function (response) {     
-  $('#my-table').dynatable({
-  dataset: {
-    records: response
-  },
-});
+<button class="btn btn btn-default" data-toggle="modal" data-target="#editItem">
+		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
+	</button>
+    
+    
+    
+    <!-- Modal edit addOptions -->
+<div class="modal fade" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Редактирование item</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="editItemForm" action="{{ url_for('new_option') }}" method="post">
+                    <select class="form-control" id="type_id" name="type_id">
+						<option disabled>Тип</option>
+                    </select><br>
+                    <div id="itemOption">
+                    
+						<script type="text/javascript">
+							$(function(){
+								$.getJSON('http://cmdb.at-consulting.ru:5000/list/VPS/?json&uuid=AwJ5', function(items) {
+								  var i = 1;
+									$.each(items, function(iditem, nameitem) { 
+									   i=i+1;
+                                       alert (items[i].id"1");
+										$('#itemOption').append('<div><input type="text" class="form-control" name="id" value="i" autocomplete="off" /></div>')
+                                        ;
+										});  
+                                            });
+                                        });
 
-});
-</script>
+					</script>
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionsForm').submit();"> Сохранить</button>
+        
+      </div>
+    </div>
+  </div>
 </div>
 </div>
-</div>
+    <!-- Modal addoptions -->
+
+
 {% endblock %}

@@ -5,12 +5,9 @@ from migrate import *
 from migrate.changeset import schema
 pre_meta = MetaData()
 post_meta = MetaData()
-entries = Table('entries', post_meta,
-    Column('id', Integer, primary_key=True, nullable=False),
-    Column('title', String(length=64)),
-    Column('text', String(length=250)),
-    Column('addtext', String(length=250)),
-    Column('new', String(length=250)),
+hash = Table('hash', pre_meta,
+    Column('id', INTEGER(display_width=11), primary_key=True, nullable=False),
+    Column('hash', VARCHAR(length=11), nullable=False),
 )
 
 
@@ -19,11 +16,11 @@ def upgrade(migrate_engine):
     # migrate_engine to your metadata
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    post_meta.tables['entries'].columns['new'].create()
+    pre_meta.tables['hash'].drop()
 
 
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here.
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    post_meta.tables['entries'].columns['new'].drop()
+    pre_meta.tables['hash'].create()

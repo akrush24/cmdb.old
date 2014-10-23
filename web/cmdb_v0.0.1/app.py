@@ -22,19 +22,19 @@ import actions
 import hashlib
 
 import sys
+
+import ldap
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
-
 
 mysql = MySQL()
 
 app = Flask(__name__)
 app.config.from_object('config')
 
-app.config['MYSQL_DATABASE_USER'] = 'cmdb'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'unix11'
-app.config['MYSQL_DATABASE_DB'] = 'cmdb_v.0.0.2'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+LDAP_SERVER = "at-consulting.ru"
+LDAP_PORT = 389 # your port
 
 mysql.init_app(app)
 
@@ -50,12 +50,7 @@ Base.query = db_session.query_property()
 
 import models
 from models import *
-    
-#def init_db():
-    # Здесь нужно импортировать все модули, где могут быть определены модели,
-    # которые необходимым образом могут зарегистрироваться в метаданных.
-    # В противном случае их нужно будет импортировать до вызова init_db()
-    #Base.metadata.create_all(bind=engine)
+
 
  
 def cols_name(query):
@@ -198,6 +193,49 @@ def get_list_user():
     return simplejson.dumps(json_row)
 
 
+
+#......................................................#
+#### Обработка Словарей ####
+@app.route('/new_dict/', methods=['GET', 'POST'])
+def new_dict():
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('''insert into dict (name) values (%s)''', request.form['name'])
+    
+    return redirect(url_for('control'))
+
+@app.route('/del_dict/<int:id>', methods=['GET'])
+def del_dict(id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    db.execute('delete from dict where id=%s', [id])
+
+
+    return redirect(url_for('control'))
+
+@app.route('/get_list_dict/')
+def get_list_dict():
+    opt_id = request.args.get('opt_id')
+    db = get_db()
+    
+    if opt_id is not None:
+        cur = db.execute('select * from dict where opt_id=%s order by id desc', opt_id)
+    else:
+        cur = db.execute('select * from dict order by id desc')
+    
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+    
+    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
+
+
 ########################################################################
 ##### Главная страница #################################################
 @app.route('/list/<typename>/')
@@ -210,7 +248,9 @@ def index(typename):
     json_row=[]
     
     if typename is not None:
-
+        
+        uuid = request.args.get('uuid')
+        
         db = get_db()
         
         try:
@@ -218,31 +258,105 @@ def index(typename):
         except IndexError:
             typeid=None
 
-        count_resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
+        if uuid is not None:
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
+        else:
+            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
 
-        for res_id, hash in count_resources:
+        for res_id, hash in resources:
 
             entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
             key=['UUID']
+            key_id=['UUID']
             val=[hash]
+            
             for opt_id, v in entries:
                 try:
                     key.append(v)
+                    key_id.append('id'+str(opt_id))
                 except:
                     key.append("")
-
+                    key_id.append("")
+                
                 entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
 
                 try:
                     val.append(entries[0][0])
                 except:
                     val.append("")
+            
                 
-                json_row.append( dict(v='1',v2='2') )
-                
+            json_row.append( dict( zip(key_id, val) ) )
+   
+            
             val2.append(val)
+
+
+    if request.args.get('json') is not None:
+        return simplejson.dumps(json_row)
+    else:
+        try:
+            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
+        except:
+            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+
+@app.route('/t/list/<typename>/')
+@app.route('/t/', defaults={'typename': None})
+def indext(typename):
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    val2=[]
+    json_row=[]
+    json_col=[]
+    
+    if typename is not None:
+        
+        uuid = request.args.get('uuid')
+        
+        db = get_db()
+        
+        try:
+            typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
+        except IndexError:
+            typeid=None
+
+        if uuid is not None:
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
+        else:
+            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
+
+        for res_id, hash in resources:
+
+            entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
+            key=['UUID']
+            key_id=['UUID']
+            val=[hash]
             
+            json_col=[]
+            json_col.append( dict(uuid=hash) )
             
+            for opt_id, v in entries:
+                try:
+                    key.append(v)
+                    key_id.append(opt_id)
+                except:
+                    key.append("")
+                    key_id.append("")
+                
+                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+
+                try:
+                    val.append(entries[0][0])
+                    json_row.append( dict( opt_id=opt_id, name=v, value=entries[0][0] ))
+                except:
+                    val.append("")
+            
+            #json_row.append( json_col )
+            
+                
+            
+            val2.append(val)
 
     if request.args.get('json') is not None:
         return simplejson.dumps(json_row)
@@ -253,11 +367,7 @@ def index(typename):
             return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
 
 
-'''
-    for en in entries:
-        json_row.append(dict(en))
-    return simplejson.dumps(json_row)
-'''
+
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -290,26 +400,49 @@ def delete(entry_id):
     flash('Entry ? deleted', [entry_id])
     return redirect(url_for('index'))
 
+def loginLDAP(email, password):
+    ld = ldap.open(LDAP_SERVER, LDAP_PORT)
+    try:
+        ld.simple_bind_s(email, password)
+    except ldap.INVALID_CREDENTIALS:
+        return False
+    return True
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
- 
+
     if request.method == 'POST':
         db = get_db()
-        entries = db.execute('select login, password from users where login=%s limit 1', [request.form['login']] ).fetchall()
         
+        reqlogin = request.form['login']
+        reqpass = request.form['password']
+        
+        entries = db.execute('select login, password from users where login=%s limit 1', [reqlogin] ).fetchall()
+
         for login, user_password in entries:
-            if hashlib.sha512(request.form['password']).hexdigest() == user_password:
+            if hashlib.sha512(r).hexdigest() == user_password:
                 session['logged_in'] = True
-                session['login']=request.form['login']
+                session['login']=reqlogin
                 flash('You were logged in')
                 return redirect(url_for('index'))
+
 
         try:
             session['logged_in']
         except:
-            error = "Invalid User or Password"
+            if 'at-consulting' not in reqlogin:
+                reqlogin = reqlogin+'@at-consulting.ru'
+                
+            if loginLDAP(reqlogin, reqpass):
+                session['logged_in'] = True
+                #match = re.search(r'*@', reqlogin)
+                session['login']=reqlogin
+                flash('You were logged in')
+                return redirect(url_for('index'))                
+            else:
+                error = "Invalid User or Password"
+
 
     return render_template('login.html', error=error)
 
@@ -365,7 +498,10 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 @app.route('/newres', methods=['GET', 'POST'])
 def newres():
-    UUID = id_generator(4,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    # 4 - 1 679 616
+    # 5 - 60 466 176
+    # 6 - 2 176 782 336
     
     try:
         db = get_db()
@@ -379,7 +515,7 @@ def newres():
         if UUID is not hashs:
             pass
         else:
-            UUID = id_generator(6,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+            UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
         
         db.execute('insert into resources (hash, type_id) values (%s, %s)', [UUID, request.form['type_id']])
         
@@ -401,47 +537,15 @@ def newres():
 
 
 
-
-
-
 #############################################################
 # DB 
-#\
-'''
-def connect_db():
-    db_conn = MySQL.connect(host='localhost',user='cmdb',passwd='unix11',db='cmdb_v.0.0.2')
-    return db_conn
-    # DB connect
-    #rv = sqlite3.connect(app.config['DATABASE'])
-    #rv.row_factory = sqlite3.Row
-    #return rv
-
-@app.before_request
-def db_connect():
-    g.db = connect_db()
-    return g.db
-'''
-
+#
 def get_db():
     #
     #if not hasattr(g, app.config['DATABASE']):
     #    g.sqlite_db = connect_db()
     return engine
 
-'''
-def init_db():
-    with app.app_context():
-        db = get_db()
-        with app.open_resource(app.config['DATABASE'], mode='r') as f:
-            db.cursor().executescript(f.read())
-
-
-@app.teardown_appcontext
-def close_db(error):
-
-    g.db.close()
-'''
-    
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
@@ -451,5 +555,5 @@ def shutdown_session(exception=None):
 # App RUN
 #
 if __name__ == '__main__':
-    app.run(host=app.config['HOST'], debug=app.config['DEBUG'], port=5000)
+    app.run(host=app.config['HOST'], debug=app.config['DEBUG'], port=app.config['PORT'])
 

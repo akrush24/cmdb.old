@@ -46,26 +46,19 @@ class Options(db.Model):
     user_visible = db.Column(db.Integer)
     front_page = db.Column(db.Integer)
     required = db.Column(db.Integer)
+    #   dictionare_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
 
 class Dict(db.Model):
     __tablename__ = 'dict'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    opt_id = db.Column(db.Integer, db.ForeignKey('options.id'))
     name = db.Column(db.String(100), unique = False)
 
-class Dict_Val(db.Model):
-    __tablename__ = 'dict_val'
-    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
-    name = db.Column(db.String(255), unique = False)
-    
-
-    
-#
 class Users(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     login = Column(String(50), unique=True)
-    full_name = Column(String(150), unique=True)
+    full_name = Column(String(150), unique=False)
     email = Column(String(120), unique=True)
     password = Column(String(255))
     
