@@ -22,6 +22,11 @@ import hashlib
 import sys
 import ldap
 
+import datetime
+
+now = datetime.datetime.now()
+
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -273,7 +278,7 @@ def index(typename):
     json_row=[]
     json_col=[]
     json_row2=[]
-
+    count=1
     if typename is not None:
         
         uuid = request.args.get('uuid')
@@ -290,13 +295,14 @@ def index(typename):
         else:
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
 
+        
         for res_id, hash in resources:
-
+            creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
             entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
-            key=['UUID']
+            key=['#', 'UUID', 'Creator']
             key_id=['UUID']
-            val=[hash]
-            
+            val=[count, hash, creator]
+            count=count+1
             json_col=[]
             json_col.append( dict(uuid=hash) )
             
@@ -470,7 +476,7 @@ def addres(type_id):
     else:
         UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
         
-    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.date ])
+    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
     res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
     return res_id
 

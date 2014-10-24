@@ -2,10 +2,10 @@
 {% block body %}
 
     <h3>Здесь будет вывод дескрипшена выбранного типа</h3>
-    <table class="table table-bordered table-hover">
-    <tr>
+    <table class="table table-bordered table-hover table-condensed">
+    <tr class="info">
     {% for cols_name in cols_names %}
-        <td><b>{{ cols_name }}</b></td>
+        <th><b>{{ cols_name }}</b></th>
     {% endfor %}
     </tr>
     
@@ -14,7 +14,8 @@
     {% for cell in entrie %}
     <td>{{ cell }}</td>
     {% endfor %}
-    <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[0] }}"></a></td>
+    <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[1] }}"></a></td>
+    <td><button id="{{ entrie[1] }}" class="glyphicon glyphicon-wrench" onClick="edit_item({{ entrie[1] }})"></a></td>
 </tr>
 {% endfor %}
 

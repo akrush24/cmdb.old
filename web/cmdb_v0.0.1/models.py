@@ -1,11 +1,6 @@
 ﻿from app import db, Base
 from sqlalchemy import Column, Integer, String
 
-ROLE_USER = 0
-ROLE_ADMIN = 1
-
-def _get_date():
-    return datetime.datetime.now()
 
 class Resources(db.Model):
     __tablename__ = 'resources'
@@ -16,9 +11,7 @@ class Resources(db.Model):
     user = db.Column(db.String(50))
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
-    
-    #create_date = db.Column(db.DateTime, default=_get_date())
-    #update_date = db.Column(db.DateTime, onupdate=_get_date())
+
 
 class Value(db.Model):
     __tablename__ = 'value'
@@ -48,7 +41,6 @@ class Options(db.Model):
     user_visible = db.Column(db.Integer)
     front_page = db.Column(db.Integer)
     required = db.Column(db.Integer)
-    #   dictionare_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
 
 class Dict(db.Model):
     __tablename__ = 'dict'

@@ -5,12 +5,18 @@
 <button class="btn btn btn-default" data-toggle="modal" data-target="#editItem">
 		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
 	</button>
-    
 
+    
+    <button id="HF8S" onClick="edit_item(this.id)">B3</button>
+    
+    
+    
+    
+    
     
     <!-- Modal edit addOptions -->
 <div class="modal fade" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -19,40 +25,13 @@
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form id="editItemForm" action="{{ url_for('new_option') }}" method="post">
-                    <select class="form-control" id="type_id" name="type_id">
-						<option disabled>Тип</option>
-                    </select><br>
+				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('new_option') }}" method="post">
+                    
                     <div id="itemOption">
                     
-						<script type="text/javascript">
-							
-                            
-                            
-                            $(document).ready(function(){
+						<script>
 
-    var arr = [ "one", "two", "three", "four", "five" ];
-    var obj = [{"opt_id": 2, "name": "VM Name", "value": "demo-tst2-cdc"}, {"opt_id": 3, "name": "GUEST OS", "value": "192.168.15.125,fe80::250:56ff:feb2:46b7"}, {"opt_id": 4, "name": "STATE", "value": "esx12_vlan14"}, {"opt_id": 11, "name": "HWHost", "value": "00:50:56:b2:46:b7"}, {"opt_id": 12, "name": "PROVISIONED SPACE", "value": "Network adapter 1"}, {"opt_id": 13, "name": "USED SPACE", "value": "True"}];
-
-    var c_opt_id;
-    var c_opttype;
-    var c_name;
-    var c_value;
-    
-        
-        for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
-            
-            if  (key == "opt_id" ) { c_opt_id = val.toString(); };
-            if  (key == "opttype" ) { c_oopttype = val.toString()};
-            if  (key == "name" ) { c_name = val.toString()};
-            if  (key == "value" ) { c_value = val.toString()};
-    });
-
-    $("#itemOption").append('<div><input type="text" class="form-control" id="'+c_opt_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div>');
-          
-    };
-    
-  });                  
+  
 					</script>
 				</form>
 			</div>
@@ -61,7 +40,7 @@
       <div class="modal-footer">
         <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionsForm').submit();"> Сохранить</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editItemForm').submit();"> Сохранить</button>
         
       </div>
     </div>

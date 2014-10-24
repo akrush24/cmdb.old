@@ -158,11 +158,11 @@
     <div class="row">
     <div class="col-md-10">
 
-    <h3>Типы</h3>
-    <table class="table table-bordered table-hover">
-    <tr>
+    <table class="table table-bordered table-hover table-condensed">
+    <caption><h3>Типы</h3></caption>    
+    <tr class="active">
     {% for cols_name in type_cols_names %}
-        <td><center><b>{{ cols_name }}</b></center></td>
+        <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
 
     </tr>
@@ -182,6 +182,7 @@
         {% if session.logged_in %}
         
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
+            <td><a class="glyphicon glyphicon glyphicon-download-alt" href="#"> Импорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="/clear_type/{{ entry.id }}"> Очистить данные</a></td>
         {% endif %}
 
@@ -191,11 +192,12 @@
 
 <br>
     
-    <h3>Опции</h3>
-    <table class="table table-bordered table-hover">
-    <tr>
+    
+    <table class="table table-bordered table-hover table-condensed">
+    <caption><h3>Опции</h3></caption>
+    <tr class="active">
     {% for cols_name in option_cols_names %}
-        <td><center><b>{{ cols_name }}</b></center></td>
+        <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
 
     </tr>
@@ -223,11 +225,12 @@
     
 <br>
 
-    <h3>Справочники</h3>
-    <table class="table table-bordered table-hover">
-    <tr>
+    
+    <table class="table table-bordered table-hover table-condensed">
+    <caption><h3>Справочники</h3></caption>
+    <tr class="active">
     {% for cols_name in dict_cols_names %}
-        <td><center><b>{{ cols_name }}</b></center></td>
+        <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
 
     </tr>
@@ -254,11 +257,11 @@
     </table>
     
 <br>
-    <h3>Пользователи</h3>
-    <table class="table table-bordered table-hover">
-    <tr>
+    <table class="table table-bordered table-hover table-condensed">
+    <caption><h3>Пользователи</h3></caption>
+    <tr class="active">
     {% for cols_name in user_cols_names %}
-        <td><center><b>{{ cols_name }}</b></center></td>
+        <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
 
     </tr>
@@ -276,7 +279,6 @@
         {% endfor %}
         
         {% if session.logged_in %}
-        
             <td><a class="glyphicon glyphicon-remove" href="/del_user/{{ entry.id }}"></a></td>
         {% endif %}
 
@@ -284,10 +286,6 @@
     {% endfor %}
     </table>
     
-	
-	
-	
-	
     
         </div>
     </div>
