@@ -474,7 +474,7 @@ def editres():
 
     except:
     '''
-    return request.form['VM Name']
+    return request.form['uuid']
 
     #return redirect(url_for('index', typename=typename))
 
