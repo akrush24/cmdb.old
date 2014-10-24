@@ -409,12 +409,12 @@ def control(action):
     query = 'select * from options'
     option_cols = db.execute(query).fetchall()
 
-    user_cols = db.execute('select login, full_name, email from users order by id desc').fetchall()
+    user_cols = db.execute('select id, login, full_name, email from users order by id desc').fetchall()
 
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
         option_cols=option_cols, option_cols_names = cols_name(query),
-        user_cols = user_cols, user_cols_names=cols_name('select login, full_name, email from users order by id desc'),
+        user_cols = user_cols, user_cols_names=cols_name('select id, login, full_name, email from users order by id desc'),
         dict_cols = db.execute('select * from dict order by id desc').fetchall(), dict_cols_names=cols_name('select * from dict order by id desc'),
     )
 

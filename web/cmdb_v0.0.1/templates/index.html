@@ -2,6 +2,7 @@
 {% block body %}
 
     <h3>Здесь будет вывод дескрипшена выбранного типа</h3>
+	<div class="table-responsive">
     <table class="table table-bordered table-hover table-condensed">
     <tr class="info">
     {% for cols_name in cols_names %}
@@ -20,5 +21,5 @@
 {% endfor %}
 
     </table>
-
+</div>
 {% endblock %}
