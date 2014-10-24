@@ -7,28 +7,25 @@ import sqlite3
 import os
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import text
-import simplejson
 from sqlalchemy.sql import select
+#from flaskext.mysql import MySQL
+import simplejson
 import re
 import peppercorn
-
-from flaskext.mysql import MySQL
-
+import string
+import random
 import actions
 import hashlib
-
 import sys
-
 import ldap
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-mysql = MySQL()
+#mysql = MySQL()
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -36,7 +33,7 @@ app.config.from_object('config')
 LDAP_SERVER = "192.168.10.2"
 LDAP_PORT = 389 # your port
 
-mysql.init_app(app)
+#mysql.init_app(app)
 
 db = SQLAlchemy(app)
 
@@ -86,7 +83,19 @@ def del_type(id):
        flash('This parameter is used!') 
         
     return redirect(url_for('control'))
-
+@app.route('/clear_type/<int:id>', methods=['GET'])
+def clear_type(id):
+    if not session.get('logged_in'):
+        abort(401)
+    
+    try:
+        db = get_db()
+        db.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
+        db.execute('delete from resources where type_id=%s', [id])
+    except:
+       flash('This parameter is used!')
+        
+    return redirect(url_for('control'))
 @app.route('/get_list_type/')
 def get_list_type():
     db = get_db()
@@ -262,67 +271,8 @@ def index(typename):
 
     val2=[]
     json_row=[]
-    
-    if typename is not None:
-        
-        uuid = request.args.get('uuid')
-        
-        db = get_db()
-        
-        try:
-            typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
-        except IndexError:
-            typeid=None
-
-        if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
-        else:
-            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
-
-        for res_id, hash in resources:
-
-            entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
-            key=['UUID']
-            key_id=['UUID']
-            val=[hash]
-            
-            for opt_id, v in entries:
-                try:
-                    key.append(v)
-                    key_id.append('id'+str(opt_id))
-                except:
-                    key.append("")
-                    key_id.append("")
-                
-                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
-
-                try:
-                    val.append(entries[0][0])
-                except:
-                    val.append("")
-            
-                
-            json_row.append( dict( zip(key_id, val) ) )
-   
-            val2.append(val)
-
-    if request.args.get('json') is not None:
-        return simplejson.dumps(json_row)
-    else:
-        try:
-            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'], typename=typename )
-        except:
-            return render_template( 'index.html', entries="", cols_names="", user=session['login'], typename=typename )
-
-@app.route('/t/list/<typename>/')
-@app.route('/t/', defaults={'typename': None})
-def indext(typename):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-
-    val2=[]
-    json_row=[]
     json_col=[]
+    json_row2=[]
 
     if typename is not None:
         
@@ -362,23 +312,23 @@ def indext(typename):
 
                 try:
                     val.append(entries[0][0])
-                    json_row.append( dict( opt_id=opt_id, name=v, value=entries[0][0] ))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
                 except:
                     val.append("")
             
-            #json_row.append( json_col )
-            
-                
-            
             val2.append(val)
-
+            
+            json_row2.append( (json_row) )
+            json_row=[]
+            
     if request.args.get('json') is not None:
-        return simplejson.dumps(json_row)
+        return simplejson.dumps(json_row2)
     else:
         try:
-            return render_template( 'index.html', entries=val2, cols_names=key, user=session['login'] )
+            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename)
         except:
-            return render_template( 'index.html', entries="", cols_names="", user=session['login'] )
+            return render_template( 'index.html', entries="", cols_names="", typename=typename)
+
 
 
 
@@ -427,10 +377,10 @@ def login():
                 session['login']=reqlogin
                 flash('You were logged in')
                 #return reqlogin
-                return redirect(url_for('index'))                
+                return redirect(url_for('index'))
             else:
                 error = "Invalid User or Password"
-
+    
     return render_template('login.html', error=error)
 
 @app.route('/logout')
@@ -453,20 +403,20 @@ def control(action):
     query = 'select * from options'
     option_cols = db.execute(query).fetchall()
 
-    user_cols = db.execute('select * from users order by id desc').fetchall()
+    user_cols = db.execute('select login, full_name, email from users order by id desc').fetchall()
 
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
         option_cols=option_cols, option_cols_names = cols_name(query),
-        user_cols = user_cols, user_cols_names=cols_name('select * from users order by id desc'),
-        user=session['login']
+        user_cols = user_cols, user_cols_names=cols_name('select login, full_name, email from users order by id desc'),
+        dict_cols = db.execute('select * from dict order by id desc').fetchall(), dict_cols_names=cols_name('select * from dict order by id desc'),
     )
 
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    return render_template('test.html', user=session['login'])
+    return render_template('test.html')
 
 @app.route('/test-json', methods=['GET', 'POST'])
 def testjson():
@@ -478,50 +428,95 @@ def testjson():
         json_row.append(dict(en))
     return simplejson.dumps(json_row)
 
-import string
-import random
+
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 @app.route('/newres', methods=['GET', 'POST'])
 def newres():
-    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    # 4 - 1 679 616
-    # 5 - 60 466 176
-    # 6 - 2 176 782 336
-    
     try:
         db = get_db()
+        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
+        res_id=addres(request.form['type_id'])
         
-        ALL_HASH=db.execute('select hash from resources').fetchall()
-        hashs=[]
-        
-        for h in ALL_HASH:
-            hashs.append(h)
-        
-        if UUID is not hashs:
-            pass
-        else:
-            UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-        
-        db.execute('insert into resources (hash, type_id) values (%s, %s)', [UUID, request.form['type_id']])
-        
-    
-        res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
-        #res_id = entries
-
+        #return str(res_id)
         for data in request.form.keys():
             if data != "type_id":
                 option_id = data[2:]
                 value=request.form[data]
                 cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
 
-        
     except:
         flash('Unexpected ERROR')
 
-    return redirect(url_for('index'))
+    return redirect(url_for('index', typename=typename))
 
+def addres(type_id):
+    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    # 4 - 1 679 616
+    # 5 - 60 466 176
+    # 6 - 2 176 782 336
+    
+    db = get_db()
+        
+    ALL_HASH=db.execute('select hash from resources').fetchall()
+    hashs=[]
+        
+    for h in ALL_HASH:
+        hashs.append(h)
+        
+    if UUID is not hashs:
+        pass
+    else:
+        UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+        
+    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.date ])
+    res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
+    return res_id
+
+
+import cgitb
+import csv
+@app.route('/import', methods=['GET', 'POST'])
+def import_csv():
+    db = get_db()
+    
+    type_id=1
+    
+    opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+
+    #opt_id=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+    
+    
+    #f='"leto1-dev-dds","PoweredOn","leto1-dev-dds:Oracle Linux 4/5/6/7 (64-bit)","esx-12","dev","DEV","50322589-582c-dd97-d10b-61f6e84bef06","DDS"'
+    
+    sep=b','
+    query=""
+    all_query=""
+    
+    with open('/tmp/csv', 'r') as f:
+        reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+        
+        
+        
+        for row in reader:
+            res_id=addres(type_id)
+            opt_id_seq=0
+            for val in row:
+                
+                if opt_id_seq < opt_id_count:
+                    query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                    db.execute( query )
+                    #all_query=all_query+query+";<br>"
+                    
+                opt_id_seq=opt_id_seq+1
+
+    #return all_query
+    
+    f.close()
+    
+    return redirect(url_for('index'))
 
 
 #############################################################

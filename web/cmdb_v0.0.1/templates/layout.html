@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-theme.min.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-table/bootstrap-table.min.css') }}">
+<script src="{{ url_for('static', filename='bootstrap-table/bootstrap-table.min.js') }}"></script>
 <body>
 
   <nav class="navbar navbar-default navbar-fixed-top " role="navigation"> 
@@ -31,7 +33,11 @@
         <ul class="nav navbar-nav navbar-left">
             <li class="navbar-brand">CMDB</li>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle glyphicon glyphicon-folder-open" data-toggle="dropdown">&nbsp; Мои ресурсы<span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
+          {% if typename %}
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right">4</span></a>
+          {% else %}
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
+          {% endif %}
           <ul class="dropdown-menu" role="menu">
             <li><a href="{{ url_for('index', typename='VPS') }}">VPS&nbsp;<span class="badge pull-right">3</span></a></li>
             <li><a href="{{ url_for('index', typename='Ticket') }}">Ticket</a></li>
@@ -52,7 +58,7 @@
             <a class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новая заявка</a>
             <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
             &nbsp;
-            <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ user }}</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ session.login }}</a>
             <a href="#" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>&nbsp;
         </ul>
 		</div>
@@ -129,7 +135,7 @@
 
 <div class="container-fluid">
     <div class="row">
-    <div class="col-xs-12 col-md-8">
+    <div class="col-xs-12 col-md-10">
 {% block body %}{% endblock %}
     </div>
     </div>

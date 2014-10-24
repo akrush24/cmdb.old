@@ -6,7 +6,7 @@
 		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
 	</button>
     
-    
+
     
     <!-- Modal edit addOptions -->
 <div class="modal fade" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -26,18 +26,33 @@
                     <div id="itemOption">
                     
 						<script type="text/javascript">
-							$(function(){
-								$.getJSON('http://cmdb.at-consulting.ru:5000/list/VPS/?json&uuid=AwJ5', function(items) {
-								  var i = 1;
-									$.each(items, function(iditem, nameitem) { 
-									   i=i+1;
-                                       alert (items[i].id"1");
-										$('#itemOption').append('<div><input type="text" class="form-control" name="id" value="i" autocomplete="off" /></div>')
-                                        ;
-										});  
-                                            });
-                                        });
+							
+                            
+                            
+                            $(document).ready(function(){
 
+    var arr = [ "one", "two", "three", "four", "five" ];
+    var obj = [{"opt_id": 2, "name": "VM Name", "value": "demo-tst2-cdc"}, {"opt_id": 3, "name": "GUEST OS", "value": "192.168.15.125,fe80::250:56ff:feb2:46b7"}, {"opt_id": 4, "name": "STATE", "value": "esx12_vlan14"}, {"opt_id": 11, "name": "HWHost", "value": "00:50:56:b2:46:b7"}, {"opt_id": 12, "name": "PROVISIONED SPACE", "value": "Network adapter 1"}, {"opt_id": 13, "name": "USED SPACE", "value": "True"}];
+
+    var c_opt_id;
+    var c_opttype;
+    var c_name;
+    var c_value;
+    
+        
+        for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
+            
+            if  (key == "opt_id" ) { c_opt_id = val.toString(); };
+            if  (key == "opttype" ) { c_oopttype = val.toString()};
+            if  (key == "name" ) { c_name = val.toString()};
+            if  (key == "value" ) { c_value = val.toString()};
+    });
+
+    $("#itemOption").append('<div><input type="text" class="form-control" id="'+c_opt_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div>');
+          
+    };
+    
+  });                  
 					</script>
 				</form>
 			</div>

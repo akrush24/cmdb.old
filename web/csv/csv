@@ -1,0 +1,11 @@
+"leto1-dev-dds","PoweredOn","leto1-dev-dds:Oracle Linux 4/5/6/7 (64-bit)","esx-12","dev","DEV","16384","4","178","352","","","","","",,,"50322589-582c-dd97-d10b-61f6e84bef06","DDS"
+"renk04-prd-dds_temp","PoweredOff","renk04-prd-dds_temp:","esx-21","DEMO","PRD","16384","4","148","491","","","","","",,,"50329ca5-283e-ed6a-2b58-f4f8e9ddc416",
+"vtbl01-prd-dds","PoweredOn","vtbl01-prd-dds:Oracle Linux 4/5/6/7 (64-bit)","esx-12","prd","PRD","16384","4","115","451","vmedvedev","ВТБ Лизинг","DAC-127","14.08.2014","",,,"50325169-c6da-41be-0d9d-a99e8473af4a","Oracle, ODI Agent"
+"rbtd2-prd-rbt_tmp","PoweredOff","rbtd2-prd-rbt_tmp:Red Hat Enterprise Linux 6 (64-bit)","esx-12","prd","PRD","3072","1","19","83","","","","","",,,"50321f1a-a634-8bb1-8fcd-23264a4214f4",""
+"jenkins","PoweredOn","jenkins:Oracle Linux 4/5/6/7 (64-bit)","esx-12","LETO","LETO","4096","2","23","65","vnazarenko","","","","",,,"5032690a-03da-c1ca-853b-c53772d7f165",""
+"renk-idc","PoweredOn","renk-idc:Oracle Linux 4/5/6/7 (64-bit)","esx-12","RENK","PRD","3072","1","42","56","avpopov","","","","",,,"5032fd0a-3457-71e7-a58a-7ede297546fb",""
+"demo01-prd-ipc","PoweredOn","demo01-prd-ipc:Oracle Linux 4/5/6/7 (64-bit)","esx-21","DEMO","PRD","16384","4","77","207","","","","","",,,"50328af2-fdff-67e8-e14e-2fdc4eebb103",
+"renk04-prd-ipc","PoweredOn","renk04-prd-ipc:Oracle Linux 4/5/6/7 (64-bit)","esx-12","prd","PRD","16384","4","45","162","avpopov","","","","",,,"5032c947-5a35-7d03-afe4-188ff551987f",""
+"leto1-ft-dds","PoweredOn","leto1-ft-dds:Oracle Linux 4/5/6/7 (64-bit)","esx-12","ci","FT","16384","4","311","604","vnazarenko","Лето","","","",,,"5032f317-e7c4-513f-d12d-1cd754e3f8f7","DDS"
+"rues1-prd-dds","PoweredOn","rues1-prd-dds:","esx-12","prd","PRD","16384","4","53","384","nperepelkina, osapunova","Росэнергосбыт","DAC-98","","31.09.2014",,,"5032f893-9d0c-f61a-8dcb-7ccdecdcf71e","ODI Agent, Tomcat"
+

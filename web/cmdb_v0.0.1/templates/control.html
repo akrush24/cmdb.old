@@ -152,21 +152,19 @@
 
 
  
- 
-
-
+<br>
 <!-- отрисовываем табличку-->
 <div class="container-fluid">
     <div class="row">
-    <div class="col-md-6">
-    
-    <table class=table>
-    <th>Типы</th>
+    <div class="col-md-10">
+
+    <h3>Типы</h3>
+    <table class="table table-bordered table-hover">
     <tr>
     {% for cols_name in type_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
-        <td><center><b>delete</b></center></td>
+
     </tr>
         
     {% for entry in type_cols %}
@@ -183,22 +181,23 @@
         
         {% if session.logged_in %}
         
-            <td><a href="/del_type/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+            <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
+            <td><a class="glyphicon glyphicon-fire" href="/clear_type/{{ entry.id }}"> Очистить данные</a></td>
         {% endif %}
 
     </tr>
     {% endfor %}
     </table>
 
-
-
-    <table class=table>
-    <th>Свойства</th>
+<br>
+    
+    <h3>Опции</h3>
+    <table class="table table-bordered table-hover">
     <tr>
     {% for cols_name in option_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
-     <td><center><b>Delete</b></center></td>
+
     </tr>
         
     {% for entry in option_cols %}
@@ -215,21 +214,53 @@
         
         {% if session.logged_in %}
         
-            <td><a href="/del_option/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+            <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
         {% endif %}
 
     </tr>
     {% endfor %}
     </table>
+    
+<br>
 
+    <h3>Справочники</h3>
+    <table class="table table-bordered table-hover">
+    <tr>
+    {% for cols_name in dict_cols_names %}
+        <td><center><b>{{ cols_name }}</b></center></td>
+    {% endfor %}
 
-    <table class=table>
-    <th>Пользователи</th>
+    </tr>
+        
+    {% for entry in dict_cols %}
+        <tr>
+        {% set k=0 %}
+
+        {% for cell in entry %}
+
+                <td>
+                    {{ cell }}
+                </td>
+
+        {% endfor %}
+        
+        {% if session.logged_in %}
+        
+            <td><a class="glyphicon glyphicon-remove" href="/del_user/{{ entry.id }}"></a></td>
+        {% endif %}
+
+    </tr>
+    {% endfor %}
+    </table>
+    
+<br>
+    <h3>Пользователи</h3>
+    <table class="table table-bordered table-hover">
     <tr>
     {% for cols_name in user_cols_names %}
         <td><center><b>{{ cols_name }}</b></center></td>
     {% endfor %}
-        <td><center><b>Delete</b></center></td>
+
     </tr>
         
     {% for entry in user_cols %}
@@ -246,12 +277,18 @@
         
         {% if session.logged_in %}
         
-            <td><a href="/del_user/{{ entry.id }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+            <td><a class="glyphicon glyphicon-remove" href="/del_user/{{ entry.id }}"></a></td>
         {% endif %}
 
     </tr>
     {% endfor %}
     </table>
+    
+	
+	
+	
+	
+    
         </div>
     </div>
 </div>

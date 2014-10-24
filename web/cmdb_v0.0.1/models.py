@@ -13,6 +13,7 @@ class Resources(db.Model):
     hash = db.Column(db.String(6))
     type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
     hash = db.Column(db.String(10), unique = True)
+    user = db.Column(db.String(50))
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
     
@@ -32,6 +33,7 @@ class Types(db.Model):
     __tablename__ = 'types'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(24), unique = True)
+    desc = db.Column(db.String(244))
     
     def __init__(self, name=None):
         self.name = name 

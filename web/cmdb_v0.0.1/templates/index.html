@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-
-    <table class=table table-bordered>
+    <h3>Здесь будет вывод дескрипшена выбранного типа</h3>
+    <table class="table table-bordered table-hover">
     <tr>
     {% for cols_name in cols_names %}
         <td><b>{{ cols_name }}</b></td>
@@ -14,7 +14,7 @@
     {% for cell in entrie %}
     <td>{{ cell }}</td>
     {% endfor %}
-    <td><a href="/del/{{typename}}/{{ entrie[0] }}"><img src="{{ url_for('static', filename='del.png') }}" alt="Del"></a></td>
+    <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[0] }}"></a></td>
 </tr>
 {% endfor %}
 
