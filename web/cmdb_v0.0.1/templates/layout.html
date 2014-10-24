@@ -20,7 +20,7 @@
 <body>
 
   <nav class="navbar navbar-default navbar-fixed-top " role="navigation"> 
-  <div class="container-fluid"> 
+  <div class="container-fluid"  style="background-color:#E0E0E0;"> 
   <div class="navbar-header">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
     <span class="sr-only">Toggle navigation</span>
@@ -139,7 +139,7 @@ $("#editItemForm").click(function()
 </div>
     <!-- Modal addTicket -->
 
-        <!-- Modal edit addOptions -->
+        <!-- Modal edit item -->
 <div class="modal fade" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -150,20 +150,13 @@ $("#editItemForm").click(function()
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('new_option') }}" method="post">
-                    
-                    <div id="itemOption">
-                    
-						<script>
-
-  
-					</script>
+				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
+                    <div id="itemOption"> <!-- Рисуем динамические поля -->
 				</form>
 			</div>
     	</div> 
       </div>
       <div class="modal-footer">
-        <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
         <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editItemForm').submit();"> Сохранить</button>
         
@@ -172,63 +165,54 @@ $("#editItemForm").click(function()
   </div>
 </div>
 </div>
-    <!-- Modal addoptions -->
+     <!-- Modal edit item -->
     
-    
-    
-    
-    
-    
+
     <!-- Onload script -->
     <script>
     var uuid;
-    function edit_item(clicked_id)
+    function edit_item(clicked_id) <!-- Перехватывает клик по кнопке редактирования в таблице items -->
 {   
-    alert(clicked_id);
-    uuid == clicked_id.toString();
+  
+    uuid = clicked_id;
     $('#editItem').modal("show");
 };
     </script>
+
     
-    
-    
-    
-    
-    <script>
-    
+<!-- Отрисовка окна  редактирования Item -->
+    <script>  
 $('#editItem').on('show.bs.modal.bs.modal', function (e) {
+    
+    $('#editItem').on('hidden.bs.modal', function (e) {
+  $( "#itemOption" ).empty(); <!-- очищаем DOM дерево предыдущих полей ввода -->
+})
     
     var c_opt_id;
     var c_opttype;
     var c_name;
     var c_value;
-
+	var c_uuid;
     $(function(){
                 $.getJSON('http://cmdb.at-consulting.ru:5000/list/VPS/?json&uuid='+uuid+'', function(objj) {
-    var obj = [];
-    obj = objj[0];
+    var obj = []; 
+    obj = objj[0]; <!-- в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
                 for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
             if  (key == "opt_id" ) { c_opt_id = val.toString(); };
             if  (key == "opttype" ) { c_oopttype = val.toString()};
             if  (key == "name" ) { c_name = val.toString()};
-            if  (key == "value" ) { c_value = val.toString()};
-                                                                                });
+            if  (key == "value" ) { c_value = val.toString()};  
+			if  (key == "uuid" ) { c_uuid = val.toString()};
+			});
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>');     
     };
+	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
     });
     });
 });                
 
 </script>
 <!--onload end -->
-    
-    
-    
-    
-    
-    
-    
-    
     
 <div class="container-fluid">
     <div class="row">

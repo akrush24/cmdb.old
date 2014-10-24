@@ -457,6 +457,27 @@ def newres():
 
     return redirect(url_for('index', typename=typename))
 
+@app.route('/editres', methods=['GET', 'POST'])
+def editres():
+    '''
+    try:
+        db = get_db()
+        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
+        res_id=addres(request.form['type_id'])
+        
+        #return str(res_id)
+        for data in request.form.keys():
+            if data != "type_id":
+                option_id = data[2:]
+                value=request.form[data]
+                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
+
+    except:
+    '''
+    return request.form['VM Name']
+
+    #return redirect(url_for('index', typename=typename))
+
 def addres(type_id):
     UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     # 4 - 1 679 616

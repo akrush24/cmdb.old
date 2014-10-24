@@ -5,17 +5,17 @@
     <table class="table table-bordered table-hover table-condensed">
     <tr class="info">
     {% for cols_name in cols_names %}
-        <th><b>{{ cols_name }}</b></th>
+        <th nowrap="nowrap"><b>{{ cols_name }}</b></th>
     {% endfor %}
     </tr>
     
 {% for entrie in entries %}
 <tr>
     {% for cell in entrie %}
-    <td>{{ cell }}</td>
+    <td nowrap="nowrap">{{ cell }}</td>
     {% endfor %}
     <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[1] }}"></a></td>
-    <td><button id="{{ entrie[1] }}" class="glyphicon glyphicon-wrench" onClick="edit_item({{ entrie[1] }})"></a></td>
+    <td><a id="{{ entrie[1] }}" class="glyphicon glyphicon-wrench" onClick="edit_item(this.id)" href="#"></a></td>
 </tr>
 {% endfor %}
 

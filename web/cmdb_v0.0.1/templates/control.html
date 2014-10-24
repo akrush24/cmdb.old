@@ -182,7 +182,8 @@
         {% if session.logged_in %}
         
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
-            <td><a class="glyphicon glyphicon glyphicon-download-alt" href="#"> Импорт данных</a></td>
+            <td><a class="glyphicon glyphicon glyphicon glyphicon glyphicon-save" href="#"> Импорт данных</a></td>
+            <td><a class="glyphicon glyphicon glyphicon glyphicon-open" href="#"> Экспорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="/clear_type/{{ entry.id }}"> Очистить данные</a></td>
         {% endif %}
 
