@@ -309,20 +309,25 @@ def index(typename):
             typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
         except IndexError:
             typeid=None
+            return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
         if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s order by id desc LIMIT 20',[uuid, typeid]).fetchall()
         else:
-            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s',[typeid]).fetchall()
-
+            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT 20',[typeid]).fetchall()
         
+        try:
+            count=db.execute('select count(resources.id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # сколько всего записей в табоице ресурсы по выбранному типу
+        except:
+            count=0
+            
         for res_id, hash in resources:
             creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
             entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
             key=['#', 'UUID', 'Creator']
             key_id=['UUID']
             val=[count, hash, creator]
-            count=count+1
+            count=count-1
             json_col=[]
             json_col.append( dict(uuid=hash) )
             

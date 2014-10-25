@@ -38,12 +38,12 @@
           {% else %}
             <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b style="color:#F2F2F2">Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
           {% endif %}
-          <ul class="dropdown-menu" role="menu" style="background-color:#778899; color:#F2F2F2">
-            <li><a href="{{ url_for('index', typename='VPS') }}">VPS&nbsp;<span class="badge pull-right">3</span></a></li>
+          <ul class="dropdown-menu" id ="dropMenu" role="menu" style="background-color:#778899; color:#F2F2F2">
+           <!-- <li><a href="{{ url_for('index', typename='VPS') }}">VPS&nbsp;<span class="badge pull-right">3</span></a></li>
             <li><a href="{{ url_for('index', typename='Ticket') }}">Ticket</a></li>
             <li><a href="{{ url_for('index', typename='Phone') }}">Phone&nbsp;<span class="badge pull-right">1</span></a></li>
-            <li class="divider"></li>
-            <li><a href="#">И много другого</a></li>
+            <li class="divider"></li> 
+            <li><a href="#">И много другого</a></li>-->
           </ul>
         </li>
         </ul>
@@ -213,6 +213,23 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 
 </script>
 <!--onload end -->
+
+
+<!-- DropDownMenu -->
+<script>
+ $(function(){
+								$.getJSON('http://cmdb.at-consulting.ru:5000/get_list_type/', function(menulist) {
+								  var i = -1;
+									$.each(menulist, function(keylist, vallist) { 
+									   i=i+1;
+										$('#dropMenu').prepend('<li><a href="http://cmdb.at-consulting.ru:5000/list/'+menulist[i].name+'">'+menulist[i].name + '&nbsp;<span class="badge pull-right">+</span></a></li></option>');
+										});  
+                                            });
+                                        });
+
+
+</script>
+
     
 <div class="container-fluid">
     <div class="row">
