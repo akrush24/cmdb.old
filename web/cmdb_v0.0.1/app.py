@@ -88,7 +88,8 @@ def del_type(id):
        flash('This parameter is used!') 
         
     return redirect(url_for('control'))
-@app.route('/clear_type/<int:id>', methods=['GET'])
+    
+@app.route('/clear_type/<int:id>')
 def clear_type(id):
     if not session.get('logged_in'):
         abort(401)
@@ -97,10 +98,13 @@ def clear_type(id):
         db = get_db()
         db.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
         db.execute('delete from resources where type_id=%s', [id])
+        
+        flash('Данные почищены')
     except:
        flash('This parameter is used!')
         
     return redirect(url_for('control'))
+    
 @app.route('/get_list_type/')
 def get_list_type():
     db = get_db()
@@ -117,6 +121,7 @@ def get_list_type():
 
 # 1. Добавление
 # 2. Редактирование
+# 3. Очистка данных
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
     if not session.get('logged_in'):
@@ -151,6 +156,21 @@ def del_option(id):
     except:
        flash('This parameter is used!', 'error') 
             
+    return redirect(url_for('control'))
+
+@app.route('/clear_option/<int:id>')
+def clear_option(id):
+    if not session.get('logged_in'):
+        abort(401)
+    
+    try:
+        db = get_db()
+        db.execute('delete from value where option_id=%s', [id])
+        
+        flash('Данные почищены')
+    except:
+       flash('This parameter is used!')
+        
     return redirect(url_for('control'))
 
 @app.route('/get_list_option/', methods=['GET'])
@@ -327,8 +347,30 @@ def index(typename):
             json_row2.append( (json_row) )
             json_row=[]
             
+    ### Экспорт в JSON
     if request.args.get('json') is not None:
         return simplejson.dumps(json_row2)
+    ### Экспорт данных в CSV
+    elif request.args.get('save') is not None:
+        CSV=""
+        count=1
+        for col in key:
+            CSV=CSV+'"'+str(col)+'"'
+            if count<len(key):
+                CSV=CSV+','
+            count=count+1
+        CSV=CSV+'<br>'
+        for row in val2:
+            count=1
+            for col in row:
+                CSV=CSV+'"'+str(col)+'"'
+                if count<len(row):
+                    CSV=CSV+','
+                count=count+1
+            CSV=CSV+'<br>'
+        
+        return CSV
+    ### Отображение таблицы на главном экране
     else:
         try:
             return render_template( 'index.html', entries=val2, cols_names=key, typename=typename)
@@ -411,11 +453,22 @@ def control(action):
 
     user_cols = db.execute('select id, login, full_name, email from users order by id desc').fetchall()
 
+    type_count={}
+    count = db.execute('select id from types').fetchall()
+    for val in count:
+        type_count[val[0]]=( db.execute('select count(id) from resources where type_id=%s', val).fetchall()[0][0] )
+        
+    opt_count={}
+    count = db.execute('select id from options').fetchall()
+    for val in count:
+        opt_count[val[0]]=( db.execute('select count(id) from value where option_id=%s', val).fetchall()[0][0] )
+    
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
         option_cols=option_cols, option_cols_names = cols_name(query),
         user_cols = user_cols, user_cols_names=cols_name('select id, login, full_name, email from users order by id desc'),
         dict_cols = db.execute('select * from dict order by id desc').fetchall(), dict_cols_names=cols_name('select * from dict order by id desc'),
+        opt_count=opt_count, type_count=type_count
     )
 
 
@@ -504,29 +557,21 @@ def addres(type_id):
 
 import cgitb
 import csv
-@app.route('/import', methods=['GET', 'POST'])
-def import_csv():
+
+@app.route('/import/<int:type_id>')
+@app.route('/import/', defaults={'type_id': 0})
+def import_csv(type_id):
     db = get_db()
     
-    type_id=1
-    
     opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-
-    #opt_id=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,2,3,4,5,6,7,8,9,10,11,12,13,14]
     opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
-    
-    
-    #f='"leto1-dev-dds","PoweredOn","leto1-dev-dds:Oracle Linux 4/5/6/7 (64-bit)","esx-12","dev","DEV","50322589-582c-dd97-d10b-61f6e84bef06","DDS"'
-    
-    sep=b','
+
     query=""
-    all_query=""
+    count=0
     
     with open('/tmp/csv', 'r') as f:
         reader = csv.reader(f, delimiter=b',',quotechar=b'"')
-        
-        
-        
+
         for row in reader:
             res_id=addres(type_id)
             opt_id_seq=0
@@ -535,16 +580,22 @@ def import_csv():
                 if opt_id_seq < opt_id_count:
                     query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
                     db.execute( query )
-                    #all_query=all_query+query+";<br>"
                     
+                
                 opt_id_seq=opt_id_seq+1
+            count=count+1
 
-    #return all_query
-    
     f.close()
+    flash('Число импортированных записей: '+str(count))
+    
+    return redirect(url_for('control'))
+
+
+@app.route('/export/<int:type_id>')
+@app.route('/export/', defaults={'type_id': 0})
+def export_csv(type_id):
     
     return redirect(url_for('index'))
-
 
 #############################################################
 # DB 

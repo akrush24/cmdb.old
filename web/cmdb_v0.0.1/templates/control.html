@@ -182,9 +182,9 @@
         {% if session.logged_in %}
         
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
-            <td><a class="glyphicon glyphicon glyphicon glyphicon glyphicon-save" href="#"> Импорт данных</a></td>
-            <td><a class="glyphicon glyphicon glyphicon glyphicon-open" href="#"> Экспорт данных</a></td>
-            <td><a class="glyphicon glyphicon-fire" href="/clear_type/{{ entry.id }}"> Очистить данные</a></td>
+            <td><a class="glyphicon glyphicon glyphicon glyphicon glyphicon-save" href="{{ url_for('import_csv', type_id=entry.id ) }}"> Импорт данных</a></td>
+            <td><a class="glyphicon glyphicon glyphicon glyphicon-open" href="{{ url_for('index', typename=entry.name) }}?save"  target="_blank"> Экспорт данных</a></td>
+            <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_type', id=entry.id) }}"></a><span class="badge pull-right">{{ type_count[entry.id] }}</span></td></td>
         {% endif %}
 
     </tr>
@@ -218,6 +218,7 @@
         {% if session.logged_in %}
         
             <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
+            <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
         {% endif %}
 
     </tr>

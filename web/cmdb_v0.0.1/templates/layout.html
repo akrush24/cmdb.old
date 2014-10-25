@@ -20,7 +20,7 @@
 <body>
 
   <nav class="navbar navbar-default navbar-fixed-top " role="navigation"> 
-  <div class="container-fluid"  style="background-color:#6CA6CD;"> 
+  <div class="container-fluid"  style="background-color:#778899;"> 
   <div class="navbar-header">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
     <span class="sr-only">Toggle navigation</span>
@@ -31,14 +31,14 @@
   </div>
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
         <ul class="nav navbar-nav navbar-left">
-            <li class="navbar-brand">CMDB</li>
+            <li class="navbar-brand" style="color:#FFF;">CMDB</li>
         <li class="dropdown">
           {% if typename %}
-            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right">4</span></a>
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b style="color:#F2F2F2">Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right">4</span></a>
           {% else %}
-            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b style="color:#F2F2F2">Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
           {% endif %}
-          <ul class="dropdown-menu" role="menu">
+          <ul class="dropdown-menu" role="menu" style="background-color:#778899; color:#F2F2F2">
             <li><a href="{{ url_for('index', typename='VPS') }}">VPS&nbsp;<span class="badge pull-right">3</span></a></li>
             <li><a href="{{ url_for('index', typename='Ticket') }}">Ticket</a></li>
             <li><a href="{{ url_for('index', typename='Phone') }}">Phone&nbsp;<span class="badge pull-right">1</span></a></li>
