@@ -28,8 +28,6 @@ class Types(db.Model):
     name = db.Column(db.String(24), unique = True)
     desc = db.Column(db.String(244))
     
-    def __init__(self, name=None):
-        self.name = name 
 
 class Options(db.Model):
     __tablename__ = 'options'
@@ -55,10 +53,4 @@ class Users(db.Model):
     full_name = Column(String(150), unique=False)
     email = Column(String(120), unique=True)
     password = Column(String(255))
-    
-    def __init__(self, name=None, email=None):
-        self.name = name
-        self.email = email
-
-    def __repr__(self):
-        return '<User %r>' % (self.name)
+    last_activity = db.Column(db.DateTime)

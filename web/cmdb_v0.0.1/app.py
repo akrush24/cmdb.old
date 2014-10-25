@@ -3,34 +3,25 @@
 
 # All Imports
 from __future__ import unicode_literals
-import sqlite3
-import os
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
+import os, sys, ldap, datetime
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import select
-#from flaskext.mysql import MySQL
 import simplejson
 import re
-import peppercorn
-import string
-import random
-import actions
-import hashlib
-import sys
-import ldap
+import string, random
+#import actions
+import hashlib, uuid
+import cgitb, csv
 
-import datetime
 
 now = datetime.datetime.now()
 
-
 reload(sys)
 sys.setdefaultencoding("utf-8")
-
-#mysql = MySQL()
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -38,22 +29,15 @@ app.config.from_object('config')
 LDAP_SERVER = "192.168.10.2"
 LDAP_PORT = 389 # your port
 
-#mysql.init_app(app)
-
 db = SQLAlchemy(app)
 
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-import models
 from models import *
-
-
  
 def cols_name(query):
     db = get_db()
@@ -64,12 +48,23 @@ def cols_name(query):
 # Decoration
 #
 
+def permissiom_check():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        #abort(401)
+    else:
+        db = get_db()
+        try:
+            db.execute('SELECT login FROM users WHERE login=%s', [session['login']]).fetchall()[0][0]
+            db.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
+        except:
+            db.execute('insert into users set login=%s', [session['login']])
+    
 #......................................................#
 #### Обработка Типов ####
 @app.route('/new_type/', methods=['GET', 'POST'])
 def new_type():
-    if not session.get('logged_in'):
-        abort(401)
+
 
     db = get_db()
     db.execute('''insert into types (name) values (%s)''', request.form['name'])
@@ -192,8 +187,6 @@ def get_list_option():
 
 #......................................................#
 #### Обработка пользователей ####
-
-import hashlib, uuid
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
     if not session.get('logged_in'):
@@ -291,6 +284,9 @@ def del_res(hash, typename):
 @app.route('/list/<typename>/')
 @app.route('/', defaults={'typename': None})
 def index(typename):
+
+    permissiom_check()
+    
     if not session.get('logged_in'):
         return redirect(url_for('login'))
 
@@ -312,7 +308,9 @@ def index(typename):
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
         if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s order by id desc LIMIT 20',[uuid, typeid]).fetchall()
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
+        elif request.args.get('save') is not None:
+            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
         else:
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT 20',[typeid]).fetchall()
         
@@ -364,7 +362,7 @@ def index(typename):
             if count<len(key):
                 CSV=CSV+','
             count=count+1
-        CSV=CSV+'<br>'
+        CSV=CSV+'\n'
         for row in val2:
             count=1
             for col in row:
@@ -372,9 +370,20 @@ def index(typename):
                 if count<len(row):
                     CSV=CSV+','
                 count=count+1
-            CSV=CSV+'<br>'
+            CSV=CSV+'\n'
         
-        return CSV
+        export_file_name = str("export_"+str(datetime.datetime.now())+'.csv')
+        f = open('exports/'+export_file_name, 'w')
+        f.write(CSV)
+        
+        f = open('exports/'+export_file_name, 'r')
+        data = f.read()
+        response = make_response(data)
+        response.headers["Content-Disposition"] = "attachment; filename="+export_file_name
+        f.close()
+        
+        return response
+         
     ### Отображение таблицы на главном экране
     else:
         try:
@@ -386,9 +395,9 @@ def index(typename):
 
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-###        Authorization        ###
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+### - - - - Authorization - - - - ###
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 def loginLDAP(email, password):
     ld = ldap.open(LDAP_SERVER, LDAP_PORT)
     try:
@@ -400,7 +409,9 @@ def loginLDAP(email, password):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-
+    
+    permissiom_check()
+    
     if request.method == 'POST':
         db = get_db()
         
@@ -447,8 +458,8 @@ def logout():
 @app.route('/control/', defaults={'action': "0"})
 @app.route('/control/<action>')
 def control(action):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))   
+    permissiom_check()
+
     db = get_db()
 
     type_cols = db.execute('select * from types order by id desc').fetchall()
@@ -558,10 +569,6 @@ def addres(type_id):
     db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
     res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
     return res_id
-
-
-import cgitb
-import csv
 
 @app.route('/import/<int:type_id>')
 @app.route('/import/', defaults={'type_id': 0})
