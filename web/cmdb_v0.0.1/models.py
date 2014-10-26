@@ -39,11 +39,12 @@ class Options(db.Model):
     user_visible = db.Column(db.Integer)
     front_page = db.Column(db.Integer)
     required = db.Column(db.Integer)
+    dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
 
 class Dict(db.Model):
     __tablename__ = 'dict'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    opt_id = db.Column(db.Integer, db.ForeignKey('options.id'))
+    opt_id = db.Column(db.Integer)
     name = db.Column(db.String(100), unique = False)
 
 class Users(db.Model):

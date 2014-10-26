@@ -62,7 +62,7 @@ def permissiom_check():
     
 #......................................................#
 #### Обработка Типов ####
-@app.route('/new_type/', methods=['GET', 'POST'])
+@app.route('/new_type/', methods=['POST'])
 def new_type():
 
 
@@ -140,7 +140,7 @@ def new_option():
     #return test
     return redirect(url_for('control'))
 
-@app.route('/del_option/<int:id>', methods=['GET'])
+@app.route('/del_option/<int:id>')
 def del_option(id):
     if not session.get('logged_in'):
         abort(401)
@@ -228,7 +228,7 @@ def get_list_user():
 
 #......................................................#
 #### Обработка Словарей ####
-@app.route('/new_dict/', methods=['GET', 'POST'])
+@app.route('/new_dict/', methods=['POST'])
 def new_dict():
     if not session.get('logged_in'):
         abort(401)
@@ -238,7 +238,7 @@ def new_dict():
     
     return redirect(url_for('control'))
 
-@app.route('/del_dict/<int:id>', methods=['GET'])
+@app.route('/del_dict/<int:id>')
 def del_dict(id):
     if not session.get('logged_in'):
         abort(401)
@@ -266,7 +266,11 @@ def get_list_dict():
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
 
-@app.route('/del/<typename>/<hash>', methods=['GET'])
+#......................................................#
+#### Обработка Ресурсов ####
+
+# Удаление..............................................
+@app.route('/del/<typename>/<hash>')
 def del_res(hash, typename):
     if not session.get('logged_in'):
         abort(401)
@@ -278,7 +282,77 @@ def del_res(hash, typename):
     
     return redirect(url_for('index', typename=typename))
 
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
+
+# Создание..............................................
+def addres(type_id): # добавляем новый элемент в таблицу Resources
+    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    # 4 - 1 679 616
+    # 5 - 60 466 176
+    # 6 - 2 176 782 336
+    
+    db = get_db()
+        
+    ALL_HASH=db.execute('select hash from resources').fetchall()
+    hashs=[]
+        
+    for h in ALL_HASH:
+        hashs.append(h)
+        
+    if UUID is not hashs:
+        pass
+    else:
+        UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+        
+    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
+    res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
+    return res_id
+
+@app.route('/newres', methods=['POST'])
+def newres():
+    try:
+        db = get_db()
+        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
+        res_id=addres(request.form['type_id'])
+        
+        #return str(res_id)
+        for data in request.form.keys():
+            if data != "type_id":
+                option_id = data[2:]
+                value=request.form[data]
+                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
+
+    except:
+        flash('Unexpected ERROR')
+
+    return redirect(url_for('index', typename=typename))
+
+# Редактирование.............................................
+@app.route('/editres', methods=['GET', 'POST'])
+def editres():
+    '''
+    try:
+        db = get_db()
+        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
+        res_id=addres(request.form['type_id'])
+        
+        #return str(res_id)
+        for data in request.form.keys():
+            if data != "type_id":
+                option_id = data[2:]
+                value=request.form[data]
+                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
+
+    except:
+    '''
+    return request.form['uuid']
+
+    #return redirect(url_for('index', typename=typename))
+
+
+    
 ########################################################################
 ##### Главная страница #################################################
 @app.route('/list/<typename>/')
@@ -504,71 +578,6 @@ def testjson():
     return simplejson.dumps(json_row)
 
 
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-
-@app.route('/newres', methods=['GET', 'POST'])
-def newres():
-    try:
-        db = get_db()
-        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
-        res_id=addres(request.form['type_id'])
-        
-        #return str(res_id)
-        for data in request.form.keys():
-            if data != "type_id":
-                option_id = data[2:]
-                value=request.form[data]
-                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
-
-    except:
-        flash('Unexpected ERROR')
-
-    return redirect(url_for('index', typename=typename))
-
-@app.route('/editres', methods=['GET', 'POST'])
-def editres():
-    '''
-    try:
-        db = get_db()
-        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
-        res_id=addres(request.form['type_id'])
-        
-        #return str(res_id)
-        for data in request.form.keys():
-            if data != "type_id":
-                option_id = data[2:]
-                value=request.form[data]
-                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
-
-    except:
-    '''
-    return request.form['uuid']
-
-    #return redirect(url_for('index', typename=typename))
-
-def addres(type_id):
-    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    # 4 - 1 679 616
-    # 5 - 60 466 176
-    # 6 - 2 176 782 336
-    
-    db = get_db()
-        
-    ALL_HASH=db.execute('select hash from resources').fetchall()
-    hashs=[]
-        
-    for h in ALL_HASH:
-        hashs.append(h)
-        
-    if UUID is not hashs:
-        pass
-    else:
-        UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-        
-    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
-    res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
-    return res_id
 
 @app.route('/import/<int:type_id>')
 @app.route('/import/', defaults={'type_id': 0})
@@ -585,13 +594,18 @@ def import_csv(type_id):
         reader = csv.reader(f, delimiter=b',',quotechar=b'"')
 
         for row in reader:
+        
             res_id=addres(type_id)
             opt_id_seq=0
             for val in row:
                 
-                if opt_id_seq < opt_id_count:
-                    query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
-                    db.execute( query )
+                if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
+                    db.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
+                    opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+                    opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+                    
+                query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                db.execute( query )
                     
                 
                 opt_id_seq=opt_id_seq+1
