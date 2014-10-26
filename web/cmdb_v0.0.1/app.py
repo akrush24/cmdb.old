@@ -15,7 +15,7 @@ import re
 import string, random
 #import actions
 import hashlib, uuid
-import cgitb, csv
+import cgitb, csv, math
 
 
 now = datetime.datetime.now()
@@ -65,10 +65,11 @@ def permissiom_check():
 @app.route('/new_type/', methods=['POST'])
 def new_type():
 
-
     db = get_db()
-    db.execute('''insert into types (name) values (%s)''', request.form['name'])
-    
+    try:
+        db.execute('''insert into types (name) values (%s)''', request.form['name'].upper())
+    except:
+        flash('Ошибка, проверьте что имена типов не совпадают')
     return redirect(url_for('control'))
 
 @app.route('/del_type/<int:id>', methods=['GET'])
@@ -353,11 +354,12 @@ def editres():
 
 
     
-########################################################################
-##### Главная страница #################################################
-@app.route('/list/<typename>/')
+# ..........................................................................
+##### Главная страница .................................................####
+@app.route('/list/<typename>/<int:page>/')
+@app.route('/list/<typename>/', defaults={'page': None})
 @app.route('/', defaults={'typename': None})
-def index(typename):
+def index(typename, page):
 
     permissiom_check()
     
@@ -370,35 +372,60 @@ def index(typename):
     json_row2=[]
     count=1
     if typename is not None:
-        
+
         uuid = request.args.get('uuid')
         
         db = get_db()
-        
         try:
             typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
         except IndexError:
             typeid=None
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
+        try:
+            count=db.execute('select count(resources.id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # сколько всего записей в табоице ресурсы по выбранному типу
+        except:
+            count=0
+
         if uuid is not None:
             resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
         elif request.args.get('save') is not None:
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
         else:
-            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT 20',[typeid]).fetchall()
-        
-        try:
-            count=db.execute('select count(resources.id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # сколько всего записей в табоице ресурсы по выбранному типу
-        except:
-            count=0
+            ROW_IN_PAGE=20 # Число строк на одну таблицу
+            COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0]
             
+            if COUNT_RES != 0:
+                COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5)
+            else:
+                COUNT_PAGE=0
+                
+            if page is None:
+                page=COUNT_PAGE
+            
+            #page=COUNT_PAGE-page+1
+            
+            START_ROW=count-(ROW_IN_PAGE*(COUNT_PAGE-(COUNT_PAGE-page+1)+1))
+            if START_ROW<0:
+                START_ROW=0
+            if (COUNT_PAGE-page+1)==1:
+                ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
+                
+            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
+            [typeid, START_ROW, ROW_IN_PAGE ] ).fetchall()
+            
+            #return str(START_ROW)+", "+str(ROW_IN_PAGE)
+        
+
+            
+        #count=page*ROW_IN_PAGE
+        
         for res_id, hash in resources:
-            creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
+            #creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
             entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
-            key=['#', 'UUID', 'Creator']
+            key=['#', 'UUID']
             key_id=['UUID']
-            val=[count, hash, creator]
+            val=[count, hash]
             count=count-1
             json_col=[]
             json_col.append( dict(uuid=hash) )
@@ -461,9 +488,9 @@ def index(typename):
     ### Отображение таблицы на главном экране
     else:
         try:
-            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename)
+            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
         except:
-            return render_template( 'index.html', entries="", cols_names="", typename=typename)
+            return render_template( 'index.html', entries="", cols_names="", typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
 
 
 

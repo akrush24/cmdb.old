@@ -4,13 +4,30 @@
     {% if cols_names %}
     <h3>Здесь будет вывод дескрипшена выбранного типа</h3>
     {% endif %}
-	<div class="table-responsive">
+	
+    <div class="table-responsive">
+    <div style="margin:5px">
+    {% if page < COUNT_PAGE %}
+    <a class="glyphicon glyphicon-arrow-left" href="{{ url_for('index', typename=typename, page=page+1) }}"></a>
+    {% else %}
+    ...
+    {% endif %}
+    Страница: <span class="badge">{{ page }}</span>
+    {% if page >1 %}
+    <a class="glyphicon glyphicon-arrow-right" href="{{ url_for('index', typename=typename, page=page-1) }}"></a>
+    {% else %}
+    ...
+    {% endif %}
+     Из: <span class="badge">{{ COUNT_PAGE }}</span>
+    </div>
+    
     <table class="table table-bordered table-hover table-condensed">
     <tr class="info">
     {% for cols_name in cols_names %}
         <th nowrap="nowrap"><b>{{ cols_name }}</b></th>
     {% endfor %}
     </tr>
+    
     
 {% for entrie in entries %}
 <tr>

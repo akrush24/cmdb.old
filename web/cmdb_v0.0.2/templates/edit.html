@@ -1,8 +1,0 @@
-{% extends "layout.html" %}
-{% block body %}
-  {% if session.logged_in %}
-    {% for entry in json %}
-        {{ entry }}
-    {% endfor %}
-  {% endif %}
-{% endblock %}
