@@ -8,23 +8,38 @@
     {% endif %}
 	
     <div class="table-responsive">
-    <div style="margin:5px">
-    {% if page < COUNT_PAGE %}
-    <a class="glyphicon glyphicon-arrow-left" href="{{ url_for('index', typename=typename, page=page+1) }}"></a>
-    {% else %}
-    ...
-    {% endif %}
-    Страница: <span class="badge">{{ page }}</span>
-    {% if page >1 %}
-    <a class="glyphicon glyphicon-arrow-right" href="{{ url_for('index', typename=typename, page=page-1) }}"></a>
-    {% else %}
-    ...
-    {% endif %}
-     Из: <span class="badge">{{ COUNT_PAGE }}</span>
-    </div>
     
+
+<ul class="pagination pagination pagination-sm">
+
+  {% if page >1 %}
+  <li><a href="{{ url_for('index', typename=typename, page=page-1) }}">&laquo;</a></li>
+  {% else %}
+  <li class="disabled"><a href="#">&laquo;</a></li>
+  {% endif %}
+    
+  {% for P in range(COUNT_PAGE) %}
+
+  {% if (P >= page and P < page+14) or (P <= page and P >= page-15) or P==COUNT_PAGE-1 or P==0 %}
+  
+      {% if P+1==page %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{{ url_for('index', typename=typename, page=P+1) }}">{{ P+1 }}<span class="sr-only"></span></a></li>
+  
+  {% endif %}
+  
+  {% endfor %}
+  
+  {% if page < COUNT_PAGE %}
+  <li><a href="{{ url_for('index', typename=typename, page=page+1) }}">&raquo;</a></li>
+  {% else %}
+  <li class="disabled"><a href="#">&raquo;</a></li>
+  {% endif %}
+  
+</ul>
+
+
     <table class="table table-bordered table-hover table-condensed">
-    <tr class="info">
+    <tr>
     {% for cols_name in cols_names %}
         <th nowrap="nowrap"><b>{{ cols_name }}</b></th>
     {% endfor %}

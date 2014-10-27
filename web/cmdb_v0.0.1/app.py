@@ -17,6 +17,7 @@ import string, random
 import hashlib, uuid
 import cgitb, csv, math
 
+from werkzeug import secure_filename
 
 now = datetime.datetime.now()
 
@@ -120,15 +121,15 @@ def get_list_type():
 @app.route('/get_user_menu/')
 def get_user_menu():
     db = get_db()
-    cur = db.execute('select name from types order by id desc')
+    cur = db.execute('select id, name from types order by id desc')
     entries = cur.fetchall()
     json_row=[]
     
     for en in entries:
-        value=db.execute('select count(id) from resources where type_id=%s', [en]).fetchall()[0][0]
+        value=db.execute('select count(id) from resources where type_id=%s', [en[0]]).fetchall()[0][0]
         json_row.append(dict(en, value=value))
         
-    return en[0]
+    #return en[1]
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
 #......................................................#
@@ -233,7 +234,7 @@ def get_list_user():
     username = request.args.get('email_list')
     db = get_db()
     if username is not None:
-        cur = db.execute( 'select * from users WHERE upper(full_name) like upper(%s) order by id desc', username+'%' )
+        cur = db.execute( 'select login, full_name from users WHERE upper(full_name) like upper(%s) order by id desc', username+'%' )
         #cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
     else:
         cur = db.execute('select * from users order by id desc limit 10')
@@ -376,8 +377,8 @@ def editres():
 # ..........................................................................
 ##### Главная страница .................................................####
 @app.route('/list/<typename>/<int:page>/')
-@app.route('/list/<typename>/', defaults={'page': None})
-@app.route('/', defaults={'typename': None, 'page': None})
+@app.route('/list/<typename>/', defaults={'page': 1})
+@app.route('/', defaults={'typename': None, 'page': 1})
 def index(typename, page):
         
     permissiom_check()
@@ -398,10 +399,7 @@ def index(typename, page):
             typeid=None
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
-        try:
-            count=db.execute('select count(resources.id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # сколько всего записей в табоице ресурсы по выбранному типу
-        except:
-            count=0
+
 
         if uuid is not None:
             resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
@@ -416,20 +414,23 @@ def index(typename, page):
             else:
                 COUNT_PAGE=0
             COUNT_PAGE=int(COUNT_PAGE)
-                
-            if page is None:
-                page=COUNT_PAGE
             
             
-            START_ROW=count-(ROW_IN_PAGE*(COUNT_PAGE-(COUNT_PAGE-page+1)+1))
+            #START_ROW=count-(ROW_IN_PAGE*(COUNT_PAGE-(COUNT_PAGE-page+1)+1))
             
-            if START_ROW<0:
-                START_ROW=0
-            if (COUNT_PAGE-page+1)==1:
-               ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
+            #if START_ROW<0:
+            #    START_ROW=0
+            
+            #if (COUNT_PAGE-page+1)==1:
+            #   ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
                 
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
-            [typeid, START_ROW, ROW_IN_PAGE ] ).fetchall()
+            [typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
+            
+
+            count=COUNT_RES-(page-1)*ROW_IN_PAGE
+
+
         
         for res_id, hash in resources:
             #creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
@@ -455,6 +456,7 @@ def index(typename, page):
                     json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
                 except:
                     val.append("")
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=""))
             
             val2.append(val)
             
@@ -617,8 +619,11 @@ def testjson():
 
 
 
-@app.route('/import/<int:type_id>')
-@app.route('/import/', defaults={'type_id': 0})
+
+app.config['UPLOAD_FOLDER'] = '/tmp/'
+
+@app.route('/import/<int:type_id>', methods=['GET', 'POST'])
+@app.route('/import/', defaults={'type_id': 0}, methods=['GET', 'POST'])
 def import_csv(type_id):
     db = get_db()
     
@@ -628,28 +633,38 @@ def import_csv(type_id):
     query=""
     count=0
     
-    with open('/tmp/csv', 'r') as f:
-        reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+    #f = request.files['file']
+    #f.save('/tmp/' + secure_filename(f.filename))
 
-        for row in reader:
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    try:
+        #csv_file=app.config['UPLOAD_FOLDER']+filename
+        with open('/tmp/CSV.txt', 'r') as f:
+            reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+            for row in reader:
+                res_id=addres(type_id)
+                opt_id_seq=0
+                for val in row:
+                    if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
+                        db.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
+                        opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+                        opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+
+                    query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                    db.execute( query )
+                
+                    opt_id_seq=opt_id_seq+1
+                count=count+1
+        f.close()
         
-            res_id=addres(type_id)
-            opt_id_seq=0
-            for val in row:
-                
-                if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                    db.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
-                    opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-                    opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
-                    
-                query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
-                db.execute( query )
-                    
-                
-                opt_id_seq=opt_id_seq+1
-            count=count+1
+    except:
+        flash('Ошибка в процессе парсинга файла')
 
-    f.close()
     flash('Число импортированных записей: '+str(count))
     
     return redirect(url_for('control'))

@@ -2,18 +2,113 @@
 {% block body %}
 
 
-<button class="btn btn btn-default" data-toggle="modal" data-target="#editItem">
-		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
-	</button>
 
     
-    <button id="HF8S" onClick="edit_item(this.id)">B3</button>
+<form action="http://cmdb.at-consulting.ru:5000/import/23" method=post enctype=multipart/form-data>
+  <input type="file" name="file">
+  <input type="submit" value="Загрузить">
+</form>
+
+
+
+<label id="labe">Clickonme</label>
+
+<script>
+$('#labe').click(function() {
+    $('input[type=file]').click();
+    $("form[name='hideupload']").submit();
+});
+</script>
+
+
+
+
+
+<form class="form-horizontal" role="form" id="editoptions">
+    <div class="form-group">
+        <div class="col-md-6">
+            <div class="form-group row" id="1">
+                <label for="inputKey" class="col-md-1 control-label">Key</label>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="inputKey" placeholder="Key">
+                </div>
+                <label for="inputValue" class="col-md-1 control-label">Value</label>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="inputValue" placeholder="Value">
+               </div>
+               <div class="col-md-2">
+                <select class="form-control" id="type_id_ticket" name="type_id">
+						<option disabled>Тип</option>
+                        <option> Text </option>
+                        <option> Input </option>
+                        <option> date </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-6">
+            <div class="form-group row" id="2">
+                <label for="inputKey" class="col-md-1 control-label">Key</label>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="inputKey" placeholder="Key">
+                </div>
+                <label for="inputValue" class="col-md-1 control-label">Value</label>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="inputValue" placeholder="Value">
+               </div>
+               <div class="col-md-2">
+                <select class="form-control" id="type_id_ticket" name="type_id">
+						<option disabled>Тип</option>
+                        <option> Text </option>
+                        <option> Input </option>
+                        <option> date </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<script>
+$('#editItem').on('show.bs.modal.bs.modal', function (e) {
     
+    $('#editItem').on('hidden.bs.modal', function (e) {
+  $( "#itemOption" ).empty(); <!-- очищаем DOM дерево предыдущих полей ввода -->
+})
     
-    
-    
-    
-    
+    var c_opt_id;
+    var c_opttype;
+    var c_optdict;
+    var c_name;
+    var c_value;
+	var c_uuid;
+    $(function(){
+                $.getJSON('{{ url_for('index', typename=typename) }}?json&uuid='+uuid+'', function(objj) {
+    var obj = []; 
+    obj = objj[0]; <!-- в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
+                for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
+            if  (key == "opt_id" ) { c_opt_id = val.toString(); };
+            if  (key == "opttype" ) { c_oopttype = val.toString()};
+            if  (key == "optdict" ) { c_optdict = val.toString()}; 
+            if  (key == "name" ) { c_name = val.toString()};
+            if  (key == "value" ) { c_value = val.toString()};  
+			if  (key == "uuid" ) { c_uuid = val.toString()};
+			});
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>');     
+    };
+	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
+    });
+    });
+});                
+</script>
+
+
+
+
 
 
 
