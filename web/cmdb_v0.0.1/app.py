@@ -49,15 +49,20 @@ def cols_name(query):
 #
 
 def permissiom_check():
+    #user_exist=None
     if not session.get('logged_in'):
         return redirect(url_for('login'))
         #abort(401)
     else:
         db = get_db()
         try:
-            db.execute('SELECT login FROM users WHERE login=%s', [session['login']]).fetchall()[0][0]
-            db.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
+            user_exist=db.execute('SELECT login FROM users WHERE login=%s', [session['login']]).fetchall()[0][0]
         except:
+            user_exist=None
+            
+        if user_exist is not None:
+            db.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
+        else:
             db.execute('insert into users set login=%s', [session['login']])
     
 #......................................................#
@@ -109,9 +114,23 @@ def get_list_type():
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
-    
+
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
+@app.route('/get_user_menu/')
+def get_user_menu():
+    db = get_db()
+    cur = db.execute('select name from types order by id desc')
+    entries = cur.fetchall()
+    json_row=[]
     
+    for en in entries:
+        value=db.execute('select count(id) from resources where type_id=%s', [en]).fetchall()[0][0]
+        json_row.append(dict(en, value=value))
+        
+    return en[0]
+    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
 #......................................................#
 #### Обработка свойств\опций ####
 
@@ -358,23 +377,20 @@ def editres():
 ##### Главная страница .................................................####
 @app.route('/list/<typename>/<int:page>/')
 @app.route('/list/<typename>/', defaults={'page': None})
-@app.route('/', defaults={'typename': None})
+@app.route('/', defaults={'typename': None, 'page': None})
 def index(typename, page):
-
+        
     permissiom_check()
     
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-
     val2=[]
     json_row=[]
     json_col=[]
     json_row2=[]
-    count=1
-    if typename is not None:
 
+    if typename is not None:
         uuid = request.args.get('uuid')
-        
         db = get_db()
         try:
             typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
@@ -393,32 +409,27 @@ def index(typename, page):
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
         else:
             ROW_IN_PAGE=20 # Число строк на одну таблицу
-            COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0]
+            COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
             
             if COUNT_RES != 0:
-                COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5)
+                COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5, 0)
             else:
                 COUNT_PAGE=0
+            COUNT_PAGE=int(COUNT_PAGE)
                 
             if page is None:
                 page=COUNT_PAGE
             
-            #page=COUNT_PAGE-page+1
             
             START_ROW=count-(ROW_IN_PAGE*(COUNT_PAGE-(COUNT_PAGE-page+1)+1))
+            
             if START_ROW<0:
                 START_ROW=0
             if (COUNT_PAGE-page+1)==1:
-                ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
+               ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
                 
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
             [typeid, START_ROW, ROW_IN_PAGE ] ).fetchall()
-            
-            #return str(START_ROW)+", "+str(ROW_IN_PAGE)
-        
-
-            
-        #count=page*ROW_IN_PAGE
         
         for res_id, hash in resources:
             #creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
@@ -439,7 +450,6 @@ def index(typename, page):
                     key_id.append("")
                 
                 entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
-
                 try:
                     val.append(entries[0][0])
                     json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
@@ -450,7 +460,10 @@ def index(typename, page):
             
             json_row2.append( (json_row) )
             json_row=[]
-            
+    
+    else: # Если тип не задан, отдаем пустую страницу
+        return render_template( 'index.html', entries="", cols_names="", typename=typename, page=0, COUNT_PAGE=0)
+        
     ### Экспорт в JSON
     if request.args.get('json') is not None:
         return simplejson.dumps(json_row2)
@@ -482,16 +495,15 @@ def index(typename, page):
         response = make_response(data)
         response.headers["Content-Disposition"] = "attachment; filename="+export_file_name
         f.close()
-        
         return response
          
     ### Отображение таблицы на главном экране
     else:
+            
         try:
             return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
         except:
-            return render_template( 'index.html', entries="", cols_names="", typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
-
+            return render_template( 'index.html', entries="", cols_names="", typename=typename, page=0, COUNT_PAGE=0)
 
 
 
@@ -527,7 +539,6 @@ def login():
                 session['login']=reqlogin
                 flash('You were logged in')
                 return redirect(url_for('index'))
-
 
         try:
             session['logged_in']

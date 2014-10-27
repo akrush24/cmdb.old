@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='dynatable/jquery.dynatable.css') }}"> <!-- Отрисовка таблиц стилей -->
 
 <script src="{{ url_for('static', filename='js/emailautocomplite.js') }}"></script> <!-- Автодополнение e-mail -->
-<script src="{{ url_for('static', filename='js/app.js') }}"></script> <!-- Автодополнение e-mail -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script> <!-- App -->
 
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script> <!-- Тема bootstrap -->
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
@@ -21,8 +21,8 @@
 <script src="{{ url_for('static', filename='bootstrap-table/bootstrap-table.min.js') }}"></script>
 <body>
 
-  <nav class="navbar navbar-default navbar-fixed-top " role="navigation"> 
-  <div class="container-fluid"  style="background-color:#778899;"> 
+  <nav class="navbar navbar-default navbar-fixed-top navbar-inverse " role="navigation"> 
+  <div class="container-fluid"  > 
   <div class="navbar-header">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
     <span class="sr-only">Toggle navigation</span>
@@ -33,14 +33,14 @@
   </div>
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
         <ul class="nav navbar-nav navbar-left">
-            <li class="navbar-brand" style="color:#FFF;">CMDB</li>
+            <li class="navbar-brand" >CMDB</li>
         <li class="dropdown">
           {% if typename %}
-            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b style="color:#F2F2F2">Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right">4</span></a>
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b >Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right"></span></a>
           {% else %}
-            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b style="color:#F2F2F2">Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right">4</span></a>
+            <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right"></span></a>
           {% endif %}
-          <ul class="dropdown-menu" id ="dropMenu" role="menu" style="background-color:#778899; color:#F2F2F2">
+          <ul class="dropdown-menu" id ="dropMenu" role="menu" >
            <!-- <li><a href="{{ url_for('index', typename='VPS') }}">VPS&nbsp;<span class="badge pull-right">3</span></a></li>
             <li><a href="{{ url_for('index', typename='Ticket') }}">Ticket</a></li>
             <li><a href="{{ url_for('index', typename='Phone') }}">Phone&nbsp;<span class="badge pull-right">1</span></a></li>
@@ -124,12 +124,12 @@
         <script> 
 
 $("#addticketsubmit").click(function()
-    {
+{
         $("form[name='Ticketform']").submit();
             });
 
 $("#editItemForm").click(function()
-    {
+{
         $("form[name='editItemForm']").submit();
              });
 
@@ -161,7 +161,6 @@ $("#editItemForm").click(function()
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
         <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editItemForm').submit();"> Сохранить</button>
-        
       </div>
     </div>
   </div>
@@ -220,11 +219,11 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 <!-- DropDownMenu -->
 <script>
  $(function(){
-								$.getJSON('{{ url_for('get_list_type') }}', function(menulist) {
+								$.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 								  var i = -1;
 									$.each(menulist, function(keylist, vallist) { 
 									   i=i+1;
-										$('#dropMenu').prepend('<li><a href="http://cmdb.at-consulting.ru:5000/list/'+menulist[i].name+'">'+menulist[i].name + '&nbsp;<span class="badge pull-right">+</span></a></li></option>');
+										$('#dropMenu').prepend('<li><a href="http://cmdb.at-consulting.ru:5000/list/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li></option>');
 										});  
                                             });
                                         });
