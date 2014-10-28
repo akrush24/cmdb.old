@@ -44,14 +44,14 @@ class Options(db.Model):
 class Dict(db.Model):
     __tablename__ = 'dict'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    opt_id = db.Column(db.Integer, primary_key=False)
-    name = db.Column(db.String(100), unique = False)
+    name = db.Column(db.String(100), unique = True)
 
 class Dict_val(db.Model):
     __tablename__ = 'dict_val'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
-    name = db.Column(db.String(100), unique = False)
+    name = db.Column(db.String(100)) # for DEL
+    value = db.Column(db.String(100))
 
 class Users(db.Model):
     __tablename__ = 'users'

@@ -64,7 +64,10 @@ def permissiom_check():
         if user_exist is not None:
             db.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
         else:
-            db.execute('insert into users set login=%s', [session['login']])
+            try:
+                db.execute('insert into users set login=%s', [session['login']])
+            except:
+                pass
     
 #......................................................#
 #### Обработка Типов ####
@@ -191,10 +194,13 @@ def clear_option(id):
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
-    type = request.args.get('type')
+    type_id = request.args.get('type')
+    opt_id = request.args.get('opt_id')
     db = get_db()
-    if type is not None:
-        cur = db.execute('select * from options where type_id = %s order by id desc', [type])
+    if type_id is not None:
+        cur = db.execute('select * from options where type_id = %s order by id desc', [type_id])
+    elif opt_id is not None:
+        cur = db.execute('select * from options where id = %s order by id desc', [opt_id])
     else:
         cur = db.execute('select * from options order by id desc')
         
@@ -253,11 +259,18 @@ def get_list_user():
 def new_dict():
     if not session.get('logged_in'):
         abort(401)
-
     db = get_db()
-    db.execute('''insert into dict (name) values (%s)''', request.form['name'])
-    
+    if request.form['name'] != "":
+        try:
+            db.execute('insert into dict (name) values (%s)', request.form['name'])
+            for data in request.form.keys():
+                value=request.form[data]
+                if data != "name" and data[:5] == "newid" and value != "":
+                    db.execute('insert into dict_val (dict_id, value) values ((select id from dict where name=%s), %s)', [request.form['name'],value])
+        except:
+            flash ("Ошибка при добавлении словаря")
     return redirect(url_for('control'))
+
 
 @app.route('/del_dict/<int:id>')
 def del_dict(id):
@@ -265,26 +278,27 @@ def del_dict(id):
         abort(401)
 
     db = get_db()
-    db.execute('delete from dict where id=%s', [id])
+    db.execute('delete from dict_val where id=%s', [id])
 
     return redirect(url_for('control'))
 
-@app.route('/get_list_dict/')
+@app.route('/get_list_dict/', methods=['GET'])
 def get_list_dict():
-    opt_id = request.args.get('opt_id')
+    dict_id = request.args.get('dict_id')
     db = get_db()
     
-    if opt_id is not None:
-        cur = db.execute('select * from dict where opt_id=%s order by id desc', opt_id)
+    
+    if dict_id is not None:
+        cur = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where  dict.id=dict_val.dict_id and dict.id=%s', dict_id)
     else:
-        cur = db.execute('select * from dict order by id desc')
+        cur = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id')
     
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
     
-    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+    return simplejson.dumps(json_row,sort_keys=True, indent=4)
 
 
 #......................................................#
@@ -353,7 +367,7 @@ def newres():
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
 def editres():
-    '''
+    
     try:
         db = get_db()
         typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
@@ -367,13 +381,45 @@ def editres():
                 cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
 
     except:
-    '''
+        pass
+        
     return request.form['uuid']
 
     #return redirect(url_for('index', typename=typename))
 
 
-    
+# Страница просмотра Итема
+@app.route('/hash/<hash>/')
+@app.route('/item/<hash>/')
+@app.route('/view/<hash>/')
+def view(hash):
+    if hash != "":
+        res_id, type_id, type_name = engine.execute('select resources.id, types.id, types.name from resources, types where hash=%s limit 1',[hash]).fetchall()[0]
+        try:
+            (res_id, type_id, type_name)=engine.execute('select resources.id, types.id, types.name from resources, types where hash=%s',[hash]).fetchall()[0][0]
+            return type_name
+        except:
+            res_id=None
+        
+        items=[]
+        if res_id is not None:
+            options=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[hash]).fetchall()
+            for option_id, option_name in options:
+                try:
+                    value=engine.execute('select value from value where res_id in (select id from resources where hash=%s) and option_id=%s', [hash, option_id] ).fetchall()[0][0]
+                except:
+                    value=""
+                    
+                items.append(dict(id=option_id, option=option_name, value=value))
+                
+            #return str(item)
+        
+            return render_template('view.html', items=items)
+            
+        else: # если ресурса не существует
+            return render_template( 'view.html')
+
+ 
 # ..........................................................................
 ##### Главная страница .................................................####
 @app.route('/list/<typename>/<int:page>/')
@@ -402,11 +448,13 @@ def index(typename, page):
 
 
         if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s',[uuid, typeid]).fetchall()
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
+            count=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         elif request.args.get('save') is not None:
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
+            count=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         else:
-            ROW_IN_PAGE=20 # Число строк на одну таблицу
+            ROW_IN_PAGE=30 # Число строк на одну таблицу
             COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
             
             if COUNT_RES != 0:
@@ -414,23 +462,12 @@ def index(typename, page):
             else:
                 COUNT_PAGE=0
             COUNT_PAGE=int(COUNT_PAGE)
-            
-            
-            #START_ROW=count-(ROW_IN_PAGE*(COUNT_PAGE-(COUNT_PAGE-page+1)+1))
-            
-            #if START_ROW<0:
-            #    START_ROW=0
-            
-            #if (COUNT_PAGE-page+1)==1:
-            #   ROW_IN_PAGE=count-(ROW_IN_PAGE*(COUNT_PAGE-1))
                 
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
             [typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
             
 
             count=COUNT_RES-(page-1)*ROW_IN_PAGE
-
-
         
         for res_id, hash in resources:
             #creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
@@ -597,10 +634,11 @@ def control(action):
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
         option_cols=option_cols, option_cols_names = cols_name(query),
         user_cols = user_cols, user_cols_names=cols_name('select id, login, full_name, email from users order by id desc'),
-        dict_cols = db.execute('select * from dict order by id desc').fetchall(), dict_cols_names=cols_name('select * from dict order by id desc'),
+        dict_cols = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id order by dict.id').fetchall(), dict_cols_names=cols_name('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id'),
         opt_count=opt_count, type_count=type_count
     )
 
+ 
 
 
 @app.route('/test', methods=['GET', 'POST'])
@@ -616,8 +654,6 @@ def testjson():
     for en in entries:
         json_row.append(dict(en))
     return simplejson.dumps(json_row)
-
-
 
 
 app.config['UPLOAD_FOLDER'] = '/tmp/'
@@ -642,9 +678,9 @@ def import_csv(type_id):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-    try:
-        #csv_file=app.config['UPLOAD_FOLDER']+filename
-        with open('/tmp/CSV.txt', 'r') as f:
+    #try:
+        csv_file=app.config['UPLOAD_FOLDER']+filename
+        with open(csv_file, 'r') as f:
             reader = csv.reader(f, delimiter=b',',quotechar=b'"')
             for row in reader:
                 res_id=addres(type_id)
@@ -662,8 +698,8 @@ def import_csv(type_id):
                 count=count+1
         f.close()
         
-    except:
-        flash('Ошибка в процессе парсинга файла')
+    #except:
+        #flash('Ошибка в процессе парсинга файла')
 
     flash('Число импортированных записей: '+str(count))
     

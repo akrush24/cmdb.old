@@ -5,10 +5,11 @@ from migrate import *
 from migrate.changeset import schema
 pre_meta = MetaData()
 post_meta = MetaData()
-types = Table('types', post_meta,
+dict_val = Table('dict_val', post_meta,
     Column('id', Integer, primary_key=True, nullable=False),
-    Column('name', String(length=24)),
-    Column('desc', String(length=244)),
+    Column('dict_id', Integer),
+    Column('name', String(length=100)),
+    Column('value', String(length=100)),
 )
 
 
@@ -17,11 +18,11 @@ def upgrade(migrate_engine):
     # migrate_engine to your metadata
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    post_meta.tables['types'].columns['desc'].create()
+    post_meta.tables['dict_val'].columns['value'].create()
 
 
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here.
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    post_meta.tables['types'].columns['desc'].drop()
+    post_meta.tables['dict_val'].columns['value'].drop()

@@ -169,7 +169,7 @@ $("#editItemForm").click(function()
 </div>
 </div>
      <!-- Modal edit item -->
-    
+
 
     <!-- Onload script -->
     <script>
@@ -233,7 +233,14 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 
 </script>
 
-    
+  <div class="container-fluid"> 
+   {% for message in get_flashed_messages() %}
+    <div class="alert alert-success" role="alert">
+        <a href="#" class="alert-link">{{ message }}</a>
+    </div>
+    {% endfor %}
+  </div>
+  
 <div class="container-fluid">
     <div class="row">
     <div class="col-xs-12 col-md-10">
@@ -244,13 +251,7 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 
 
   <!--<nav class="navbar navbar-default navbar-fixed-bottom " role="navigation"> -->
-  <div class="container-fluid"> 
-   {% for message in get_flashed_messages() %}
-    <div class="alert alert-success" role="alert">
-        <a href="#" class="alert-link">{{ message }}</a>
-    </div>
-    {% endfor %}
-  </div>
+
   <!--</nav>-->
   
 
