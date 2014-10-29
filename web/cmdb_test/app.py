@@ -9,7 +9,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from flask.ext.login import login_user, logout_user, current_user, login_required
 from sqlalchemy.sql import select
 import simplejson
 import re
@@ -52,17 +51,11 @@ def cols_name(query):
 # Decoration
 #
 
-def login_required(): # Проверка вошел пользователь или нет
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-
-
 #......................................................#
 #### Обработка Типов ####
 @app.route('/new_type/', methods=['POST'])
 def new_type():
-    login_required()
-    
+   
     db = get_db()
     try:
         db.execute('''insert into types (name) values (%s)''', request.form['name'].upper())
@@ -82,7 +75,7 @@ def del_type(id):
     
 @app.route('/clear_type/<int:id>')
 def clear_type(id):
-    login_required()
+
     try:
         db = get_db()
         db.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
@@ -96,7 +89,6 @@ def clear_type(id):
     
 @app.route('/get_list_type/')
 def get_list_type():
-    login_required()
     
     db = get_db()
     cur = db.execute('select * from types order by id desc')
@@ -109,7 +101,6 @@ def get_list_type():
 
 @app.route('/get_user_menu/')
 def get_user_menu():
-    login_required()
     
     db = get_db()
     cur = db.execute('select id, name from types order by id desc')
@@ -131,7 +122,6 @@ def get_user_menu():
 # 3. Очистка данных
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
-    login_required()
 
     test=""
     db = get_db()
@@ -154,7 +144,6 @@ def new_option():
 
 @app.route('/del_option/<int:id>')
 def del_option(id):
-    login_required()
 
     try:
         db = get_db()
@@ -166,7 +155,6 @@ def del_option(id):
 
 @app.route('/clear_option/<int:id>')
 def clear_option(id):
-    login_required()
     
     if not session.get('logged_in'):
         abort(401)
@@ -183,7 +171,6 @@ def clear_option(id):
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
-    login_required()
     
     type_id = request.args.get('type')
     opt_id = request.args.get('opt_id')
@@ -207,7 +194,6 @@ def get_list_option():
 #### Обработка пользователей ####
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
-    login_required()
 
     db = get_db()
     db.execute('insert into users (login, full_name, email, password) values (%s, %s, %s, %s)',
@@ -217,7 +203,6 @@ def new_user():
 
 @app.route('/del_user/<int:id>', methods=['GET'])
 def del_user(id):
-    login_required()
 
     db = get_db()
     db.execute('delete from users where id=%s', [id])
@@ -226,7 +211,6 @@ def del_user(id):
 
 @app.route('/get_list_user/', methods=['GET'])
 def get_list_user():
-    login_required()
     
     username = request.args.get('email_list')
     db = get_db()
@@ -248,7 +232,6 @@ def get_list_user():
 #### Обработка Словарей ####
 @app.route('/new_dict/', methods=['POST'])
 def new_dict():
-    login_required()
     
     if not session.get('logged_in'):
         abort(401)
@@ -267,7 +250,6 @@ def new_dict():
 
 @app.route('/del_dict/<int:id>')
 def del_dict(id):
-    login_required()
     
     if not session.get('logged_in'):
         abort(401)
@@ -279,7 +261,6 @@ def del_dict(id):
 
 @app.route('/get_list_dict/', methods=['GET'])
 def get_list_dict():
-    login_required()
     
     dict_id = request.args.get('dict_id')
     db = get_db()
@@ -304,7 +285,6 @@ def get_list_dict():
 # Удаление..............................................
 @app.route('/del/<typename>/<hash>')
 def del_res(hash, typename):
-    login_required()
 
     db = get_db()
     
@@ -343,7 +323,6 @@ def addres(type_id): # добавляем новый элемент в табл�
 
 @app.route('/newres', methods=['POST'])
 def newres():
-    login_required()
     
     try:
         db = get_db()
@@ -365,7 +344,6 @@ def newres():
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
 def editres():
-    login_required()
     
     try:
         db = get_db()
@@ -391,7 +369,6 @@ def editres():
 @app.route('/hash/<hash>/')
 @app.route('/item/<hash>/')
 def view(hash):
-    login_required()
     
     if hash != "":
         res_id, type_id, type_name = engine.execute('select resources.id, types.id, types.name from resources, types where hash=%s limit 1',[hash]).fetchall()[0]
@@ -426,7 +403,6 @@ def view(hash):
 @app.route('/list/<typename>/', defaults={'page': 1})
 @app.route('/', defaults={'typename': None, 'page': 1})
 def index(typename, page):
-    login_required()
     
     val2=[]
     json_row=[]
@@ -604,12 +580,13 @@ def logout():
 
 
     
-    
+# Функция выполняется при каждом запросе
 @app.before_request
 def before_request():
-    if not session.get('logged_in'): # Если пользователь не вошел в систему
+    if not session.get('logged_in') and request.endpoint != 'static' and request.endpoint != 'login': # Если пользователь не вошел в систему
         g.user=None
-        #return "EEE"
+        flash("Need authorized")
+        return render_template('login.html', error="Need authorized")
         
     else:
         g.user = session.get('login')
@@ -640,8 +617,7 @@ def before_request():
 @app.route('/control/', defaults={'action': "0"})
 @app.route('/control/<action>')
 def control(action):
-    login_required()
-    
+   
     db = get_db()
 
     type_cols = db.execute('select * from types order by id desc').fetchall()
@@ -670,17 +646,6 @@ def control(action):
     )
 
  
-
-
-
-
-                
-                
-
-
-
-
-
 app.config['UPLOAD_FOLDER'] = '/tmp/'
 
 
@@ -690,7 +655,6 @@ app.config['UPLOAD_FOLDER'] = '/tmp/'
 @app.route('/import/<int:type_id>', methods=['GET', 'POST'])
 @app.route('/import/', defaults={'type_id': 0}, methods=['GET', 'POST'])
 def import_csv(type_id):
-    login_required()
     
     db = get_db()
     
@@ -740,7 +704,7 @@ def import_csv(type_id):
 @app.route('/export/<int:type_id>')
 @app.route('/export/', defaults={'type_id': 0})
 def export_csv(type_id):
-    login_required()
+
     return redirect(url_for('index'))
 
 

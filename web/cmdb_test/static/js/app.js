@@ -33,6 +33,17 @@ $("#editItemForm").click(function()
 // Перехват клика по редактированию итема
 
 
+ $(function(){
+								$(function(){ 
+                                $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
+								  var i = -1;
+									$.each(menulist, function(keylist, vallist) { 
+									   i=i+1;
+										$('#dropMenu').prepend('<li><a href="http://cmdb.at-consulting.ru:5000/list/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li></option>');
+										});  
+                                            });
+                                        });
+                                        });
 
 
 

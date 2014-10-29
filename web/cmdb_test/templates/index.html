@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if typename %}
+    
+    {% if cols_names %}
+    <h3>Здесь будет вывод дескрипшена выбранного типа</h3>
+    {% endif %}
+
+    <div class="table-responsive">
+
+<ul class="pagination pagination-sm">
+
+  {% if page >1 %}
+  <li><a href="{{ url_for('index', typename=typename, page=page-1) }}">&laquo;</a></li>
+  {% else %}
+  <li class="disabled"><a href="#">&laquo;</a></li>
+  {% endif %}
+  
+  {% set space=0 %}
+  {% for P in range(COUNT_PAGE) %}
+
+  {% if (P >= page-5 and P<page) or P==0 or page==P+1 %}
+      {% if space > 1 %} <li><a href="#">...</a></li> {% set space=0 %} {% endif %}
+      {% if P+1==page %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{{ url_for('index', typename=typename, page=P+1) }}">{{ P+1 }}<span class="sr-only"></span></a></li>
+  {% elif (P > page and P < page+4) or P+1==COUNT_PAGE and page!=P+1 %}
+      {% if space > 1 and  P+1==COUNT_PAGE %} <li><a href="#">...</a></li> {% set space=0 %} {% endif %}
+      {% if P+1==page %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{{ url_for('index', typename=typename, page=P+1) }}">{{ P+1 }}<span class="sr-only"></span></a></li>
+  {% else %}
+       {% set space=space+1 %}
+  {% endif %}
+  
+  
+  {% endfor %}
+  
+  {% if page < COUNT_PAGE %}
+  <li><a href="{{ url_for('index', typename=typename, page=page+1) }}">&raquo;</a></li>
+  {% else %}
+  <li class="disabled"><a href="#">&raquo;</a></li>
+  {% endif %}
+  
+</ul>
+
+
+    <table class="table table-bordered table-hover table-condensed">
+    <tr>
+    {% for cols_name in cols_names %}
+        <th nowrap="nowrap"><b>{{ cols_name }}</b></th>
+    {% endfor %}
+    </tr>
+    
+    
+{% for entrie in entries %}
+<tr>
+    {% for cell in entrie %}
+    <td nowrap="nowrap"><a href="{{ url_for('view', hash=entrie[1]) }}">{{ cell }}</a></td>
+    {% endfor %}
+    <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[1] }}"></a></td>
+    <td><a id="{{ entrie[1] }}" class="glyphicon glyphicon-wrench" onClick="edit_item(this.id)" href="#"></a></td>
+</tr>
+{% endfor %}
+
+    </table>
+</div>
+    {% else %}
+        <div class="alert alert-danger">Тип не выбран</div>
+    {% endif %}
+{% endblock %}

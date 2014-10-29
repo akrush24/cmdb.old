@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
+
+
+{% if items!="" %}
+
+{% for item in items %}
+<div class="input-group">
+<div class="input-group-addon">{{ item.option }}</div>
+<input type="text" class="form-control" name="id{{ item.id }}" value="{{ item.value }}">
+</div>
+{% endfor %}
+
+    
+
+
+<button type="button" class="btn btn-default" href="ggogle.ru">Закрыть</button>
+<button type="submit" class="btn btn-primary" > Сохранить</button>
+</form>
+
+{% else %}
+    <div class="alert alert-danger">Ресурс не найден</div>
+{% endif %}
+
+
+{% endblock %}
