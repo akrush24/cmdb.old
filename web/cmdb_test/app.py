@@ -479,39 +479,9 @@ def index(typename, page):
     ### Экспорт в JSON
     if request.args.get('json') is not None:
         return simplejson.dumps(json_row2)
-    ### Экспорт данных в CSV
-    elif request.args.get('save') is not None:
-        CSV=""
-        count=1
-        for col in key:
-            CSV=CSV+'"'+str(col)+'"'
-            if count<len(key):
-                CSV=CSV+','
-            count=count+1
-        CSV=CSV+'\n'
-        for row in val2:
-            count=1
-            for col in row:
-                CSV=CSV+'"'+str(col)+'"'
-                if count<len(row):
-                    CSV=CSV+','
-                count=count+1
-            CSV=CSV+'\n'
-        
-        export_file_name = str("export_"+str(datetime.datetime.now())+'.csv')
-        f = open('exports/'+export_file_name, 'w')
-        f.write(CSV)
-        
-        f = open('exports/'+export_file_name, 'r')
-        data = f.read()
-        response = make_response(data)
-        response.headers["Content-Disposition"] = "attachment; filename="+export_file_name
-        f.close()
-        return response
          
     ### Отображение таблицы на главном экране
     else:
-            
         try:
             return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
         except:
@@ -605,10 +575,7 @@ def before_request():
             except:
                 pass
 
-                
-                
-                
-                
+
                 
 ### -----------------------------------------------------------------
 ### Панель управления ............................................###
@@ -701,38 +668,44 @@ def import_csv(type_id):
     return redirect(url_for('control'))
 
 
-@app.route('/export/<int:type_id>')
-@app.route('/export/', defaults={'type_id': None})
-def export_csv(type_id):
-    if type_id is not None:
-        res_id = engine.execute('select id from resources where type_id=%s limit 1',[type_id]).fetchall()
-        opt_id = engine.execute('select id from options where type_id=%s limit 1',[type_id]).fetchall()
+@app.route('/export/<typename>')
+@app.route('/export/', defaults={'typename': None})
+def export_csv(typename):
+    if typename is not None:
+        
+        try:
+            res_id = engine.execute('select id from resources where type_id in (select id from types where name=%s)',[typename]).fetchall()
+            opt_id = engine.execute('select id from options where type_id in (select id from types where name=%s)',[typename]).fetchall()
+        except:
+            flash('Некорректный тип')
+            return redirect(url_for('control'))
+            
+        CSV=""
         
         for resid in res_id:
+            count=0
             for optid in opt_id:
-                engine.execute('select value from value where res_id= %s and option_id=%s limit 1',[resid, optid]).fetchall()
-                
-        '''
-        items=[]
-        if res_id is not None:
-            options=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[hash]).fetchall()
-            for option_id, option_name in options:
+                count=count+1
                 try:
-                    value=engine.execute('select value from value where res_id in (select id from resources where hash=%s) and option_id=%s', [hash, option_id] ).fetchall()[0][0]
+                    CSV=CSV+'"'+engine.execute('select value from value where res_id= %s and option_id=%s',[resid[0], optid[0]]).fetchall()[0][0]+'"'
                 except:
-                    value=""
-                    
-                items.append(dict(id=option_id, option=option_name, value=value))
-                
-            #return str(item)
+                    CSV=CSV+'""'
+                if count < len(opt_id):
+                    CSV=CSV+','
+            CSV=CSV+'<br>'
         
-            return render_template('view.html', items=items)
-            
-        else: # если ресурса не существует
-            return render_template( 'view.html')
-        '''
+        export_file_name = str("export_"+'_'+typename+'_'+str(datetime.datetime.now())+'.csv')
+        f = open('exports/'+export_file_name, 'w')
+        f.write(CSV)
         
-    return redirect(url_for('index'))
+        f = open('exports/'+export_file_name, 'r')
+        data = f.read()
+        response = make_response(data)
+        response.headers["Content-Disposition"] = "attachment; filename="+export_file_name
+        f.close()
+        return response
+        
+    return redirect(url_for('control'))
 
 
 ''' ############################### '''

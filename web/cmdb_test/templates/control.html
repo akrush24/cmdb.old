@@ -214,13 +214,12 @@
         
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
             <td>
-<form action="{{ url_for('import_csv', type_id=entry.id ) }}" method=post enctype=multipart/form-data>
-  <input type="file" name="file">
-  <button class="glyphicon glyphicon-upload" type="submit" value="Загрузить"> CSV</button>
-  <i><b>формат CSV</b>: Unix Format, UTF-8, разделитель ","</i>
-</form>
-            <!--<a class="glyphicon glyphicon-save" href="{{ url_for('import_csv', type_id=entry.id ) }}">Импорт данных</a>--></td>
-            <td><a class="glyphicon glyphicon-open" href="{{ url_for('index', typename=entry.name) }}?save"  target="_blank"> Экспорт данных</a></td>
+            <form action="{{ url_for('import_csv', type_id=entry.id ) }}" method=post enctype=multipart/form-data>
+              <input type="file" name="file">
+              <button class="glyphicon glyphicon-upload" type="submit" value="Загрузить"> CSV</button>
+              <i><b>формат CSV</b>: Unix Format, UTF-8, разделитель ","</i>
+            </form>
+            <td><a class="glyphicon glyphicon-open" href="{{ url_for('export_csv', typename=entry.name) }}"  target="_blank"> Экспорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_type', id=entry.id) }}"></a><span class="badge pull-right">{{ type_count[entry.id] }}</span></td></td>
         {% endif %}
 

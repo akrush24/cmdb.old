@@ -92,42 +92,6 @@
 						<option disabled>Тип</option>
                     </select><br>
                     <div id="inputNewOption">
-                    
-						<script type="text/javascript">
-							$(function(){
-								$.getJSON('{{ url_for('get_list_type') }}', function(data) {
-								  var i = -1;
-									$.each(data, function(id, name) { 
-									   i=i+1;
-										$('#type_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-										});  
-                                            });
-                                        });
-
-                                    $('#type_id').change(function(){                                //подгрузка опций для типа
-                                          var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
-                                            $( "#inputNewOption" ).empty();                                 //очищаем контейнер от предыдущих объектов
-                                            $(function(){                                           //сама функция подгрузки опций
-                                                $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
-                                                    var i = -1;
-                                                $.each(data, function(id, name) { 
-                                                    i=i+1;
-                                                        $('#inputNewOption').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="' + data[i].name + '" required=""/></div>');
-
-                                                          });  
-                                                        });
-                                                       });
-                                           }); //Конец функции выбора типа
-                                           
-                                           //добавить поле ввода
-                                                 $(function() { 
-                                                        var iditer=1; // Итератор для нового newid
-                                                    $('#addbtn').click(function() {
-                                                        $('#inputNewOption').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новую опцию" required="" autocomplete="off" /></div>')
-                                                        iditer=iditer+1;
-                                                    });
-                                                    });
-					</script>
 				</form>
 			</div>
     	</div> 
@@ -179,8 +143,52 @@
   </div>
 </div>
 
+<script>// Добавление справочника
+$(function() { 
+var iditer=1; // Итератор для нового newid
+$('#adddictline').click(function() {
+$('#dictline').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новое значение" required="" autocomplete="off" /></div>')
+iditer=iditer+1;
+});
+});
+</script>
 
 
+<script> //окно редактирования и добавления опций
+$('#addOptions').on('show.bs.modal.bs.modal', function (e) {
+$(function(){
+ $.getJSON('{{ url_for('get_list_type') }}', function(data) {
+  var i = -1;
+  $.each(data, function(id, name) { 
+   i=i+1;
+    $('#type_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+      });  
+        });
+            });
+
+$('#type_id').change(function(){                                //подгрузка опций для типа
+var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
+$( "#inputNewOption" ).empty();                                 //очищаем контейнер от предыдущих объектов
+$(function(){                                           //сама функция подгрузки опций
+$.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
+    var i = -1;
+    $.each(data, function(id, name) { 
+    i=i+1;
+    $('#inputNewOption').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="' + data[i].name + '" required=""/></div>');
+    });  
+        });
+            });
+            }); //Конец функции выбора типа
+//добавить поле ввода
+$(function() { 
+    var iditer=1; // Итератор для нового newid
+    $('#addbtn').click(function() {
+    $('#inputNewOption').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новую опцию" required="" autocomplete="off" /></div>')
+    iditer=iditer+1;
+    });
+    });
+    });
+</script>
 
  
 <br>
@@ -214,13 +222,12 @@
         
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
             <td>
-<form action="{{ url_for('import_csv', type_id=entry.id ) }}" method=post enctype=multipart/form-data>
-  <input type="file" name="file">
-  <button class="glyphicon glyphicon-upload" type="submit" value="Загрузить"> CSV</button>
-  <i><b>формат CSV</b>: Unix Format, UTF-8, разделитель ","</i>
-</form>
-            <!--<a class="glyphicon glyphicon-save" href="{{ url_for('import_csv', type_id=entry.id ) }}">Импорт данных</a>--></td>
-            <td><a class="glyphicon glyphicon-open" href="{{ url_for('index', typename=entry.name) }}?save"  target="_blank"> Экспорт данных</a></td>
+            <form action="{{ url_for('import_csv', type_id=entry.id ) }}" method=post enctype=multipart/form-data>
+              <input type="file" name="file">
+              <button class="glyphicon glyphicon-upload" type="submit" value="Загрузить"> CSV</button>
+              <i><b>формат CSV</b>: Unix Format, UTF-8, разделитель ","</i>
+            </form>
+            <td><a class="glyphicon glyphicon-open" href="{{ url_for('export_csv', typename=entry.name) }}"  target="_blank"> Экспорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_type', id=entry.id) }}"></a><span class="badge pull-right">{{ type_count[entry.id] }}</span></td></td>
         {% endif %}
 
