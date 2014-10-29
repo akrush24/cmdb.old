@@ -702,9 +702,36 @@ def import_csv(type_id):
 
 
 @app.route('/export/<int:type_id>')
-@app.route('/export/', defaults={'type_id': 0})
+@app.route('/export/', defaults={'type_id': None})
 def export_csv(type_id):
-
+    if type_id is not None:
+        res_id = engine.execute('select id from resources where type_id=%s limit 1',[type_id]).fetchall()
+        opt_id = engine.execute('select id from options where type_id=%s limit 1',[type_id]).fetchall()
+        
+        for resid in res_id:
+            for optid in opt_id:
+                engine.execute('select value from value where res_id= %s and option_id=%s limit 1',[resid, optid]).fetchall()
+                
+        '''
+        items=[]
+        if res_id is not None:
+            options=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[hash]).fetchall()
+            for option_id, option_name in options:
+                try:
+                    value=engine.execute('select value from value where res_id in (select id from resources where hash=%s) and option_id=%s', [hash, option_id] ).fetchall()[0][0]
+                except:
+                    value=""
+                    
+                items.append(dict(id=option_id, option=option_name, value=value))
+                
+            #return str(item)
+        
+            return render_template('view.html', items=items)
+            
+        else: # если ресурса не существует
+            return render_template( 'view.html')
+        '''
+        
     return redirect(url_for('index'))
 
 
