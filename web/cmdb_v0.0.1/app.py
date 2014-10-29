@@ -410,6 +410,7 @@ def index(typename, page):
     json_row2=[]
 
     if typename is not None:
+
         uuid = request.args.get('uuid')
         db = get_db()
         try:
@@ -417,8 +418,6 @@ def index(typename, page):
         except IndexError:
             typeid=None
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
-
-
 
         if uuid is not None:
             resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
@@ -705,6 +704,40 @@ def export_csv(typename):
         
     return redirect(url_for('control'))
 
+
+
+@app.route('/export_json/')
+def export_json():
+    json_row=[]
+    json_row2=[]
+
+    if request.args.get('uuid') is not None:
+
+        uuid = request.args.get('uuid')
+        db = get_db()
+
+        if uuid is not None:
+            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
+
+        for res_id, hash in resources:
+            entries=db.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
+
+            
+            for opt_id, v in entries:
+                
+                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                try:
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
+                except:
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=""))
+            
+            json_row2.append( (json_row) )
+            json_row=[]
+            
+            return simplejson.dumps(json_row2)
+    
+    else: # Если uuid задан, отдаем пустую страницу
+        return render_template( 'index.html', entries="", cols_names="", typename="", page=0, COUNT_PAGE=0)
 
 
 

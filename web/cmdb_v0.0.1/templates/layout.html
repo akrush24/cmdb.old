@@ -180,7 +180,7 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     var c_value;
 	var c_uuid;
     $(function(){
-                $.getJSON('{{ url_for('index', typename=typename) }}?json&uuid='+uuid+'', function(objj) {
+                $.getJSON('{{ url_for('export_json') }}?uuid='+uuid+'', function(objj) {
                 var obj = []; 
                 obj = objj[0]; // в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
                 for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
@@ -257,7 +257,7 @@ $( "#name" ).autocomplete({
             response($.map(data, function(item){
               return{
                 label: item.type+'| '+item.opt+' '+item.value, // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.hash  // value значение которое присвоитс¤ полю ввода из ключа EMAIL в json.
+                value: item.hash  // value значение которое присвоится полю ввода из ключа hash в json.
               }
 			  
             }));
