@@ -1,11 +1,5 @@
 ﻿$(document).ready(function(){
 
-
-
-
-
-
-
 }); //onreadypage_end
 
 

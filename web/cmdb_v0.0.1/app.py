@@ -679,9 +679,7 @@ def export_csv(typename):
         except:
             flash('Некорректный тип')
             return redirect(url_for('control'))
-            
         CSV=""
-        
         for resid in res_id:
             count=0
             for optid in opt_id:
@@ -707,6 +705,22 @@ def export_csv(typename):
         
     return redirect(url_for('control'))
 
+
+
+
+''' ##############################################'''
+################# Функция поиска ###################
+@app.route('/search', methods=['GET'])
+def search():
+    str = request.args.get('term')
+    if str != "":     
+        JSON=[]
+        for value in engine.execute( '''select types.name as type, value.value, options.name as opt, resources.hash from types, resources, value, options where value like %s and value.option_id=options.id and value.res_id=resources.id and types.id=resources.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():
+            JSON.append(dict(value))
+        return simplejson.dumps(JSON,sort_keys=True,indent=4)
+    return redirect(url_for('index'))
+    
+    
 
 ''' ############################### '''
 ###          СТАНИЦЫ ОШИБОК

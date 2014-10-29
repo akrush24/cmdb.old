@@ -58,7 +58,7 @@
             <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
             &nbsp;
             <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ session.login }}</a>
-            <a href="#" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>&nbsp;
+            <a href="#" class="btn btn-default navbar-btn" role="button" data-toggle="modal" data-target="#about"><span class="glyphicon glyphicon-question-sign"></span></a>&nbsp;
         </ul>
 		</div>
     </div>
@@ -127,6 +127,30 @@
 </div>
 </div>
      <!-- Modal edit item -->
+     
+     
+     <!-- Modal about -->
+<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="aboutlabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="aboutlabel">О системе</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+             Версия CMDB V0.0.1
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal about -->
 
 
     
@@ -216,8 +240,40 @@ $("#addticketsubmit").click(function() //подтверждение отправ
         
 </script>
 
-<script>
-
+<script> //живой поиск  http://stackoverflow.com/questions/19440428/jquery-catching-click-event-on-jquery-ui-autocomplete
+$( "#name" ).autocomplete({
+      source: function(request, response){
+        // «апрос 
+        $.ajax({
+          url: '{{ url_for('search') }}',
+          dataType: "json",
+          // параметры запроса, передаваемые на сервер (последний - подстрока дл¤ поиска):
+          data:{
+            term: request.term
+          },
+          // обработка успешного выполнени¤ запроса
+          success: function(data){
+            // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
+            response($.map(data, function(item){
+              return{
+                label: item.type+'| '+item.opt+' '+item.value, // label это надпись в списке, ей присваиваем параметр из name.
+                value: item.hash  // value значение которое присвоитс¤ полю ввода из ключа EMAIL в json.
+              }
+			  
+            }));
+          }
+          
+          
+        });
+      },
+      select: function (event, ui) {
+              var thisuuid = ui.item.value;
+              edit_item(thisuuid);        //  магия! если нажать на строку поиска откроется редактирование
+    },
+      
+      
+      minLength: 1 // минимальна¤ длина запроса для выполнени¤ поиска.
+    }); 
 </script>
 
 
