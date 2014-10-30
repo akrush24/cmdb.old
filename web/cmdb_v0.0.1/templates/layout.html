@@ -48,7 +48,7 @@
         </ul>
         <form class="navbar-form navbar-left" role="search">
             <div class="form-group">
-              <input id="name" type="text" class="form-control" placeholder="Поиск"> <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
+              <input id="name" type="search" class="form-control " placeholder="Поиск" > <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
             </div>
         <button type="submit" class="btn hide"></button>
         </form>
@@ -191,9 +191,10 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
             if  (key == "value" ) { c_value = val.toString()};  
 			if  (key == "uuid" ) { c_uuid = val.toString()};
 			});
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>');     
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>');     
     };
 	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
+    $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?hash='+uuid+'"></div>');
     });
     });
 });  

@@ -339,24 +339,24 @@ def newres():
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
 def editres(): 
-    try:
-        db = get_db()
-        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
-        res_id=addres(request.form['type_id'])
-        
-        #return str(res_id)
         for data in request.form.keys():
-            if data != "type_id":
+            if data != "uuid":
                 option_id = data[2:]
                 value=request.form[data]
-                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
+                
+                option_exist=None
+                try:
+                    option_exist=db.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s)', [option_id, request.form['uuid']]).fetchall()[0][0]
+                except:
+                    option_exist=None
 
-    except:
-        pass
-        
-    return request.form['uuid']
+                engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s)', [value, option_id, request.form['uuid']] )
 
-    #return redirect(url_for('index', typename=typename))
+                if option_exist is None:
+                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s))', [option_id, value, request.form['uuid']] )
+
+
+        return redirect(url_for('index', typename='PHONE')+'?hash='+request.form['uuid'])
 
 
 # Страница просмотра Итема
@@ -393,7 +393,6 @@ def view(hash):
 @app.route('/list/<typename>/', defaults={'page': 1})
 @app.route('/', defaults={'typename': None, 'page': 1})
 def index(typename, page):
-    
     val2=[]
     json_row=[]
     json_col=[]
@@ -475,8 +474,6 @@ def index(typename, page):
             return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
         except:
             return render_template( 'index.html', entries="", cols_names="", typename=typename, page=0, COUNT_PAGE=0)
-
-
 
 
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
