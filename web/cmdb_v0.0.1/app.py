@@ -43,8 +43,7 @@ from models import *
 #import view
  
 def cols_name(query):
-    db = get_db()
-    cursor = db.execute(query)
+    cursor = engine.execute(query)
     return list( cursor.keys())
 
 ##############################################
@@ -55,10 +54,8 @@ def cols_name(query):
 #### Обработка Типов ####
 @app.route('/new_type/', methods=['POST'])
 def new_type():
-   
-    db = get_db()
     try:
-        db.execute('''insert into types (name) values (%s)''', request.form['name'].upper())
+        engine.execute('''insert into types (name) values (%s)''', request.form['name'].upper())
     except:
         flash('Ошибка, проверьте что имена типов не совпадают')
     return redirect(url_for('control'))
@@ -66,8 +63,7 @@ def new_type():
 @app.route('/del_type/<int:id>', methods=['GET'])
 def del_type(id):
     try:
-        db = get_db()
-        db.execute('delete from types where id=%s', [id])
+        engine.execute('delete from types where id=%s', [id])
     except:
        flash('This parameter is used!') 
         
@@ -75,12 +71,9 @@ def del_type(id):
     
 @app.route('/clear_type/<int:id>')
 def clear_type(id):
-
     try:
-        db = get_db()
-        db.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
-        db.execute('delete from resources where type_id=%s', [id])
-        
+        engine.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
+        engine.execute('delete from resources where type_id=%s', [id])
         flash('Данные почищены')
     except:
        flash('This parameter is used!')
@@ -89,9 +82,7 @@ def clear_type(id):
     
 @app.route('/get_list_type/')
 def get_list_type():
-    
-    db = get_db()
-    cur = db.execute('select * from types order by id desc')
+    cur = engine.execute('select * from types order by id desc')
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
@@ -101,14 +92,12 @@ def get_list_type():
 
 @app.route('/get_user_menu/')
 def get_user_menu():
-    
-    db = get_db()
-    cur = db.execute('select id, name from types order by id desc')
+    cur = engine.execute('select id, name from types order by id desc')
     entries = cur.fetchall()
     json_row=[]
     
     for en in entries:
-        value=db.execute('select count(id) from resources where type_id=%s', [en[0]]).fetchall()[0][0]
+        value=engine.execute('select count(id) from resources where type_id=%s', [en[0]]).fetchall()[0][0]
         json_row.append(dict(en, value=value))
         
     #return en[1]
@@ -122,20 +111,18 @@ def get_user_menu():
 # 3. Очистка данных
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
-
     test=""
-    db = get_db()
     for data in request.form.keys():
         value=request.form[data]
         if data != "type_id" and data[:5] != "newid" and value != "":
             option_id = data[2:]
             
-            cur = db.execute('update options set name=%s where id=%s', value, option_id)
+            cur = engine.execute('update options set name=%s where id=%s', value, option_id)
 
             test=test+option_id+' = '+value+'; '
             
         if data[:5] == "newid" and value != "":
-            db.execute('insert into options (name, type_id) values (%s, %s)', [value, request.form['type_id']])
+            engine.execute('insert into options (name, type_id) values (%s, %s)', [value, request.form['type_id']])
             test=test+'NEWID: '+data[:5]+'='+value+'; '
 
     
@@ -144,10 +131,8 @@ def new_option():
 
 @app.route('/del_option/<int:id>')
 def del_option(id):
-
     try:
-        db = get_db()
-        db.execute('delete from options where id=%s', [id])
+        engine.execute('delete from options where id=%s', [id])
     except:
        flash('This parameter is used!', 'error') 
             
@@ -155,13 +140,8 @@ def del_option(id):
 
 @app.route('/clear_option/<int:id>')
 def clear_option(id):
-    
-    if not session.get('logged_in'):
-        abort(401)
-    
     try:
-        db = get_db()
-        db.execute('delete from value where option_id=%s', [id])
+        engine.execute('delete from value where option_id=%s', [id])
         
         flash('Данные почищены')
     except:
@@ -171,16 +151,15 @@ def clear_option(id):
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
-    
     type_id = request.args.get('type')
     opt_id = request.args.get('opt_id')
-    db = get_db()
+
     if type_id is not None:
-        cur = db.execute('select * from options where type_id = %s order by id desc', [type_id])
+        cur = engine.execute('select * from options where type_id = %s order by id desc', [type_id])
     elif opt_id is not None:
-        cur = db.execute('select * from options where id = %s order by id desc', [opt_id])
+        cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
     else:
-        cur = db.execute('select * from options order by id desc')
+        cur = engine.execute('select * from options order by id desc')
         
     entries = cur.fetchall()
     json_row=[]
@@ -194,31 +173,25 @@ def get_list_option():
 #### Обработка пользователей ####
 @app.route('/new_user/', methods=['GET', 'POST'])
 def new_user():
-
-    db = get_db()
-    db.execute('insert into users (login, full_name, email, password) values (%s, %s, %s, %s)',
+    engine.execute('insert into users (login, full_name, email, password) values (%s, %s, %s, %s)',
                 [request.form['login'], request.form['full_name'], request.form['email'], hashlib.sha512(request.form['password']).hexdigest()]  )
     
     return redirect(url_for('control'))
 
 @app.route('/del_user/<int:id>', methods=['GET'])
 def del_user(id):
-
-    db = get_db()
-    db.execute('delete from users where id=%s', [id])
+    engine.execute('delete from users where id=%s', [id])
 
     return redirect(url_for('control'))
 
 @app.route('/get_list_user/', methods=['GET'])
 def get_list_user():
-    
     username = request.args.get('email_list')
-    db = get_db()
     if username is not None:
-        cur = db.execute( 'select login, full_name from users WHERE upper(full_name) like upper(%s) order by id desc', username+'%' )
-        #cur = db.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
+        cur = engine.execute( 'select login, full_name from users WHERE upper(full_name) like upper(%s) order by id desc', username+'%' )
+        #cur = engine.execute( 'select * from users WHERE upper(full_name) like upper("%'+user+'%") or upper(login) like upper("%'+user+'%") order by id desc' )
     else:
-        cur = db.execute('select login, full_name from users order by id desc limit 10')
+        cur = engine.execute('select login, full_name from users order by id desc limit 10')
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
@@ -232,51 +205,40 @@ def get_list_user():
 #### Обработка Словарей ####
 @app.route('/new_dict/', methods=['POST'])
 def new_dict():
-    
-    if not session.get('logged_in'):
-        abort(401)
-    db = get_db()
     if request.form['name'] != "":
         try:
-            db.execute('insert into dict (name) values (%s)', request.form['name'])
+            engine.execute('insert into dict (name) values (%s)', request.form['name'])
             for data in request.form.keys():
                 value=request.form[data]
                 if data != "name" and data[:5] == "newid" and value != "":
-                    db.execute('insert into dict_val (dict_id, value) values ((select id from dict where name=%s), %s)', [request.form['name'],value])
+                    engine.execute('insert into dict_val (dict_id, value) values ((select id from dict where name=%s), %s)', [request.form['name'],value])
         except:
             flash ("Ошибка при добавлении словаря")
+
     return redirect(url_for('control'))
 
 
 @app.route('/del_dict/<int:id>')
 def del_dict(id):
-    
-    if not session.get('logged_in'):
-        abort(401)
-
-    db = get_db()
-    db.execute('delete from dict_val where id=%s', [id])
-
+    engine.execute('delete from dict_val where id=%s', [id])
     return redirect(url_for('control'))
 
 @app.route('/get_list_dict/', methods=['GET'])
 def get_list_dict():
-    
     dict_id = request.args.get('dict_id')
-    db = get_db()
-    
-    
+
     if dict_id is not None:
-        cur = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where  dict.id=dict_val.dict_id and dict.id=%s', dict_id)
+        entries = engine.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where  dict.id=dict_val.dict_id and dict.id=%s', dict_id).fetchall()
     else:
-        cur = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id')
-    
-    entries = cur.fetchall()
+        entries = engine.execute('select id, name from dict').fetchall()
+
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
     
     return simplejson.dumps(json_row,sort_keys=True, indent=4)
+
+
 
 
 #......................................................#
@@ -285,12 +247,8 @@ def get_list_dict():
 # Удаление..............................................
 @app.route('/del/<typename>/<hash>')
 def del_res(hash, typename):
-
-    db = get_db()
-    
-    db.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s)', [hash])
-    db.execute('delete from resources where hash=%s', [hash])
-    
+    engine.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s)', [hash])
+    engine.execute('delete from resources where hash=%s', [hash])
     return redirect(url_for('index', typename=typename))
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -300,9 +258,8 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 # Создание..............................................
 def addres(type_id): # добавляем новый элемент в таблицу Resources
     UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    db = get_db()
         
-    ALL_HASH=db.execute('select hash from resources').fetchall()
+    ALL_HASH=engine.execute('select hash from resources').fetchall()
     hashs=[]
         
     for h in ALL_HASH:
@@ -313,15 +270,14 @@ def addres(type_id): # добавляем новый элемент в табл�
     else:
         UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
         
-    db.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
-    res_id=db.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
+    engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
+    res_id=engine.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
     return res_id
 
 @app.route('/newres', methods=['POST'])
 def newres():
     try:
-        db = get_db()
-        typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
+        typename = engine.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
         res_id=addres(request.form['type_id'])
         
         #return str(res_id)
@@ -329,12 +285,13 @@ def newres():
             if data != "type_id":
                 option_id = data[2:]
                 value=request.form[data]
-                cur = db.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
+                cur = engine.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
 
     except:
         flash('Unexpected ERROR')
 
     return redirect(url_for('index', typename=typename))
+
 
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
@@ -346,47 +303,14 @@ def editres():
                 
                 option_exist=None
                 try:
-                    option_exist=db.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s)', [option_id, request.form['uuid']]).fetchall()[0][0]
-                except:
-                    option_exist=None
-
-                engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s)', [value, option_id, request.form['uuid']] )
-
-                if option_exist is None:
+                    option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s)', [option_id, request.form['uuid']]).fetchall()[0][0]
+                    engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s)', [value, option_id, request.form['uuid']] )
+                except IndexError:
                     engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s))', [option_id, value, request.form['uuid']] )
-
 
         return redirect(url_for('index', typename='PHONE')+'?hash='+request.form['uuid'])
 
 
-# Страница просмотра Итема
-@app.route('/hash/<hash>/')
-@app.route('/item/<hash>/')
-def view(hash):
-    
-    if hash != "":
-        res_id, type_id, type_name = engine.execute('select resources.id, types.id, types.name from resources, types where hash=%s limit 1',[hash]).fetchall()[0]
-        try:
-            (res_id, type_id, type_name)=engine.execute('select resources.id, types.id, types.name from resources, types where hash=%s',[hash]).fetchall()[0][0]
-            return type_name
-        except:
-            res_id=None
-        
-        items=[]
-        if res_id is not None:
-            options=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[hash]).fetchall()
-            for option_id, option_name in options:
-                try:
-                    value=engine.execute('select value from value where res_id in (select id from resources where hash=%s) and option_id=%s', [hash, option_id] ).fetchall()[0][0]
-                except:
-                    value=""
-                items.append(dict(id=option_id, option=option_name, value=value))
-            return render_template('view.html', items=items)
-            
-        else: # если ресурса не существует
-            return render_template( 'view.html')
-
- 
 # ..........................................................................
 ##### Главная страница .................................................####
 @app.route('/list/<typename>/<int:page>/')
@@ -399,24 +323,22 @@ def index(typename, page):
     json_row2=[]
 
     if typename is not None:
-
         uuid = request.args.get('uuid')
-        db = get_db()
         try:
-            typeid=db.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
+            typeid=engine.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
         except IndexError:
             typeid=None
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
         if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
-            count=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+            resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
+            count=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         elif request.args.get('save') is not None:
-            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
-            count=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+            resources=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
+            count=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         else:
             ROW_IN_PAGE=50 # Число строк на одну таблицу
-            COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+            COUNT_RES=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
             
             if COUNT_RES != 0:
                 COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5, 0)
@@ -424,15 +346,14 @@ def index(typename, page):
                 COUNT_PAGE=0
             COUNT_PAGE=int(COUNT_PAGE)
                 
-            resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
+            resources=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
             [typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
-            
 
             count=COUNT_RES-(page-1)*ROW_IN_PAGE
         
         for res_id, hash in resources:
-            #creator=db.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
-            entries=db.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
+            #creator=engine.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
+            entries=engine.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
             key=['#', 'UUID']
             key_id=['UUID']
             val=[count, hash]
@@ -448,7 +369,7 @@ def index(typename, page):
                     key.append("")
                     key_id.append("")
                 
-                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
                     val.append(entries[0][0])
                     json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
@@ -487,18 +408,17 @@ def loginLDAP(email, password):
         return False
     return True
 
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+### - - - - - Страничка логина - - - - - ###
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
 
-    if request.method == 'POST':
-        db = get_db()
-        
+    if request.method == 'POST':     
         reqlogin = request.form['login']
         reqpass = request.form['password']
-        
-        entries = db.execute('select login, password from users where login=%s limit 1', [reqlogin] ).fetchall()
-
+        entries = engine.execute('select login, password from users where login=%s limit 1', [reqlogin] ).fetchall()
         for login, user_password in entries:
             if hashlib.sha512(reqpass).hexdigest() == user_password:
                 session['logged_in'] = True
@@ -516,10 +436,8 @@ def login():
             if loginLDAP(reqlogin, reqpass):
                 session['logged_in'] = True
                 reqlogin=reqlogin.lower().replace('@at-consulting.ru','').replace('at-consulting\\','')
-
                 session['login']=reqlogin
                 flash('You were logged in')
-                #return reqlogin
                 return redirect(url_for('index'))
             else:
                 error = "Invalid User or Password"
@@ -531,7 +449,6 @@ def login():
 def logout():
     session.pop('logged_in', None)
     session.pop('login', None)
-    #flash('You were logged out')
     return redirect(url_for('login'))
 
 
@@ -543,21 +460,18 @@ def before_request():
         g.user=None
         flash("Need authorized")
         return render_template('login.html', error="Need authorized")
-        
     else:
         g.user = session.get('login')
-        
-        db = get_db()
         try:
-            user_exist=db.execute('SELECT login FROM users WHERE login=%s', [session['login']]).fetchall()[0][0]
+            user_exist=engine.execute('SELECT login FROM users WHERE login=%s', [session['login']]).fetchall()[0][0]
         except:
             user_exist=None
             
         if user_exist is not None:
-            db.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
+            engine.execute('update users set last_activity=%s WHERE login=%s', [datetime.datetime.now(), session['login']])
         else:
             try:
-                db.execute('insert into users set login=%s', [session['login']])
+                engine.execute('insert into users set login=%s', [session['login']])
             except:
                 pass
 
@@ -570,36 +484,29 @@ def before_request():
 @app.route('/control/', defaults={'action': "0"})
 @app.route('/control/<action>')
 def control(action):
-   
-    db = get_db()
-
-    type_cols = db.execute('select * from types order by id desc').fetchall()
-
-    query = 'select * from options'
-    option_cols = db.execute(query).fetchall()
-
-    user_cols = db.execute('select id, login, full_name, email from users order by id desc').fetchall()
+    type_cols = engine.execute('select * from types order by id desc').fetchall()
+    option_cols = engine.execute('select * from options').fetchall()
+    user_cols = engine.execute('select id, login, full_name, email from users order by id desc').fetchall()
 
     type_count={}
-    count = db.execute('select id from types').fetchall()
+    count = engine.execute('select id from types').fetchall()
     for val in count:
-        type_count[val[0]]=( db.execute('select count(id) from resources where type_id=%s', val).fetchall()[0][0] )
+        type_count[val[0]]=( engine.execute('select count(id) from resources where type_id=%s', val).fetchall()[0][0] )
         
     opt_count={}
-    count = db.execute('select id from options').fetchall()
+    count = engine.execute('select id from options').fetchall()
     for val in count:
-        opt_count[val[0]]=( db.execute('select count(id) from value where option_id=%s', val).fetchall()[0][0] )
+        opt_count[val[0]]=( engine.execute('select count(id) from value where option_id=%s', val).fetchall()[0][0] )
     
     return render_template('control.html', 
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
-        option_cols=option_cols, option_cols_names = cols_name(query),
+        option_cols=option_cols, option_cols_names = cols_name('select * from options'),
         user_cols = user_cols, user_cols_names=cols_name('select id, login, full_name, email from users order by id desc'),
-        dict_cols = db.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id order by dict.id').fetchall(), dict_cols_names=cols_name('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id'),
+        dict_cols = engine.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id order by dict.id').fetchall(), dict_cols_names=cols_name('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id'),
         opt_count=opt_count, type_count=type_count
     )
 
- 
-app.config['UPLOAD_FOLDER'] = '/tmp/'
+
 
 
 ''' ############################### '''
@@ -608,26 +515,16 @@ app.config['UPLOAD_FOLDER'] = '/tmp/'
 @app.route('/import/<int:type_id>', methods=['GET', 'POST'])
 @app.route('/import/', defaults={'type_id': 0}, methods=['GET', 'POST'])
 def import_csv(type_id):
-    
-    db = get_db()
-    
-    opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-    opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
-
-    query=""
+    opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+    opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
     count=0
-    
-    #f = request.files['file']
-    #f.save('/tmp/' + secure_filename(f.filename))
-
     if request.method == 'POST':
         file = request.files['file']
         if file:
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-    #try:
-        csv_file=app.config['UPLOAD_FOLDER']+filename
+    csv_file=app.config['UPLOAD_FOLDER']+filename
+    try:
         with open(csv_file, 'r') as f:
             reader = csv.reader(f, delimiter=b',',quotechar=b'"')
             for row in reader:
@@ -635,30 +532,29 @@ def import_csv(type_id):
                 opt_id_seq=0
                 for val in row:
                     if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                        db.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
-                        opt_id=db.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-                        opt_id_count=db.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
-
-                    query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
-                    db.execute( query )
-                
+                        engine.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
+                        opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+                        opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+                    
+                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, "%s", %s)', [opt_id[opt_id_seq][0], val, res_id] )
                     opt_id_seq=opt_id_seq+1
                 count=count+1
-        f.close()
+        f.close() 
+    except:
+        flash('Ошибка в процессе парсинга файла')
         
-    #except:
-        #flash('Ошибка в процессе парсинга файла')
-
     flash('Число импортированных записей: '+str(count))
-    
     return redirect(url_for('control'))
 
-
+    
+    
+''' ############################### '''
+###          EXPORT
+''' ############################### '''
 @app.route('/export/<typename>')
 @app.route('/export/', defaults={'typename': None})
 def export_csv(typename):
     if typename is not None:
-        
         try:
             res_id = engine.execute('select id from resources where type_id in (select id from types where name=%s)',[typename]).fetchall()
             opt_id = engine.execute('select id from options where type_id in (select id from types where name=%s)',[typename]).fetchall()
@@ -692,7 +588,9 @@ def export_csv(typename):
     return redirect(url_for('control'))
 
 
-
+''' ############################### '''
+###          EXPORT JSON
+''' ############################### '''
 @app.route('/export_json/')
 def export_json():
     json_row=[]
@@ -701,18 +599,16 @@ def export_json():
     if request.args.get('uuid') is not None:
 
         uuid = request.args.get('uuid')
-        db = get_db()
 
         if uuid is not None:
-            resources=db.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
+            resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
 
         for res_id, hash in resources:
-            entries=db.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
+            entries=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
 
-            
             for opt_id, v in entries:
                 
-                entries=db.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
                     json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
                 except:
@@ -754,16 +650,8 @@ def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
 
-
-#############################################################
-# DB 
-#
-def get_db():
-    #
-    #if not hasattr(g, app.config['DATABASE']):
-    #    g.sqlite_db = connect_db()
-    return engine
-
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+### Отрабатывает после окончания каждого запроса ###
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
