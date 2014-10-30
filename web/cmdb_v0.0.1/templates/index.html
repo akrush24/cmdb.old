@@ -20,7 +20,7 @@
   {% set space=0 %}
   {% for P in range(COUNT_PAGE) %}
 
-  {% if (P >= page-5 and P<page) or P==0 or page==P+1 %}
+  {% if (P >= page-5 and P<=page) or P==0 %}
       {% if space > 1 %} <li><a href="#">...</a></li> {% set space=0 %} {% endif %}
       {% if P+1==page %}<li class="active">{% else %}<li>{% endif %}
       <a href="{{ url_for('index', typename=typename, page=P+1) }}">{{ P+1 }}<span class="sr-only"></span></a></li>
@@ -55,10 +55,9 @@
 {% for entrie in entries %}
 <tr>
     {% for cell in entrie %}
-    <td nowrap="nowrap"><a href="{{ url_for('view', hash=entrie[1]) }}">{{ cell }}</a></td>
+    <td nowrap="nowrap"><a id="{{ entrie[1] }}" onClick="edit_item(this.id)" href="#">{{ cell }}</a></td>
     {% endfor %}
     <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[1] }}"></a></td>
-    <td><a id="{{ entrie[1] }}" class="glyphicon glyphicon-wrench" onClick="edit_item(this.id)" href="#"></a></td>
 </tr>
 {% endfor %}
 

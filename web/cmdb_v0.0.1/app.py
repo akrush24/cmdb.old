@@ -300,10 +300,6 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 # Создание..............................................
 def addres(type_id): # добавляем новый элемент в таблицу Resources
     UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    # 4 - 1 679 616
-    # 5 - 60 466 176
-    # 6 - 2 176 782 336
-    
     db = get_db()
         
     ALL_HASH=db.execute('select hash from resources').fetchall()
@@ -323,7 +319,6 @@ def addres(type_id): # добавляем новый элемент в табл�
 
 @app.route('/newres', methods=['POST'])
 def newres():
-    
     try:
         db = get_db()
         typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
@@ -343,8 +338,7 @@ def newres():
 
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
-def editres():
-    
+def editres(): 
     try:
         db = get_db()
         typename = db.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
@@ -386,11 +380,7 @@ def view(hash):
                     value=engine.execute('select value from value where res_id in (select id from resources where hash=%s) and option_id=%s', [hash, option_id] ).fetchall()[0][0]
                 except:
                     value=""
-                    
                 items.append(dict(id=option_id, option=option_name, value=value))
-                
-            #return str(item)
-        
             return render_template('view.html', items=items)
             
         else: # если ресурса не существует
@@ -426,7 +416,7 @@ def index(typename, page):
             resources=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
             count=db.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         else:
-            ROW_IN_PAGE=30 # Число строк на одну таблицу
+            ROW_IN_PAGE=50 # Число строк на одну таблицу
             COUNT_RES=db.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
             
             if COUNT_RES != 0:

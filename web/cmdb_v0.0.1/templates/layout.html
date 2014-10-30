@@ -36,13 +36,13 @@
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
         <ul class="nav navbar-nav navbar-left">
             <li class="navbar-brand" >CMDB</li>
-        <li class="dropdown">
+        <li class="dropdown" style="width:300px;" >
           {% if typename %}
             <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b >Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right"></span></a>
           {% else %}
             <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b>Мои ресурсы</b><span class="caret"></span>&nbsp;<span class="badge pull-right"></span></a>
           {% endif %}
-          <ul class="dropdown-menu" id ="dropMenu" role="menu" >
+          <ul class="dropdown-menu" id ="dropMenu" role="menu">
           </ul>
         </li>
         </ul>
@@ -139,8 +139,9 @@
       </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
-      	 	<div class="col-lg-6" >
-             Версия CMDB V0.0.1
+      	 	<div class="col-lg-8" >
+             <b>Configuration management database</b><br>
+             Версия: <b>v 0.0.1</b>
 			</div>
     	</div> 
       </div>
@@ -160,14 +161,14 @@
 								  var i = -1;
 									$.each(menulist, function(keylist, vallist) { 
 									   i=i+1;
-										$('#dropMenu').prepend('<li><a href="{{ url_for('index') }}list/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li></option>');
+										$('#dropMenu').prepend('<li><a href="{{ url_for('index') }}list/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li>');
 										});  
                                             });
                                         });
 </script>
 
 
-<script> // редактирвоание итема
+<script> // редактирвоание итема edit_item(hashofitem);
 $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     
     $('#editItem').on('hidden.bs.modal', function (e) {
