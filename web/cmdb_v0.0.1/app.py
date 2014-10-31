@@ -307,8 +307,11 @@ def editres():
                     engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s)', [value, option_id, request.form['uuid']] )
                 except IndexError:
                     engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s))', [option_id, value, request.form['uuid']] )
-
-        return redirect(url_for('index', typename='PHONE')+'?hash='+request.form['uuid'])
+        try:
+            typename=engine.execute('select types.name from types, resources where resources.type_id=types.id and resources.hash=%s', [request.form['uuid']]).fetchall()[0][0]
+        except:
+            typename=""
+        return redirect(url_for('index', typename=typename)+'?hash='+request.form['uuid'])
 
 
 # ..........................................................................
@@ -524,24 +527,29 @@ def import_csv(type_id):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     csv_file=app.config['UPLOAD_FOLDER']+filename
-    try:
-        with open(csv_file, 'r') as f:
-            reader = csv.reader(f, delimiter=b',',quotechar=b'"')
-            for row in reader:
-                res_id=addres(type_id)
-                opt_id_seq=0
-                for val in row:
-                    if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                        engine.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
-                        opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-                        opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
-                    
-                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, "%s", %s)', [opt_id[opt_id_seq][0], val, res_id] )
-                    opt_id_seq=opt_id_seq+1
-                count=count+1
+    query=""
+    #try:
+    with open(csv_file, 'r') as f:
+        #reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+        reader = csv.reader(f, delimiter=b';')
+        for row in reader:
+            res_id=addres(type_id)
+            opt_id_seq=0
+            for val in row:
+                if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
+                    engine.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
+                    opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
+                    opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+
+                #query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                #engine.execute( query )
+                engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, %s)', opt_id[opt_id_seq][0], val, res_id )
+                query='insert into value (option_id, value, res_id) values (%s, %s, %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                opt_id_seq=opt_id_seq+1
+            count=count+1
         f.close() 
-    except:
-        flash('Ошибка в процессе парсинга файла')
+    #except:
+    #    flash('Ошибка в процессе парсинга файла: '+query)
         
     flash('Число импортированных записей: '+str(count))
     return redirect(url_for('control'))
@@ -635,8 +643,8 @@ def search():
             JSON.append(dict(value))
         return simplejson.dumps(JSON,sort_keys=True,indent=4)
     return redirect(url_for('index'))
-    
-    
+
+
 
 ''' ############################### '''
 ###          СТАНИЦЫ ОШИБОК
