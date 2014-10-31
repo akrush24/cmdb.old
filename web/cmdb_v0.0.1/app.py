@@ -545,14 +545,13 @@ def import_csv(type_id):
     query=""
     #try:
     with open(csv_file, 'r') as f:
-        #reader = csv.reader(f, delimiter=b',',quotechar=b'"')
-        reader = csv.reader(f, delimiter=b';')
+        reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+        #reader = csv.reader(f, delimiter=b';')
         for row in reader:
             res_id=addres(type_id)
             opt_id_seq=0
             for val in row:
                 if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                    
                     # Добавляем новую опцию с временным именем
                     new_oprion_name='IMPORT_TMP#'+str(opt_id_seq)
                     new_option=Options(name=new_oprion_name, type_id=type_id)
@@ -581,7 +580,11 @@ def import_csv(type_id):
 def export_csv(typename):
     if typename is not None:
         try:
-            res_id = engine.execute('select id from resources where type_id in (select id from types where name=%s)',[typename]).fetchall()
+            #res_id = engine.execute('select id from resources where type_id in (select id from types where name=%s)',[typename]).fetchall()
+            res_id = db_session.query(Resources).filter(Resources.type_id==db_session.query(Types.id).filter(Types.name==typename))
+            
+            #opt_id = db_session.query(Options).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename))
+            #opt_id_count = db_session.query(Options).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename)).count()
             opt_id = engine.execute('select id from options where type_id in (select id from types where name=%s)',[typename]).fetchall()
         except:
             flash('Некорректный тип')
@@ -595,6 +598,7 @@ def export_csv(typename):
                     CSV=CSV+'"'+engine.execute('select value from value where res_id= %s and option_id=%s',[resid[0], optid[0]]).fetchall()[0][0]+'"'
                 except:
                     CSV=CSV+'""'
+                #if count < opt_id_count:
                 if count < len(opt_id):
                     CSV=CSV+','
             CSV=CSV+'<br>'
