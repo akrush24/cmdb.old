@@ -30,6 +30,13 @@ if (byuuid !== undefined ) {edit_item(byuuid);}
                 uuid = clicked_id;
                 $('#editItem').modal("show"); //Показать модальное окно для редактирвоания итема
             };
+            
+            var c_id;
+            function edit_option_view(idid)
+            { c_id = idid;
+             $('#editoptionss').modal("show");
+            };
+
 
 
 

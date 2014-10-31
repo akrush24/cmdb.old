@@ -67,12 +67,12 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
             if  (key == "dict_id" ) { c_dict_id = val}; //id справочника
 			});
     $("#selecttypediv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required=""></div><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="'+c_description+'" name="'+c_description+'" value="'+c_description+'" required=""></div>');
-    $("#selecttypediv").append('<select class="form-control" id="changeOptType" name="opttype"><option disabled>Cправочник</option><option value="dict">Dict</option><option value="date">Date</option><option value="input">Input</option></select>');
+    $("#selecttypediv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Вид поля</div><select class="form-control" id="changeOptType" name="opttype"><option disabled>Cправочник</option><option value="dict">Dict</option><option value="date">Date</option><option value="input">Input</option></select></div></div>');
     $("#changeOptType").val(c_opttype);
     
     
         if (c_opttype == "dict") {
-        $("#editoptionstype").append('<select class="form-control" id="dict_list_id" name="dict_id"><option disabled>справочник</option></select>');
+        $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>');
         $(function(){
             $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
             var i = -1;
@@ -94,7 +94,7 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
         var sellectedtype = $('#changeOptType option:selected').val();  // если изменили вид опции то ...
         
             if (sellectedtype == "dict") {
-            $("#editoptionstype").append('<select class="form-control" id="dict_list_id" name="dict_id"><option disabled>справочник</option></select>');
+            $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>');
             $(function(){
                 $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
                 var i = -1;

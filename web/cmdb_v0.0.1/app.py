@@ -103,12 +103,12 @@ def get_user_menu():
     #return en[1]
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
+    
+    
+    
+    
 #......................................................#
 #### Обработка свойств\опций ####
-
-# 1. Добавление
-# 2. Редактирование
-# 3. Очистка данных
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
     test=""
@@ -116,18 +116,14 @@ def new_option():
         value=request.form[data]
         if data != "type_id" and data[:5] != "newid" and value != "":
             option_id = data[2:]
-            
             cur = engine.execute('update options set name=%s where id=%s', value, option_id)
-
             test=test+option_id+' = '+value+'; '
             
         if data[:5] == "newid" and value != "":
             engine.execute('insert into options (name, type_id) values (%s, %s)', [value, request.form['type_id']])
             test=test+'NEWID: '+data[:5]+'='+value+'; '
-
-    
-    #return test
     return redirect(url_for('control'))
+
 
 @app.route('/del_option/<int:id>')
 def del_option(id):
@@ -137,6 +133,21 @@ def del_option(id):
        flash('This parameter is used!', 'error') 
             
     return redirect(url_for('control'))
+
+@app.route('/edit_option/', methods=['GET', 'POST'])
+def edit_option():
+    opt = db_session.query(Options).filter(Options.id==request.form['id']).one()
+    opt.name=request.form['name']
+    opt.description=request.form['description']
+    try:
+        opt.dict_id=request.form['dict_id']
+    except:
+        pass
+    opt.opttype=request.form['opttype']
+    db_session.flush()
+
+    return redirect(url_for('control'))
+
 
 @app.route('/clear_option/<int:id>')
 def clear_option(id):
@@ -148,6 +159,7 @@ def clear_option(id):
        flash('This parameter is used!')
         
     return redirect(url_for('control'))
+
 
 @app.route('/get_list_option/', methods=['GET'])
 def get_list_option():
@@ -168,7 +180,10 @@ def get_list_option():
     
     return simplejson.dumps(json_row)
 
-
+    
+    
+    
+    
 #......................................................#
 #### Обработка пользователей ####
 @app.route('/new_user/', methods=['GET', 'POST'])
@@ -518,8 +533,8 @@ def control(action):
 @app.route('/import/<int:type_id>', methods=['GET', 'POST'])
 @app.route('/import/', defaults={'type_id': 0}, methods=['GET', 'POST'])
 def import_csv(type_id):
-    opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-    opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+    opt_id = db_session.query(Options.id).filter(Options.type_id==type_id)
+    opt_id_count = db_session.query(Options).filter(Options.type_id==type_id).count()
     count=0
     if request.method == 'POST':
         file = request.files['file']
@@ -537,15 +552,17 @@ def import_csv(type_id):
             opt_id_seq=0
             for val in row:
                 if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                    engine.execute('insert into options set name=%s, type_id=%s', ['IMPORT_TEMP_'+str(opt_id_seq), type_id] )
-                    opt_id=engine.execute('select id from options where type_id=%s order by id', [type_id]).fetchall()
-                    opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
+                    
+                    # Добавляем новую опцию с временным именем
+                    new_oprion_name='IMPORT_TMP#'+str(opt_id_seq)
+                    new_option=Options(name=new_oprion_name, type_id=type_id)
+                    db_session.add( new_option )
+                    db_session.commit()
+                    
+                    opt_id = db_session.query(Options.id).filter(Options.type_id==type_id)
+                    opt_id_count = db_session.query(Options).filter(Options.type_id==type_id).count()
 
-                #query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
-                #engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, %s)', opt_id[opt_id_seq][0], val, res_id )
-                query='insert into value (option_id, value, res_id) values (%s, %s, %s)' % (opt_id[opt_id_seq][0], val, res_id)
                 db_session.add( Value(option_id=opt_id[opt_id_seq][0], value=val, res_id=res_id) )
-                
                 opt_id_seq=opt_id_seq+1
             count=count+1
         f.close() 
@@ -605,22 +622,20 @@ def export_json():
     json_row2=[]
 
     if request.args.get('uuid') is not None:
-
         uuid = request.args.get('uuid')
-
         if uuid is not None:
             resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
 
         for res_id, hash in resources:
-            entries=engine.execute('select id, name from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
+            entries=engine.execute('select id, name, opttype from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
 
-            for opt_id, v in entries:
+            for opt_id, v, opttype in entries:
                 
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=""))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, value=""))
             
             json_row2.append( (json_row) )
             json_row=[]

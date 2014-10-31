@@ -260,8 +260,10 @@ $(function() {
         {% endfor %}
         
         {% if session.logged_in %}
-        
+            
+            
             <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
+            <td><a class="glyphicon glyphicon-wrench" onClick="edit_option_view({{ entry.id }})" href="#"></a></td></td>
             <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
         {% endif %}
 
