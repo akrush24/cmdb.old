@@ -12,18 +12,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Редактирование опции</h4>
+        <h4 class="modal-title" id="myModalLabel">Редактирование свойств опций</h4>
       </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-            
-            
-				<form id="editoptionsForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
-                    <div id="editoptionslist"> <!-- Рисуем динамические поля -->
+				<form id="editoptionsForm" class="form-horizontal span8" action="{{ url_for('new_option') }}" method="post"> <!-- editres -->
+                    <div id="selecttypediv"></div> <!-- Рисуем динамические поля -->
+                    <div id="editoptionstype"></div>
 				</form>
-                
-                
 			</div>
     	</div> 
       </div>
@@ -40,7 +37,7 @@
 <script>
 $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
   $('#editoptionss').on('hidden.bs.modal', function (e) {
-  $( "#editoptionslist" ).empty(); <!-- очищаем DOM дерево предыдущих полей ввода -->
+  $( "#selecttypediv" ).empty(); <!-- очищаем DOM дерево предыдущих полей ввода -->
   
 })
 
@@ -52,42 +49,91 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
     var c_front_page;
     var c_required;
     var c_dict_id;
-	var c_id = 8;
+	var c_id = 7; //id опции
     var select_visible;
     var select_frontpage; <!-- Временные переменные -->
+    
+
     $(function(){
                 $.getJSON('{{ url_for('get_list_option') }}?&opt_id='+c_id+'', function(obji) {
                 for ( var i in obji) { jQuery.each(obji[i], function(key, val) {
-            if  (key == "name" ) { c_name = val };
-            if  (key == "type_id" ) { c_type_id = val };
-            if  (key == "description" ) { c_description = val};
-            if  (key == "opttype" ) { c_opttype = val}; 
-            if  (key == "user_visible" ) { c_user_visible = val};
-            if  (key == "front_page" ) { c_front_page = val};  
-			if  (key == "required" ) { c_required = val};
-            if  (key == "dict_id" ) { c_dict_id = val};
+            if  (key == "name" ) { c_name = val }; // имя
+            if  (key == "type_id" ) { c_type_id = val }; // id типа
+            if  (key == "description" ) { c_description = val}; // описание опции
+            if  (key == "opttype" ) { c_opttype = "dict"};  // Вид опции. dict, date, inputtext
+            if  (key == "user_visible" ) { c_user_visible = val}; //видно пользователю?
+            if  (key == "front_page" ) { c_front_page = val}; // показывать на главной? 
+			if  (key == "required" ) { c_required = val}; // обязательное поле?
+            if  (key == "dict_id" ) { c_dict_id = val}; //id справочника
 			});
-    $("#editoptionslist").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required=""></div><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="'+c_description+'" name="'+c_description+'" value="" required=""></div>');
+    $("#selecttypediv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required=""></div><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="'+c_description+'" name="'+c_description+'" value="'+c_description+'" required=""></div>');
+    $("#selecttypediv").append('<select class="form-control" id="changeOptType" name="opttype"><option disabled>Cправочник</option><option value="dict">Dict</option><option value="date">Date</option><option value="input">Input</option></select>');
+    $("#changeOptType").val(c_opttype);
+    
     
         if (c_opttype == "dict") {
-    $("#editoptionslist").append('<select class="form-control" id="dict_list_id" name="dict_list"><option disabled>справочник</option></select>');
-    $(function(){
-								$.getJSON('{{ url_for('get_list_dict') }}', function(data) {
-								  var i = -1;
-									$.each(data, function(id, name) { 
-									   i=i+1;
-										$('#dict_list_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-										});  
-                                            });
-                                            $("#dict_list_id").val(c_dict_id);
-                                        });
+        $("#editoptionstype").append('<select class="form-control" id="dict_list_id" name="dict_id"><option disabled>справочник</option></select>');
+        $(function(){
+            $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
+            var i = -1;
+            $.each(data, function(id, name) { 
+                i=i+1;
+                $('#dict_list_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                });  
+                });
+                $("#dict_list_id").val(c_dict_id);
+                });
+       };
+        
+        if (c_opttype == "date") { 
+        $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Дата</div><input type="date" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required="">');
         };
+        
+        $('#changeOptType').change(function(){  //выбор вида опции
+        $( "#editoptionstype" ).empty(); //чистим контейнер
+        var sellectedtype = $('#changeOptType option:selected').val();  // если изменили вид опции то ...
+        
+            if (sellectedtype == "dict") {
+            $("#editoptionstype").append('<select class="form-control" id="dict_list_id" name="dict_id"><option disabled>справочник</option></select>');
+            $(function(){
+                $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
+                var i = -1;
+                $.each(data, function(id, name) { 
+                    i=i+1;
+                    $('#dict_list_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                    });  
+                    });
+                    $("#dict_list_id").val(c_dict_id);
+                    });
+                    };
+            if (sellectedtype == "date") { 
+            $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Дата</div><input type="date" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required="">');
+            };
+            
+            if (sellectedtype == "input") { 
+            $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Дата</div><input type="date" class="form-control" id="'+c_type_id+'" name="'+c_name+'"  placeholder="'+c_name+'" value="'+c_name+'" required="">');
+            };
+        
+        });
+    
+    
     
     };
-	$("#editoptionslist").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
+	$("#editoptionstype").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
     });
     });
-});                
+    
+    
+    
+    
+    
+    
+    
+}); 
+
+
+
+               
 </script>
 
 

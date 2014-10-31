@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 import os, sys, ldap, datetime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, update, delete,   text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import select
+from sqlalchemy.sql import select, and_, or_, not_
 import simplejson
 import re
 import string, random
@@ -257,7 +257,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 # Создание..............................................
 def addres(type_id): # добавляем новый элемент в таблицу Resources
-    UUID = id_generator(4,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    UUID = id_generator(10,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
         
     ALL_HASH=engine.execute('select hash from resources').fetchall()
     hashs=[]
@@ -542,9 +542,10 @@ def import_csv(type_id):
                     opt_id_count=engine.execute('select count(id) from options where type_id=%s', [type_id]).fetchall()[0][0]
 
                 #query='insert into value (option_id, value, res_id) values (%s, "%s", %s)' % (opt_id[opt_id_seq][0], val, res_id)
-                #engine.execute( query )
-                engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, %s)', opt_id[opt_id_seq][0], val, res_id )
+                #engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, %s)', opt_id[opt_id_seq][0], val, res_id )
                 query='insert into value (option_id, value, res_id) values (%s, %s, %s)' % (opt_id[opt_id_seq][0], val, res_id)
+                db_session.add( Value(option_id=opt_id[opt_id_seq][0], value=val, res_id=res_id) )
+                
                 opt_id_seq=opt_id_seq+1
             count=count+1
         f.close() 
@@ -554,8 +555,7 @@ def import_csv(type_id):
     flash('Число импортированных записей: '+str(count))
     return redirect(url_for('control'))
 
-    
-    
+
 ''' ############################### '''
 ###          EXPORT
 ''' ############################### '''
@@ -662,12 +662,31 @@ def internal_error(error):
 ### Отрабатывает после окончания каждого запроса ###
 @app.teardown_appcontext
 def shutdown_session(exception=None):
+    db_session.commit()
     db_session.remove()
 
 
+#######################################################
+''' FOR TESTING '''
+#######################################################
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     return render_template('test.html')
+
+@app.route('/s/')
+def s():
+    # SELECT
+    '''
+    s = select( [Users], and_(Users.login.like('a%'), Users.id<999) ).order_by(Users.id.desc())
+    result = engine.execute(s)
+    return str(result.fetchall())
+    '''
+    
+    #INSERT
+    db_session.add(Users(login='test299'))
+    return "OK"
+    
+    
     
     
 

@@ -227,9 +227,10 @@ $(function(){
                                             $(function(){                                           //сама функция подгрузки опций
                                                 $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
                                                     var i = -1;
-                                                $.each(data, function(id, name) { 
+                                                $.each(data, function(id, name) {  // отрисовка полей вввода
                                                     i=i+1;
                                                         $('#inputs').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'" required=""/></div>');
+                                                        
 
                                                           });  
                                                         });
