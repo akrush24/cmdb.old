@@ -213,8 +213,9 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
                 var i = -1;
                 $.each(dict_data, function(val_id, value) { 
                     i=i+1;
-					
-                    $("#id855").append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
+					alert(c_opt_id);
+                    $('#id'+(c_opt_id-1)+'').append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
+					//приходится отнимать от optid- 1, не ясно почему.
 					//$('#id'+c_opt_id+'')
                     });  
                     });
