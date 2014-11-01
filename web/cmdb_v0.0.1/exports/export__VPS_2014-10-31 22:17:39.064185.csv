@@ -1,0 +1,28 @@
+"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1
+"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1
+"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1
+"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1,"SELECT value.value AS value_value 
+FROM value 
+WHERE value.res_id = :res_id_1 AND value.option_id = :option_id_1

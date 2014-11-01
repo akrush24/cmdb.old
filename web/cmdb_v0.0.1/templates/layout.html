@@ -182,26 +182,51 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     var c_name;
     var c_value;
 	var c_uuid;
+	var c_dict_id;
     $(function(){
                 $.getJSON('{{ url_for('export_json') }}?uuid='+uuid+'', function(objj) {
                 var obj = []; 
                 obj = objj[0]; // в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
                 for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
-            if  (key == "opt_id" ) { c_opt_id = val.toString(); };
-            if  (key == "opttype" ) { c_oopttype = val};
-            if  (key == "name" ) { c_name = val.toString()};
-            if  (key == "value" ) { c_value = val.toString()};  
-			if  (key == "uuid" ) { c_uuid = val.toString()};
+            if  (key == "opt_id" ) { c_opt_id = val };
+            if  (key == "opttype" ) { c_opttype = val};
+            if  (key == "name" ) { c_name = val};
+            if  (key == "value" ) { c_value = val};  
+			if  (key == "uuid" ) { c_uuid = val};
+			if  (key == "dict_id" ) { c_dict_id = val};
 			});
             
-    if (c_opttype == undefined) {
+    if (c_opttype == undefined || c_opttype == "input" ) {
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
     };
     
-    if (c_opttype == "dict") { alert (c_opttype);
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
+	if (c_opttype == "date") { 
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="date" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
     };
-    
+	
+	
+	if (c_opttype == "dict") { 
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="id'+c_opt_id+'" name="'+c_opt_id+'"><option disabled>Справочник</option></select>'); 
+    alert(c_opt_id);
+	$(function(){  
+                $.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+c_dict_id+'', function(dict_data) { 
+                var i = -1;
+                $.each(dict_data, function(val_id, value) { 
+                    i=i+1;
+					
+                    $("#id855").append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
+					//$('#id'+c_opt_id+'')
+                    });  
+                    });
+
+                    //$("#dict_list_id").val(c_dict_id);
+                    });
+	
+	}; //endif
+	
+	
+   
+	
     };
 	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
     $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?hash='+uuid+'"></div>');
@@ -405,7 +430,7 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
                     });
                     };
             $("#editoptionstype").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
-        
+       
         });
     
     

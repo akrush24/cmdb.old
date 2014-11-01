@@ -580,12 +580,8 @@ def import_csv(type_id):
 def export_csv(typename):
     if typename is not None:
         try:
-            #res_id = engine.execute('select id from resources where type_id in (select id from types where name=%s)',[typename]).fetchall()
-            res_id = db_session.query(Resources).filter(Resources.type_id==db_session.query(Types.id).filter(Types.name==typename))
-            
-            #opt_id = db_session.query(Options).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename))
-            #opt_id_count = db_session.query(Options).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename)).count()
-            opt_id = engine.execute('select id from options where type_id in (select id from types where name=%s)',[typename]).fetchall()
+            res_id = db_session.query(Resources.id).filter(Resources.type_id==db_session.query(Types.id).filter(Types.name==typename))
+            opt_id = db_session.query(Options.id).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename))
         except:
             flash('Некорректный тип')
             return redirect(url_for('control'))
@@ -595,13 +591,13 @@ def export_csv(typename):
             for optid in opt_id:
                 count=count+1
                 try:
-                    CSV=CSV+'"'+engine.execute('select value from value where res_id= %s and option_id=%s',[resid[0], optid[0]]).fetchall()[0][0]+'"'
+                    CSV=CSV+'"'+db_session.query(Value.value).filter(Value.res_id==resid[0], Value.option_id==optid[0])[0][0]
                 except:
                     CSV=CSV+'""'
-                #if count < opt_id_count:
-                if count < len(opt_id):
+                if count < opt_id.count():
                     CSV=CSV+','
-            CSV=CSV+'<br>'
+                else:
+                    CSV=CSV+"\n"
         
         export_file_name = str("export_"+'_'+typename+'_'+str(datetime.datetime.now())+'.csv')
         f = open('exports/'+export_file_name, 'w')
@@ -631,15 +627,15 @@ def export_json():
             resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
 
         for res_id, hash in resources:
-            entries=engine.execute('select id, name, opttype from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
+            entries=engine.execute('select id, name, opttype, dict_id from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
 
-            for opt_id, v, opttype in entries:
-                
+            for opt_id, v, opttype, dict_id in entries:
+                    
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, value=entries[0][0] ))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, value=""))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, value=""))
             
             json_row2.append( (json_row) )
             json_row=[]
