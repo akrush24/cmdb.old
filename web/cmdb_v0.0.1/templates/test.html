@@ -7,40 +7,6 @@
 
 <input type="text" class="form-control login" placeholder="email" id="eml" name="email" autocomplete="off" /> <br>
   
-<script> //живой поиск  по email http://stackoverflow.com/questions/19440428/jquery-catching-click-event-on-jquery-ui-autocomplete
-$('.login').autocomplete({
-      source: function(request, response){
-        // «апрос 
-        $.ajax({
-          url: '{{ url_for('get_list_user_ldap') }}',
-          dataType: "json",
-          // параметры запроса, передаваемые на сервер (последний - подстрока дл¤ поиска):
-          data:{
-            term: request.term
-          },
-          // обработка успешного выполнени¤ запроса
-          success: function(data){
-            // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
-            response($.map(data, function(item){
-              return{
-                label: item.fio+'| '+item.login+' '+item.email, // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.email  // value значение которое присвоится полю ввода из ключа hash в json.
-              }
-            }));
-          }
-        });
-      },
-      select: function (event, ui) {
-              var thisuuid = ui.item.value;
-              edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
-    },
-      minLength: 1 // минимальна¤ длина запроса для выполнени¤ поиска.
-    }); 
-</script>
-
-
-
-
 
 
 

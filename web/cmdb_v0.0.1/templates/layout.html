@@ -19,6 +19,13 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-table/bootstrap-table.min.css') }}">
 <script src="{{ url_for('static', filename='bootstrap-table/bootstrap-table.min.js') }}"></script>
+
+<style>
+ul.ui-autocomplete {
+    z-index: 1100;
+}
+</style>
+
 <body>
 
   <nav class="navbar navbar-default navbar-fixed-top navbar-inverse" role="navigation">
@@ -108,16 +115,12 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
         <h4 class="modal-title" id="myModalLabel">Редактирование item</h4>
-		<input type="text" class="form-control login" placeholder="email" id="eml" name="email" autocomplete="off" /> <br>
-      
 	  </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
                     <div id="itemOption"> <!-- Рисуем динамические поля -->
-					
-					
 				</form>
 			</div>
     	</div> 
@@ -172,11 +175,10 @@ $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 </script>
 
 
-<script> // Редактирование итема вызов чере edit_item(hashofitem);
+<script> // Редактирование итема вызывается чере функцию edit_item(hashofitem);
 $('#editItem').on('show.bs.modal.bs.modal', function (e) {
-
-    $('#editItem').on('hidden.bs.modal', function (e) {
-  $( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
+    $('#editItem').on('hidden.bs.modal', function (e) { // очищаем DOM дерево при закрытии
+	$( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
 })
     
     var c_opt_id;
@@ -207,8 +209,8 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="date" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
     };
 	
-	if (c_opttype == "login") { 
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control login" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
+	if (c_opttype == "login") {
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control login" id="i'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" autocomplete="off" required=""></div></div>'); 
     };
 	
 	
@@ -232,8 +234,10 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     };
 	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
     $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?hash='+uuid+'"></div>');
+    loginAutoComplite(); // Подгружает автодополнение lokin для классов .login
+	});
     });
-    });
+	
 });  
 
 $("#editItemForm").click(function() //кнопка отправки формы
@@ -318,23 +322,23 @@ $( "#name" ).autocomplete({
 </script>
 
 
-<script> //живой поиск  по email http://stackoverflow.com/questions/19440428/jquery-catching-click-event-on-jquery-ui-autocomplete
+<script> //живой поиск  по email http://stackoverflow.com/questions/19440428/jquery-catching-click-event-on-jquery-ui-autocomplete 
+
+function loginAutoComplite(){
 $('.login').autocomplete({
+	  autoFocus: true, //автофокус первого элемента меню
       source: function(request, response){
-        // «апрос 
+        // запрос 
         $.ajax({
           url: '{{ url_for('get_list_user_ldap') }}',
           dataType: "json",
-          // параметры запроса, передаваемые на сервер (последний - подстрока дл¤ поиска):
-          data:{
+          data:{ // параметры запроса, передаваемые на сервер (последний - подстрока дл¤ поиска):
             term: request.term
           },
-          // обработка успешного выполнени¤ запроса
-          success: function(data){
-            // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
-            response($.map(data, function(item){
+          success: function(data){ // обработка успешного выполнение запроса
+            response($.map(data, function(item){ // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
               return{
-                label: item.fio+'| '+item.login+' '+item.email, // label это надпись в списке, ей присваиваем параметр из name.
+                label: item.fio+'| '+item.email, // label это надпись в списке, ей присваиваем параметр из name.
                 value: item.email  // value значение которое присвоится полю ввода из ключа hash в json.
               }
             }));
@@ -342,11 +346,12 @@ $('.login').autocomplete({
         });
       },
       select: function (event, ui) {
-              var thisuuid = ui.item.value;
-              edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
+              //var thisuuid = ui.item.value;
+              //edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
     },
       minLength: 1 // минимальна¤ длина запроса для выполнени¤ поиска.
     }); 
+		};
 </script>
 
   <div class="container-fluid"> 
