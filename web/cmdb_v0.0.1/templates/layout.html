@@ -206,17 +206,15 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 	
 	
 	if (c_opttype == "dict") { 
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="id'+c_opt_id+'" name="'+c_opt_id+'"><option disabled>Справочник</option></select>'); 
-    alert(c_opt_id);
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="selid'+c_opt_id+'" name="'+c_opt_id+'"><option disabled>Справочник</option></select>'); 
 	$(function(){  
                 $.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+c_dict_id+'', function(dict_data) { 
                 var i = -1;
                 $.each(dict_data, function(val_id, value) { 
                     i=i+1;
-					alert(c_opt_id);
-                    $('#id'+(c_opt_id-1)+'').append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
+                    $('#selid'+(c_opt_id-1)+'').append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
 					//приходится отнимать от optid- 1, не ясно почему.
-					//$('#id'+c_opt_id+'')
+					$('#selid'+(c_opt_id-1)+'').val(c_dict_id);
                     });  
                     });
 
