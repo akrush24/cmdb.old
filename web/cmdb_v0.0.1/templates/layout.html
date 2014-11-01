@@ -194,6 +194,7 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
             if  (key == "value" ) { c_value = val};  
 			if  (key == "uuid" ) { c_uuid = val};
 			if  (key == "dict_id" ) { c_dict_id = val};
+			
 			});
             
     if (c_opttype == undefined || c_opttype == "input" ) {
@@ -205,20 +206,20 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     };
 	
 	
-	if (c_opttype == "dict") { 
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="selid'+c_opt_id+'" name="'+c_opt_id+'"><option disabled>Справочник</option></select>'); 
-	$(function(){  
+	if (c_opttype == "dict") {
+	var newoptid = c_opt_id;
+	var newvalue = c_value;
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="selid'+newoptid+'" name="id'+newoptid+'"><option disabled>Справочник</option></select>'); 
+	$(function(){
                 $.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+c_dict_id+'', function(dict_data) { 
                 var i = -1;
                 $.each(dict_data, function(val_id, value) { 
                     i=i+1;
-                    $('#selid'+(c_opt_id-1)+'').append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
-					//приходится отнимать от optid- 1, не ясно почему.
-					$('#selid'+(c_opt_id-1)+'').val(c_dict_id);
+                    $('#selid'+(newoptid)+'').append('<option value="'+ dict_data[i].val_id + '">' + dict_data[i].value + '</option>');
+					$('#selid'+(newoptid)+'').val(newvalue);
                     });  
                     });
 
-                    //$("#dict_list_id").val(c_dict_id);
                     });
 	
 	}; //endif
