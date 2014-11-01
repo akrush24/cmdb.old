@@ -631,7 +631,7 @@ def export_json():
 
             for opt_id, v, opttype, dict_id in entries:
                     
-                entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
                 try:
                     json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, value=entries[0][0] ))
                 except:
