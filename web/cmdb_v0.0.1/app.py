@@ -216,6 +216,41 @@ def get_list_user():
 
 
 
+@app.route('/get_list_user_ldap/', methods=['GET'])
+def get_list_user_ldap():
+    username = request.args.get('term')
+    
+    ad = ldap.initialize("ldap://192.168.10.2")
+    ad.protocol_version = ldap.VERSION3
+    ad.set_option(ldap.OPT_REFERRALS, 0)
+    ad.simple_bind_s('vmtest', 'qwerty$4')
+
+    basedn = 'DC=at-consulting,DC=ru'
+    scope = ldap.SCOPE_SUBTREE
+    #attrlist = ["sAMAccountName", "mail"]
+    attrlist = [b'cn', b"mail", b"sAMAccountName"]
+    
+    if username:
+        filterexp = "(&(objectCategory=Person)(sAMAccountName=*)(cn=%s*))" % username
+    else:
+        filterexp = "(&(objectCategory=Person)(sAMAccountName=*)(cn=*))"
+    results = ad.search_s(basedn, scope, filterexp, attrlist)
+    ldap_users=[]
+    count=1
+    for result in results:
+        if count <20:
+            try:
+                result[1]["mail"][0]
+                #ldap_users.append(result)
+                ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0]))
+            except: #If No MAIL...
+                pass
+        count=count+1
+        
+    return simplejson.dumps(ldap_users)
+
+
+
 #......................................................#
 #### Обработка Словарей ####
 @app.route('/new_dict/', methods=['POST'])

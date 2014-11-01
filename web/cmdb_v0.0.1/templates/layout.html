@@ -102,18 +102,22 @@
     <!-- Modal addTicket -->
 
         <!-- Modal edit item -->
-<div class="modal fade" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal" id="editItem" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
         <h4 class="modal-title" id="myModalLabel">Редактирование item</h4>
-      </div>
+		<input type="text" class="form-control login" placeholder="email" id="eml" name="email" autocomplete="off" /> <br>
+      
+	  </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
                     <div id="itemOption"> <!-- Рисуем динамические поля -->
+					
+					
 				</form>
 			</div>
     	</div> 
@@ -170,7 +174,7 @@ $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 
 <script> // Редактирование итема вызов чере edit_item(hashofitem);
 $('#editItem').on('show.bs.modal.bs.modal', function (e) {
-    
+
     $('#editItem').on('hidden.bs.modal', function (e) {
   $( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
 })
@@ -201,6 +205,10 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     
 	if (c_opttype == "date") { 
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="date" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
+    };
+	
+	if (c_opttype == "login") { 
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control login" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
     };
 	
 	
@@ -236,7 +244,8 @@ $("#editItemForm").click(function() //кнопка отправки формы
 </script>
 
 
-<script>
+
+<script> //добавить новый тикет - переделать!
 $('#addTicket').on('show.bs.modal.bs.modal', function (e) {
 $(function(){
 								$.getJSON('{{ url_for('get_list_type') }}', function(data) {
@@ -300,7 +309,7 @@ $( "#name" ).autocomplete({
       },
       select: function (event, ui) {
               var thisuuid = ui.item.value;
-              edit_item(thisuuid);        //  магия! если нажать на строку поиска откроется редактирование
+              edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
     },
       
       
@@ -309,9 +318,36 @@ $( "#name" ).autocomplete({
 </script>
 
 
-
-
-
+<script> //живой поиск  по email http://stackoverflow.com/questions/19440428/jquery-catching-click-event-on-jquery-ui-autocomplete
+$('.login').autocomplete({
+      source: function(request, response){
+        // «апрос 
+        $.ajax({
+          url: '{{ url_for('get_list_user_ldap') }}',
+          dataType: "json",
+          // параметры запроса, передаваемые на сервер (последний - подстрока дл¤ поиска):
+          data:{
+            term: request.term
+          },
+          // обработка успешного выполнени¤ запроса
+          success: function(data){
+            // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
+            response($.map(data, function(item){
+              return{
+                label: item.fio+'| '+item.login+' '+item.email, // label это надпись в списке, ей присваиваем параметр из name.
+                value: item.email  // value значение которое присвоится полю ввода из ключа hash в json.
+              }
+            }));
+          }
+        });
+      },
+      select: function (event, ui) {
+              var thisuuid = ui.item.value;
+              edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
+    },
+      minLength: 1 // минимальна¤ длина запроса для выполнени¤ поиска.
+    }); 
+</script>
 
   <div class="container-fluid"> 
    {% for message in get_flashed_messages() %}
