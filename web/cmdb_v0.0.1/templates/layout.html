@@ -191,6 +191,11 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 	if (obj[i].opttype == undefined || obj[i].opttype == "input" ) {
 		$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
 		};
+		
+	if (obj[i].opttype == "textarea") { 
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><textarea class="form-control" rows="3" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'">'+obj[i].value+'</textarea></div></div>'); 
+    };
+	
 	if (obj[i].opttype == "date") { 
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="date" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
     };
