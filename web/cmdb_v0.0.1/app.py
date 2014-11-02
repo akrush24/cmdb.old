@@ -228,21 +228,30 @@ def get_list_user_ldap():
     basedn = 'DC=at-consulting,DC=ru'
     scope = ldap.SCOPE_SUBTREE
     #attrlist = ["sAMAccountName", "mail"]
-    attrlist = [b'cn', b"mail", b"sAMAccountName"]
+    attrlist = [b'cn', b"mail", b"sAMAccountName", b"title", b"telephoneNumber"]
     
     if username:
-        filterexp = "(&(objectCategory=Person)(sAMAccountName=*)(cn=%s*))" % username
-    else:
-        filterexp = "(&(objectCategory=Person)(sAMAccountName=*)(cn=*))"
-    results = ad.search_s(basedn, scope, filterexp, attrlist)
+        filterexp = "(&(objectCategory=Person)(sAMAccountName=*)(cn=*%s*))" % username
+        results = ad.search_s(basedn, scope, filterexp, attrlist)
+
+        filterexp = "(&(objectCategory=Person)(sAMAccountName=*%s*)(cn=*))" % username
+        results = results+ad.search_s(basedn, scope, filterexp, attrlist)        
+
     ldap_users=[]
     count=1
     for result in results:
         if count <20:
             try:
                 result[1]["mail"][0]
-                #ldap_users.append(result)
-                ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0]))
+                try:
+                    JobTitle=result[1]["title"][0]
+                except:
+                    JobTitle="NONE"
+                try:
+                    telephoneNumber=result[1]["telephoneNumber"][0]
+                except:
+                    telephoneNumber="NONE"                    
+                ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber))
             except: #If No MAIL...
                 pass
         count=count+1

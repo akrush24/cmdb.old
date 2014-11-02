@@ -181,54 +181,40 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
 	$( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
 })
     
-    var c_opt_id;
-    var c_opttype;
-    var c_name;
-    var c_value;
-	var c_uuid;
-	var c_dict_id;
+ 
     $(function(){
                 $.getJSON('{{ url_for('export_json') }}?uuid='+uuid+'', function(objj) {
                 var obj = []; 
                 obj = objj[0]; // в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
-                for ( var i in obj) { jQuery.each(obj[i], function(key, val) {
-            if  (key == "opt_id" ) { c_opt_id = val };
-            if  (key == "opttype" ) { c_opttype = val};
-            if  (key == "name" ) { c_name = val};
-            if  (key == "value" ) { c_value = val};  
-			if  (key == "uuid" ) { c_uuid = val};
-			if  (key == "dict_id" ) { c_dict_id = val};
-			
-			});
-            
-    if (c_opttype == undefined || c_opttype == "input" ) {
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
-    };
-    
-	if (c_opttype == "date") { 
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="date" class="form-control" id="'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" required=""></div></div>'); 
+                for ( var i in obj) { 
+
+	if (obj[i].opttype == undefined || obj[i].opttype == "input" ) {
+		$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
+		};
+	if (obj[i].opttype == "date") { 
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="date" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
     };
 	
-	if (c_opttype == "login") {
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><input type="text" class="form-control login" id="i'+c_opt_id+'" name="id'+c_opt_id+'"  placeholder="'+c_name+'" value="'+c_value+'" autocomplete="off" required=""></div></div>'); 
+	if (obj[i].opttype == "login") {
+    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control login" id="i'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" autocomplete="off" required=""></div></div>'); 
     };
 	
 	
-	if (c_opttype == "dict") {
-	var newoptid = c_opt_id;
-	var arrayvalue = c_value;
-    $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+c_name+'</div><select class="form-control" id="selid'+newoptid+'" name="id'+newoptid+'"><option disabled>Справочник</option></select>'); 
-	$(function(){
-                $.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+c_dict_id+'', function(dict_array) { 
-                for ( var i in dict_array) { //выборка в dict_array
-                    $('#selid'+(newoptid)+'').append('<option value="'+ dict_array[i].val_id + '">' + dict_array[i].value + '</option>');
-					$('#selid'+(newoptid)+'').val(arrayvalue); 
-                    } //end for
+	if (obj[i].opttype == "dict") {
+	drawselectlist(obj[i].opt_id,obj[i].name,obj[i].opttype,obj[i].value); //вызываем функцию отрисовки selectlist
+
+    function drawselectlist(optid,nm,opt,vlm){ //функция отрисовки selectlist
+			$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="selid'+optid+'" name="id'+optid+'"></select>'); 
+				$.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+obj[i].dict_id+'', function(dict_array) { 
+				for ( var k in dict_array) { //выборка в dict_array
+                    $('#selid'+(optid)+'').append('<option value="'+ dict_array[k].val_id + '">' + dict_array[k].value + '</option>');
+					$('#selid'+(optid)+'').val(vlm); 
+                    }   //end for
 					}); //end getJson
-                    }); //end func
+			}
 	}; //end dict if
 	
-	
+			
    
 	
     };
@@ -338,7 +324,7 @@ $('.login').autocomplete({
           success: function(data){ // обработка успешного выполнение запроса
             response($.map(data, function(item){ // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
               return{
-                label: item.fio+'| '+item.email, // label это надпись в списке, ей присваиваем параметр из name.
+                label: item.fio+'| '+item.email+' '+item.jobtitle+' '+item.telephoneNumber, // label это надпись в списке, ей присваиваем параметр из name.
                 value: item.email  // value значение которое присвоится полю ввода из ключа hash в json.
               }
             }));
