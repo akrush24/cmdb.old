@@ -327,23 +327,23 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
     {% for cols_name in type_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
-
     </tr>
-        
     {% for entry in type_cols %}
         <tr>
         {% set k=0 %}
-
         {% for cell in entry %}
-
-                <td>
-                    {{ cell }}
-                </td>
-
+            <td>
+            {% if k==1 %} 
+                <a href="{{ url_for('index', typename=cell) }}"> 
+            {% endif %} 
+                {{ cell }}
+            {% if k==0 %} 
+                </a>
+            {% endif %}
+            {% set k=k+1 %}
+            </td>
         {% endfor %}
-        
         {% if session.logged_in %}
-        
             <td><a class="glyphicon glyphicon-remove" href="/del_type/{{ entry.id }}"></a></td>
             <td>
             <form action="{{ url_for('import_csv', type_id=entry.id ) }}" method=post enctype=multipart/form-data>
@@ -358,7 +358,6 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
     </tr>
     {% endfor %}
     </table>
-
 <br>
     
     

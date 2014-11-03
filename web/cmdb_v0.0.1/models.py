@@ -51,7 +51,6 @@ class Dict(db.Model):
     __tablename__ = 'dict'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
-    name = db.Column(db.String(100)) # for DEL
     value = db.Column(db.String(100))
 
 class Users(db.Model):
