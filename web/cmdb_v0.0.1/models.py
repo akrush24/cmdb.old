@@ -26,6 +26,7 @@ class Types(db.Model):
     __tablename__ = 'types'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(24), unique = True)
+    workflow =  db.Column(db.Integer, db.ForeignKey('workflow_s.id'))
     desc = db.Column(db.String(244))
     
 
@@ -61,3 +62,15 @@ class Users(db.Model):
     email = Column(String(120), unique=True)
     password = Column(String(255))
     last_activity = db.Column(db.DateTime)
+
+class WorkFlow_s(db.Model):
+    __tablename__ = 'workflow_s'
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    name = db.Column(db.String(250)), unique=True)
+    
+class WorkFlow(db.Model):
+    __tablename__ = 'workflow'
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    name = db.Column(db.String(250))
+    step =  db.Column(db.Integer, db.ForeignKey('workflow.id'))
+    
