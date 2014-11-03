@@ -266,11 +266,11 @@ def get_list_user_ldap():
 def new_dict():
     if request.form['name'] != "":
         try:
-            engine.execute('insert into dict (name) values (%s)', request.form['name'])
+            engine.execute('insert into dict_s (name) values (%s)', request.form['name'])
             for data in request.form.keys():
                 value=request.form[data]
                 if data != "name" and data[:5] == "newid" and value != "":
-                    engine.execute('insert into dict_val (dict_id, value) values ((select id from dict where name=%s), %s)', [request.form['name'],value])
+                    engine.execute('insert into dict (dict_id, value) values ((select id from dict_s where name=%s), %s)', [request.form['name'],value])
         except:
             flash ("Ошибка при добавлении словаря")
 
@@ -279,7 +279,7 @@ def new_dict():
 
 @app.route('/del_dict/<int:id>')
 def del_dict(id):
-    engine.execute('delete from dict_val where id=%s', [id])
+    engine.execute('delete from dict where id=%s', [id])
     return redirect(url_for('control'))
 
 @app.route('/get_list_dict/', methods=['GET'])
@@ -287,9 +287,9 @@ def get_list_dict():
     dict_id = request.args.get('dict_id')
 
     if dict_id is not None:
-        entries = engine.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where  dict.id=dict_val.dict_id and dict.id=%s', dict_id).fetchall()
+        entries = engine.execute('select dict.id as val_id, dict_s.id, dict_s.name, dict.value from dict_s, dict where  dict_s.id=dict.dict_id and dict_s.id=%s', dict_id).fetchall()
     else:
-        entries = engine.execute('select id, name from dict').fetchall()
+        entries = engine.execute('select id, name from dict_s').fetchall()
 
     json_row=[]
     for en in entries:
@@ -298,8 +298,16 @@ def get_list_dict():
     return simplejson.dumps(json_row,sort_keys=True, indent=4)
 
 
+@app.route('/del_dict_s/<int:id>')
+def del_dict_s(id):
+    try:
+        engine.execute('delete from dict_s where id=%s', [id])
+    except:
+        flash('Схема используется')
+    return redirect(url_for('control'))
 
-
+    
+    
 #......................................................#
 #### Обработка Ресурсов ####
 
@@ -564,7 +572,8 @@ def control(action):
         type_cols=type_cols, type_cols_names=cols_name('select * from types order by id desc'), 
         option_cols=option_cols, option_cols_names = cols_name('select * from options'),
         user_cols = user_cols, user_cols_names=cols_name('select id, login, full_name, email from users order by id desc'),
-        dict_cols = engine.execute('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id order by dict.id').fetchall(), dict_cols_names=cols_name('select dict_val.id as val_id, dict.id, dict.name, dict_val.value from dict, dict_val where dict.id=dict_val.dict_id'),
+        dict_cols = engine.execute('select dict.id as val_id, dict_s.id, dict_s.name, dict.value from dict_s, dict where dict_s.id=dict.dict_id order by dict_s.id').fetchall(), dict_cols_names=cols_name('select dict.id as val_id, dict_s.id, dict_s.name, dict.value from dict_s, dict where dict_s.id=dict.dict_id'),
+        dict_s=engine.execute('select * from dict_s').fetchall(), dict_s_cols_names=cols_name('select * from dict_s'),
         opt_count=opt_count, type_count=type_count
     )
 

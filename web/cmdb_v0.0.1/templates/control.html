@@ -397,6 +397,26 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
     
 <br>
 
+    <table class="table table-bordered table-hover table-condensed">
+    <caption><h3>Справочники (схема)</h3></caption>
+    <tr class="active">
+    {% for cols_name in dict_s_cols_names %}
+        <th><center><b>{{ cols_name }}</b></center></th>
+    {% endfor %}
+    </tr>
+    {% for entry in dict_s %}
+        <tr>
+        {% for cell in entry %}
+                <td>
+                    {{ cell }}
+                </td>
+        {% endfor %}
+        {% if session.logged_in %}
+            <td><a class="glyphicon glyphicon-remove" href="{{ url_for('del_dict_s', id=entry.id) }}"></a></td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    </table>
     
     <table class="table table-bordered table-hover table-condensed">
     <caption><h3>Справочники</h3></caption>

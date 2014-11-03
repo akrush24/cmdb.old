@@ -42,13 +42,13 @@ class Options(db.Model):
     required = db.Column(db.Integer)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
 
-class Dict(db.Model):
-    __tablename__ = 'dict'
+class Dict_s(db.Model):
+    __tablename__ = 'dict_s'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(100), unique = True)
 
-class Dict_val(db.Model):
-    __tablename__ = 'dict_val'
+class Dict(db.Model):
+    __tablename__ = 'dict'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
     name = db.Column(db.String(100)) # for DEL
@@ -66,7 +66,7 @@ class Users(db.Model):
 class WorkFlow_s(db.Model):
     __tablename__ = 'workflow_s'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    name = db.Column(db.String(250)), unique=True)
+    name = db.Column(db.String(250), unique=True)
     
 class WorkFlow(db.Model):
     __tablename__ = 'workflow'
