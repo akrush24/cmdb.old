@@ -75,7 +75,7 @@ ul.ui-autocomplete {
  
  <!-- Modal addTicket -->
 <div class="modal fade" id="addTicket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -242,6 +242,12 @@ $("#editItemForm").click(function() //кнопка отправки формы
 
 <script> //добавить новый тикет - переделать!
 $('#addTicket').on('show.bs.modal.bs.modal', function (e) {
+$('#addTicket').on('hidden.bs.modal', function (e) { // очищаем DOM дерево при закрытии
+	$( "#type_id_ticket" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
+	$( "#inputs" ).empty();
+	})
+
+
 $(function(){
 								$.getJSON('{{ url_for('get_list_type') }}', function(data) {
 								  var i = -1;
@@ -252,21 +258,50 @@ $(function(){
                                             });
                                         });
 
-                    $('#type_id_ticket').change(function(){                                //подгрузка опций для типа
-                                          var sellectedtype = $('#type_id_ticket option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
-                                            $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
-                                            $(function(){                                           //сама функция подгрузки опций
-                                                $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
-                                                    var i = -1;
-                                                $.each(data, function(id, name) {  // отрисовка полей вввода
-                                                    i=i+1;
-                                                        $('#inputs').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'" required=""/></div>');
-                                                        
+$('#type_id_ticket').change(function(){                                //подгрузка опций для типа
+ var sellectedtype = $('#type_id_ticket option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
+    $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
+    $(function(){                                           //сама функция подгрузки опций
+      $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
+         var i = -1;
+        $.each(data, function(id, name) {  // отрисовка полей вввода
+          i=i+1;
+           if (data[i].opttype == "input" || data[i].opttype == undefined ) {
+			$('#inputs').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'" required=""/></div>');
+           };
+			
+			if (data[i].opttype == "textarea") { 
+    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><textarea class="form-control" rows="3" id="'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'"></textarea></div></div>'); 
+    };
+	
+	if (data[i].opttype == "date") { 
+    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="date" class="form-control" id="'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
+    };
+	
+	if (data[i].opttype == "login") {
+    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control login" id="i'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'" value="" autocomplete="off" required=""></div></div>'); 
+    };
+	
+	if (data[i].opttype == "dict") {
+	drawselectlis(data[i].opt_id,data[i].name,data[i].opttype,data[i].value); //вызываем функцию отрисовки selectlist
 
-                                                          });  
-                                                        });
-                                                       });
-                                           }); //Конец функции выбора типа
+    function drawselectlis(optid,nm,opt,vlm){ //функция отрисовки selectlist
+			$("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="selid'+optid+'" name="id'+optid+'"></select>'); 
+				$.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+data[i].dict_id+'', function(dict_array) { 
+				for ( var k in dict_array) { //выборка в dict_array
+                    $('#selid'+(optid)+'').append('<option value="'+ dict_array[k].val_id + '">' + dict_array[k].value + '</option>');
+					$('#selid'+(optid)+'').val(vlm); 
+                    }   //end for
+					}); //end getJson
+			}
+	}; //end dict if
+		
+		
+														
+          });  
+          });
+          });
+          }); //Конец функции выбора типа
 });  
 
 $("#addticketsubmit").click(function() //подтверждение отправки данных

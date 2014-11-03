@@ -73,3 +73,12 @@ class WorkFlow(db.Model):
     name = db.Column(db.String(250))
     step =  db.Column(db.Integer, db.ForeignKey('workflow.id'))
     
+class Score(db.Model):
+    __tablename__ = 'score'
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    type_id =  db.Column(db.Integer, db.ForeignKey('types.id'), unique = True)
+    score = Column(Integer)
+    
+    
+    
+    
