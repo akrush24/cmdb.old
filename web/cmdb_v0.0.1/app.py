@@ -55,9 +55,12 @@ def cols_name(query):
 @app.route('/new_type/', methods=['POST'])
 def new_type():
     try:
-        engine.execute('''insert into types (name) values (%s)''', request.form['name'].upper())
+        engine.execute('insert into types (name) values (%s)', request.form['name'].upper())
+        
     except:
         flash('Ошибка, проверьте что имена типов не совпадают')
+    
+    engine.execute('insert into score (type_id, score) values ( (select id from types where name=%s), 1000 )', request.form['name'].upper())
     return redirect(url_for('control'))
 
 @app.route('/del_type/<int:id>', methods=['GET'])
@@ -336,18 +339,24 @@ def addres(type_id): # добавляем новый элемент в табл�
         pass
     else:
         UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-        
+
+    # увеличиваем количество итемов по данному ресурсы +1
+    #score = db_session.query(Score).filter(Score.type_id==request.form['type_id']).one()
+    #score.score = score.score+1
+    #db_session.flush()
+    #UUID=score.score
+    
     engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
     res_id=engine.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
+
     return res_id
 
 @app.route('/newres', methods=['POST'])
 def newres():
+    res_id=addres(request.form['type_id'])
+    
     try:
         typename = engine.execute('select name from types where id=%s', [request.form['type_id']]).fetchall()[0][0]
-        res_id=addres(request.form['type_id'])
-        
-        #return str(res_id)
         for data in request.form.keys():
             if data != "type_id":
                 option_id = data[2:]

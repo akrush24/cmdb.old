@@ -84,17 +84,10 @@ ul.ui-autocomplete {
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form name="Ticketform" id="addTicket" action="{{ url_for('newres') }}" method="post">
-                    <select class="form-control" id="type_id_ticket" name="type_id">
-						<option disabled>Тип</option>
-                    </select><br>
-                    <div id="inputs">
-                    <script>
-                    
-					</script>
-                    
-                    </div>
-                    <button type="submit"  class="btn hide">
+				<form name="Ticketform" id="addNewTicket" action="{{ url_for('newres') }}" method="post">
+                    <select class="form-control" id="type_id_ticket" name="type_id"><option disabled>Выбрать</option></select>
+                    <div id="FrmFieldsDiv"></div> <!--Динамические поля ввода -->
+                    <button type="submit"  class="btn hide"></button>
 				</form>
 			</div>
     	</div> 
@@ -120,7 +113,7 @@ ul.ui-autocomplete {
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				<form id="editItemForm" class="form-horizontal span8" action="{{ url_for('editres') }}" method="post">
-                    <div id="itemOption"> <!-- Рисуем динамические поля -->
+                    <div id="itemOption"></div> <!-- Рисуем динамические поля -->
 				</form>
 			</div>
     	</div> 
@@ -176,7 +169,7 @@ $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 
 
 <script> // Редактирование итема вызывается чере функцию edit_item(hashofitem);
-$('#editItem').on('show.bs.modal.bs.modal', function (e) {
+$('#editItem').on('show.bs.modal', function (e) {
     $('#editItem').on('hidden.bs.modal', function (e) { // очищаем DOM дерево при закрытии
 	$( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
 })
@@ -225,7 +218,7 @@ $('#editItem').on('show.bs.modal.bs.modal', function (e) {
     };
 	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
     $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?hash='+uuid+'"></div>');
-    loginAutoComplite(); // Подгружает автодополнение lokin для классов .login
+    loginAutoComplite(); // Подгружает автодополнение login для классов .login
 	});
     });
 	
@@ -240,71 +233,73 @@ $("#editItemForm").click(function() //кнопка отправки формы
 
 
 
-<script> //добавить новый тикет - переделать!
-$('#addTicket').on('show.bs.modal.bs.modal', function (e) {
+<script> //Добавить новый итем
 $('#addTicket').on('hidden.bs.modal', function (e) { // очищаем DOM дерево при закрытии
-	$( "#type_id_ticket" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
-	$( "#inputs" ).empty();
-	})
+	$("#Ticketform.frm").trigger('reset')
+	});
 
+$('#addTicket').on('show.bs.modal', function (e) { //Подгружаем список опций
+	if( $('#type_id_ticket option').size() == 1) {
+	 $(function(){ 
+		$.getJSON('{{ url_for('get_list_type') }}', function(dd) {
+		for (var i in dd) {
+			$('#type_id_ticket').append('<option value="' + dd[i].id + '">' + dd[i].name + '</option>'); 
+				}  
+				}).fail(function(jqxhr){
+				alert(jqxhr.responseText); // обработчик ошибки
+}); 
+				}); 
+				};
+});
 
-$(function(){
-								$.getJSON('{{ url_for('get_list_type') }}', function(data) {
-								  var i = -1;
-									$.each(data, function(id, name) { 
-									   i=i+1;
-										$('#type_id_ticket').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-										});  
-                                            });
-                                        });
-
-$('#type_id_ticket').change(function(){                                //подгрузка опций для типа
- var sellectedtype = $('#type_id_ticket option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
-    $( "#inputs" ).empty();                                 //очищаем контейнер от предыдущих объектов
-    $(function(){                                           //сама функция подгрузки опций
-      $.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
-         var i = -1;
-        $.each(data, function(id, name) {  // отрисовка полей вввода
-          i=i+1;
-           if (data[i].opttype == "input" || data[i].opttype == undefined ) {
-			$('#inputs').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="'+'" required=""/></div>');
+$('#type_id_ticket').on('change',function(){      
+    var select = $('#type_id_ticket option:selected').val();
+    drawfields(select);
+	});
+	
+	function drawfields(select){
+	$( "#FrmFieldsDiv" ).empty(); // очистить листинг полей
+    $.getJSON('{{ url_for('get_list_option') }}?type='+select+'', function(data) {
+         for (var i in data) {
+		  
+    if (data[i].opttype == "input" || data[i].opttype == undefined ) {
+	$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
            };
 			
-			if (data[i].opttype == "textarea") { 
-    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><textarea class="form-control" rows="3" id="'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'"></textarea></div></div>'); 
+	if (data[i].opttype == "textarea") { 
+    $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><textarea class="form-control" rows="3" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'"></textarea></div></div>'); 
     };
 	
 	if (data[i].opttype == "date") { 
-    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="date" class="form-control" id="'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
+    $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="date" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
     };
 	
 	if (data[i].opttype == "login") {
-    $("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control login" id="i'+data[i].opt_id+'" name="id'+data[i].opt_id+'"  placeholder="'+data[i].name+'" value="" autocomplete="off" required=""></div></div>'); 
-    };
+    $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control login" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" autocomplete="off" required=""></div></div>'); 
+    loginAutoComplite(); //Добавим полю живой поиск пользователя
+	};
 	
 	if (data[i].opttype == "dict") {
-	drawselectlis(data[i].opt_id,data[i].name,data[i].opttype,data[i].value); //вызываем функцию отрисовки selectlist
+	drawnewitem(data[i].id,data[i].name,data[i].opttype,0); //вызываем функцию отрисовки selectlist
 
-    function drawselectlis(optid,nm,opt,vlm){ //функция отрисовки selectlist
-			$("#inputs").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="selid'+optid+'" name="id'+optid+'"></select>'); 
+    function drawnewitem(optid,nm,opt,vlm){ //функция отрисовки selectlist
+			$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="sel'+optid+'" name="id'+optid+'"></select>'); 
 				$.getJSON('{{ url_for('get_list_dict') }}?&dict_id='+data[i].dict_id+'', function(dict_array) { 
-				for ( var k in dict_array) { //выборка в dict_array
-                    $('#selid'+(optid)+'').append('<option value="'+ dict_array[k].val_id + '">' + dict_array[k].value + '</option>');
-					$('#selid'+(optid)+'').val(vlm); 
+				for ( var kk in dict_array) { //выборка в dict_array
+                    $('#sel'+(optid)+'').append('<option value="'+ dict_array[kk].val_id + '">' + dict_array[kk].value + '</option>');
+					//$('#sel'+(optid)+'').val(vlm); 
                     }   //end for
 					}); //end getJson
 			}
 	}; //end dict if
-		
-		
-														
-          });  
+											
+          }  //endFor 
           });
-          });
-          }); //Конец функции выбора типа
-});  
+		  
+          }; //endDrawfields
 
-$("#addticketsubmit").click(function() //подтверждение отправки данных
+		 
+$("#addticketsubmit").click(function() //отправка данных формы
         {
         $("form[name='Ticketform']").submit();
         });

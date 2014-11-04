@@ -5,9 +5,9 @@ from sqlalchemy import Column, Integer, String
 class Resources(db.Model):
     __tablename__ = 'resources'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-    hash = db.Column(db.String(6))
     type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
-    hash = db.Column(db.String(10), unique = True)
+    hash = db.Column(db.String(10), unique = False)
+    resid=db.Column(db.Integer)
     user = db.Column(db.String(50))
     create_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
@@ -78,7 +78,5 @@ class Score(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     type_id =  db.Column(db.Integer, db.ForeignKey('types.id'), unique = True)
     score = Column(Integer)
-    
-    
-    
-    
+
+
