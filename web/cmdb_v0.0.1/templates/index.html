@@ -59,7 +59,7 @@
     <td nowrap="nowrap"><a id="{{ entrie[0] }}" onClick="edit_item(this.id)" href="#">{% if k==0 %}<b>{{ cell }}</b>{% else %}{{ cell }}{% endif %}</a></td>
     {% set k=k+1 %}
     {% endfor %}
-    <td><a class="glyphicon glyphicon-remove" href="/del/{{typename}}/{{ entrie[1] }}"></a></td>
+    <td><a class="glyphicon glyphicon-remove" href="/del/{{ entrie[0] }}"></a></td>
 </tr>
 {% endfor %}
 

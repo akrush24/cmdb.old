@@ -315,10 +315,14 @@ def del_dict_s(id):
 #### Обработка Ресурсов ####
 
 # Удаление..............................................
-@app.route('/del/<typename>/<hash>')
-def del_res(hash, typename):
-    engine.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s)', [hash])
-    engine.execute('delete from resources where hash=%s', [hash])
+@app.route('/del/<itemid>')
+def del_res(itemid):
+    r = re.findall(r"(^.+)-([\d]+)", itemid)
+    id=r[0][1]
+    typename=r[0][0]
+
+    engine.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s and type_id in (select id from types where name=%s))', [id, typename])
+    engine.execute('delete from resources where hash=%s and type_id in (select id from types where name=%s)', [id, typename])
     return redirect(url_for('index', typename=typename))
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):

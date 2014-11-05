@@ -323,7 +323,7 @@ $( "#name" ).autocomplete({
             response($.map(data, function(item){
               return{
                 label: item.type+'| '+item.opt+' '+item.value, // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.hash  // value значение которое присвоится полю ввода из ключа hash в json.
+                value: item.type+'-'+item.hash  // value значение которое присвоится полю ввода из ключа hash в json.
               }
 			  
             }));
@@ -360,7 +360,7 @@ $('.login').autocomplete({
             response($.map(data, function(item){ // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
               return{
                 label: item.fio+'| '+item.email+' '+item.jobtitle+' '+item.telephoneNumber, // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.email  // value значение которое присвоится полю ввода из ключа hash в json.
+                value: item.email+'('+item.fio+')'  // value значение которое присвоится полю ввода из ключа hash в json.
               }
             }));
           }
