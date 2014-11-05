@@ -341,15 +341,15 @@ def addres(type_id): # добавляем новый элемент в табл�
         UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
     # увеличиваем количество итемов по данному ресурсы +1
-    #score = db_session.query(Score).filter(Score.type_id==request.form['type_id']).one()
-    #score.score = score.score+1
-    #db_session.flush()
-    #UUID=score.score
+    score = db_session.query(Score).filter(Score.type_id==request.form['type_id']).one()
+    score.score = score.score+1
+    db_session.flush()
+    UUID=score.score
     
     engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
     res_id=engine.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
 
-    return res_id
+    return score.score
 
 @app.route('/newres', methods=['POST'])
 def newres():
@@ -675,6 +675,8 @@ def export_csv(typename):
     return redirect(url_for('control'))
 
 
+
+
 ''' ############################### '''
 ###          EXPORT JSON
 ''' ############################### '''
@@ -686,18 +688,18 @@ def export_json():
     if request.args.get('uuid') is not None:
         uuid = request.args.get('uuid')
         if uuid is not None:
-            resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s', [uuid]).fetchall()
+            resources=engine.execute('select resources.id, hash, type_id from resources where BINARY resources.hash=%s', [uuid]).fetchall()
 
-        for res_id, hash in resources:
+        for res_id, hash, type_id in resources:
             entries=engine.execute('select id, name, opttype, dict_id from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
 
             for opt_id, v, opttype, dict_id in entries:
                     
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
                 try:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, value=entries[0][0] ))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, value=""))
+                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=""))
             
             json_row2.append( (json_row) )
             json_row=[]
