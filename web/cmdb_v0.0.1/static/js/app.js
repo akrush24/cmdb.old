@@ -2,13 +2,13 @@
 
 $.extend({ //обработчик перехода по ссылке на итем
   getUrlVars: function(){
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for(var i = 0; i < hashes.length; i++)
+    var vars = [], id;
+    var ides = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < ides.length; i++)
     {
-      hash = hashes[i].split('=');
-      vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
+      id = ides[i].split('=');
+      vars.push(id[0]);
+      vars[id[0]] = id[1];
     }
     return vars;
   },
@@ -17,23 +17,22 @@ $.extend({ //обработчик перехода по ссылке на ите
   }
 });
 
-var byuuid = $.getUrlVar('hash'); //считать хэш итема из ссылки и открыть окно редактирвоания
+var byuuid = $.getUrlVar('id'); //считать id итема из ссылки и открыть окно редактирвоания
 if (byuuid !== undefined ) {edit_item(byuuid);}
 
 }); //onreadypage_end
 
 
 // Перехват клика по редактированию итема
-        var uuid;
-        function edit_item(clicked_id)
-            {   
-                uuid = clicked_id;
+        var val_param_id;
+        function edit_item(param_id){
+                val_param_id = param_id;
                 $('#editItem').modal("show"); //Показать модальное окно для редактирвоания итема
             };
             
             var c_id;
-            function edit_option_view(idid)
-            { c_id = idid;
+            function edit_option_view(clicked_opt_id)
+            { c_id = clicked_opt_id;
              $('#editoptionss').modal("show");
             };
 

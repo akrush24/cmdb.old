@@ -60,7 +60,7 @@ def new_type():
     except:
         flash('Ошибка, проверьте что имена типов не совпадают')
     
-    engine.execute('insert into score (type_id, score) values ( (select id from types where name=%s), 1000 )', request.form['name'].upper())
+    engine.execute('insert into score (type_id, score) values ( (select id from types where name=%s), 0 )', request.form['name'].upper())
     return redirect(url_for('control'))
 
 @app.route('/del_type/<int:id>', methods=['GET'])
@@ -327,32 +327,21 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 # Создание..............................................
 def addres(type_id): # добавляем новый элемент в таблицу Resources
-    UUID = id_generator(10,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-        
-    ALL_HASH=engine.execute('select hash from resources').fetchall()
-    hashs=[]
-        
-    for h in ALL_HASH:
-        hashs.append(h)
-        
-    if UUID is not hashs:
-        pass
-    else:
-        UUID = id_generator(6,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
+    score = db_session.query(Score).filter(Score.type_id==type_id).one()
     # увеличиваем количество итемов по данному ресурсы +1
-    score = db_session.query(Score).filter(Score.type_id==request.form['type_id']).one()
     score.score = score.score+1
     db_session.flush()
-    UUID=score.score
     
-    engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [UUID, type_id, session['login'], datetime.datetime.now() ])
-    res_id=engine.execute('select id from resources where hash=%s limit 1', [UUID]).fetchall()[0][0]
+    engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [score.score, type_id, session['login'], datetime.datetime.now() ])
+    res_id=engine.execute('select id from resources where hash=%s limit 1', [score.score]).fetchall()[0][0]
 
-    return score.score
+    return res_id
 
-@app.route('/newres', methods=['POST'])
-def newres():
+
+
+### Добавление нового Итема
+@app.route('/new_item', methods=['POST'])
+def new_item():
     res_id=addres(request.form['type_id'])
     
     try:
@@ -362,38 +351,41 @@ def newres():
                 option_id = data[2:]
                 value=request.form[data]
                 cur = engine.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
-
     except:
         flash('Unexpected ERROR')
-
     return redirect(url_for('index', typename=typename))
 
 
 # Редактирование.............................................
 @app.route('/editres', methods=['GET', 'POST'])
 def editres(): 
+        r = re.findall(r"(^.+)-([\d]+)", request.form['id'])
+        id=r[0][1]
+        types = db_session.query(Types).filter(Types.name==r[0][0]).one()
+            
         for data in request.form.keys():
-            if data != "uuid":
+
+            if data != "id":
                 option_id = data[2:]
                 value=request.form[data]
                 
                 option_exist=None
                 try:
-                    option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s)', [option_id, request.form['uuid']]).fetchall()[0][0]
-                    engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s)', [value, option_id, request.form['uuid']] )
+                    option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s and type_id=%s)', [option_id, id, types.id]).fetchall()[0][0]
+                    engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s and type_id=%s)', [value, option_id, id, types.id] )
                 except IndexError:
-                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s))', [option_id, value, request.form['uuid']] )
+                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s and type_id=%s))', [option_id, value, id, types.id] )
         try:
-            typename=engine.execute('select types.name from types, resources where resources.type_id=types.id and resources.hash=%s', [request.form['uuid']]).fetchall()[0][0]
+            typename=engine.execute('select types.name from types, resources where resources.type_id=types.id and resources.hash=%s and resources.type_id=%s', [id, types.id]).fetchall()[0][0]
         except:
             typename=""
-        return redirect(url_for('index', typename=typename)+'?hash='+request.form['uuid'])
+        return redirect(url_for('index', typename=typename)+'?id='+request.form['id'])
 
 
 # ..........................................................................
 ##### Главная страница .................................................####
-@app.route('/list/<typename>/<int:page>/')
-@app.route('/list/<typename>/', defaults={'page': 1})
+@app.route('/browse/<typename>/<int:page>/')
+@app.route('/browse/<typename>/', defaults={'page': 1})
 @app.route('/', defaults={'typename': None, 'page': 1})
 def index(typename, page):
     val2=[]
@@ -433,9 +425,10 @@ def index(typename, page):
         for res_id, hash in resources:
             #creator=engine.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
             entries=engine.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
-            key=['#', 'UUID']
+            key=['Код']
             key_id=['UUID']
-            val=[count, hash]
+            g=typename+'-'+str(hash)
+            val=[g]
             count=count-1
             json_col=[]
             json_col.append( dict(uuid=hash) )
@@ -462,7 +455,7 @@ def index(typename, page):
             json_row=[]
     
     else: # Если тип не задан, отдаем пустую страницу
-        return render_template( 'index.html', entries="", cols_names="", typename=typename, page=0, COUNT_PAGE=0)
+        return render_template( 'index.html', entries="", cols_names="", page=0, COUNT_PAGE=0)
         
     ### Экспорт в JSON
     if request.args.get('json') is not None:
@@ -471,9 +464,9 @@ def index(typename, page):
     ### Отображение таблицы на главном экране
     else:
         try:
-            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, page=page, COUNT_PAGE=COUNT_PAGE)
+            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE)
         except:
-            return render_template( 'index.html', entries="", cols_names="", typename=typename, page=0, COUNT_PAGE=0)
+            return render_template( 'index.html', entries="", cols_names="", typename=typename, type_id=typeid, page=0, COUNT_PAGE=0)
 
 
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
@@ -559,7 +552,6 @@ def before_request():
 ### -----------------------------------------------------------------
 ### Панель управления ............................................###
 """..............................................................."""
-
 @app.route('/control/', defaults={'action': "0"})
 @app.route('/control/<action>')
 def control(action):
@@ -605,30 +597,33 @@ def import_csv(type_id):
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     csv_file=app.config['UPLOAD_FOLDER']+filename
     query=""
-    #try:
-    with open(csv_file, 'r') as f:
-        reader = csv.reader(f, delimiter=b',',quotechar=b'"')
-        #reader = csv.reader(f, delimiter=b';')
-        for row in reader:
-            res_id=addres(type_id)
-            opt_id_seq=0
-            for val in row:
-                if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
-                    # Добавляем новую опцию с временным именем
-                    new_oprion_name='IMPORT_TMP#'+str(opt_id_seq)
-                    new_option=Options(name=new_oprion_name, type_id=type_id)
-                    db_session.add( new_option )
-                    db_session.commit()
-                    
-                    opt_id = db_session.query(Options.id).filter(Options.type_id==type_id)
-                    opt_id_count = db_session.query(Options).filter(Options.type_id==type_id).count()
+    try:
+        with open(csv_file, 'r') as f:
+            #reader = csv.reader(f, delimiter=b',',quotechar=b'"')
+            reader = csv.reader(f, delimiter=b';')
+            
+            for row in reader:
+                res_id=addres(type_id)
+                
+                opt_id_seq=0
+                for val in row:
+                    if opt_id_seq >= opt_id_count: # Если число опцый в выбранном типе меньше чем в импортируемом CSV файле то добавляем новую опцию
+                        # Добавляем новую опцию с временным именем
+                        new_oprion_name='IMPORT_TMP#'+str(opt_id_seq)
+                        new_option=Options(name=new_oprion_name, type_id=type_id)
+                        
+                        db_session.add( new_option )
+                        db_session.commit()
+                        
+                        opt_id = db_session.query(Options.id).filter(Options.type_id==type_id)
+                        opt_id_count = db_session.query(Options).filter(Options.type_id==type_id).count()
 
-                db_session.add( Value(option_id=opt_id[opt_id_seq][0], value=val, res_id=res_id) )
-                opt_id_seq=opt_id_seq+1
-            count=count+1
-        f.close() 
-    #except:
-    #    flash('Ошибка в процессе парсинга файла: '+query)
+                    db_session.add( Value(option_id=opt_id[opt_id_seq][0], value=val, res_id=res_id) )
+                    opt_id_seq=opt_id_seq+1
+                count=count+1
+            f.close() 
+    except:
+        flash('Ошибка в процессе парсинга файла: '+query)
         
     flash('Число импортированных записей: '+str(count))
     return redirect(url_for('control'))
@@ -685,28 +680,36 @@ def export_json():
     json_row=[]
     json_row2=[]
 
-    if request.args.get('uuid') is not None:
-        uuid = request.args.get('uuid')
-        if uuid is not None:
-            resources=engine.execute('select resources.id, hash, type_id from resources where BINARY resources.hash=%s', [uuid]).fetchall()
+    
+    if request.args.get('id') is not None:
+        r = re.findall(r"(^.+)-([\d]+)", request.args.get('id'))
+        typename = r[0][0]
+        id=r[0][1]
+        
+        types = db_session.query(Types).filter(Types.name==typename).one()
+        
+        #return str(typename)+"; "+str(id)+"; "+str(types.id)
+        
+        if id is not None and types.id is not None:
+            resources=engine.execute('select resources.id, hash, type_id from resources where BINARY resources.hash=%s and type_id=%s', [id, types.id]).fetchall()
 
         for res_id, hash, type_id in resources:
-            entries=engine.execute('select id, name, opttype, dict_id from options where type_id in (select type_id from resources where hash=%s)',[uuid]).fetchall()
+            entries=engine.execute('select id, name, opttype, dict_id from options where type_id in (select type_id from resources where hash=%s and type_id=%s)',[id, types.id]).fetchall()
 
             for opt_id, v, opttype, dict_id in entries:
                     
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
                 try:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
+                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=""))
+                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value="" ))
             
             json_row2.append( (json_row) )
             json_row=[]
             
             return simplejson.dumps(json_row2)
     
-    else: # Если uuid задан, отдаем пустую страницу
+    else: # Если id задан, отдаем пустую страницу
         return render_template( 'index.html', entries="", cols_names="", typename="", page=0, COUNT_PAGE=0)
 
 

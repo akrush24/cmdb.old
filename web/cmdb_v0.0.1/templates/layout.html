@@ -61,7 +61,7 @@ ul.ui-autocomplete {
         </form>
         
         <ul class="nav navbar-nav navbar-right">
-            <a class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новая заявка</a>
+            <a class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новый item</a>
             <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
             &nbsp;
             <a href="{{ url_for('logout') }}" class="btn btn-default navbar-btn" role="button"><span class="glyphicon glyphicon-log-out"></span>&nbsp;{{ session.login }}</a>
@@ -79,12 +79,12 @@ ul.ui-autocomplete {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Добавить новый ресурс</h4>
+        <h4 class="modal-title" id="myModalLabel">Добавить новый Item</h4>
       </div>
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form name="Ticketform" id="addNewTicket" action="{{ url_for('newres') }}" method="post">
+				<form name="Ticketform" id="addNewTicket" action="{{ url_for('new_item') }}" method="post">
                     <select class="form-control" id="type_id_ticket" name="type_id"><option disabled>Выбрать</option></select>
                     <div id="FrmFieldsDiv"></div> <!--Динамические поля ввода -->
                     <button type="submit"  class="btn hide"></button>
@@ -157,11 +157,11 @@ ul.ui-autocomplete {
 
 
     
-<script> // Отрисовка меню ресурсов
+<script> // Отрисовка меню item
  $(function(){
 $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 	for ( var i in menulist) {
-	$('#dropMenu').prepend('<li><a href="{{ url_for('index') }}list/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li>');
+	$('#dropMenu').prepend('<li><a href="{{ url_for('index') }}browse/'+menulist[i].name+'"><b>'+menulist[i].name + '</b>&nbsp;&nbsp;<span class="badge pull-right">'+menulist[i].value + '</span></a></li>');
 	  };
 		});
 		  });
@@ -169,6 +169,9 @@ $.getJSON('{{ url_for('get_user_menu') }}', function(menulist) {
 
 
 <script> // Редактирование итема вызывается чере функцию edit_item(hashofitem);
+
+
+
 $('#editItem').on('show.bs.modal', function (e) {
     $('#editItem').on('hidden.bs.modal', function (e) { // очищаем DOM дерево при закрытии
 	$( "#itemOption" ).empty(); // очищаем DOM дерево предыдущих полей ввода -->
@@ -176,7 +179,7 @@ $('#editItem').on('show.bs.modal', function (e) {
     
  
     $(function(){
-                $.getJSON('{{ url_for('export_json') }}?uuid='+uuid+'', function(objj) {
+                $.getJSON('{{ url_for('export_json') }}?id='+val_param_id+'', function(objj) {
                 var obj = []; 
                 obj = objj[0]; // в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
                 for ( var i in obj) { 
@@ -199,7 +202,7 @@ $('#editItem').on('show.bs.modal', function (e) {
 	
 	
 	if (obj[i].opttype == "dict") {
-	drawselectlist(obj[i].opt_id,obj[i].name,obj[i].opttype,obj[i].value); //вызываем функцию отрисовки selectlist
+	drawselectlist(obj[i].opt_id,obj[i].name,obj[i].opttype,obj[i].value); //вызываем функцию отрисовки drawselectlist
 
     function drawselectlist(optid,nm,opt,vlm){ //функция отрисовки selectlist
 			$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="selid'+optid+'" name="id'+optid+'"></select>'); 
@@ -216,8 +219,8 @@ $('#editItem').on('show.bs.modal', function (e) {
    
 	
     };
-	$("#itemOption").append('<div><input type="hidden" name="uuid" value='+uuid+'></div>');
-    $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?hash='+uuid+'"></div>');
+	$("#itemOption").append('<div><input type="hidden" name="id" value='+val_param_id+'></div>');
+    $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?id='+val_param_id+'"></div>');
     loginAutoComplite(); // Подгружает автодополнение login для классов .login
 	});
     });
@@ -292,13 +295,10 @@ $('#type_id_ticket').on('change',function(){
 					}); //end getJson
 			}
 	}; //end dict if
-											
           }  //endFor 
           });
-		  
           }; //endDrawfields
 
-		 
 $("#addticketsubmit").click(function() //отправка данных формы
         {
         $("form[name='Ticketform']").submit();

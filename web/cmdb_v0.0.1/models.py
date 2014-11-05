@@ -6,7 +6,7 @@ class Resources(db.Model):
     __tablename__ = 'resources'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
-    hash = db.Column(db.String(10), unique = False)
+    hash = db.Column(db.Integer)
     resid=db.Column(db.Integer)
     user = db.Column(db.String(50))
     create_date = db.Column(db.DateTime)
