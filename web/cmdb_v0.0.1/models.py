@@ -79,4 +79,11 @@ class Score(db.Model):
     type_id =  db.Column(db.Integer, db.ForeignKey('types.id'), unique = True)
     score = Column(Integer)
 
+class Relation(db.Model):
+    __tablename__ = 'relation'
+    id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('types.id'), unique = True)
+    option_id = db.Column(db.Integer, db.ForeignKey('option.id'), unique = True)
+
+
 
