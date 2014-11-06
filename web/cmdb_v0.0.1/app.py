@@ -75,8 +75,8 @@ def del_type(id):
 @app.route('/clear_type/<int:id>')
 def clear_type(id):
     try:
-        engine.execute('delete from value where res_id in (select id from resources where type_id=%s)', [id])
-        engine.execute('delete from resources where type_id=%s', [id])
+        engine.execute('delete from value where res_id in (select id from items where type_id=%s)', [id])
+        engine.execute('delete from items where type_id=%s', [id])
         flash('Данные почищены')
     except:
        flash('This parameter is used!')
@@ -100,7 +100,7 @@ def get_user_menu():
     json_row=[]
     
     for en in entries:
-        value=engine.execute('select count(id) from resources where type_id=%s', [en[0]]).fetchall()[0][0]
+        value=engine.execute('select count(id) from items where type_id=%s', [en[0]]).fetchall()[0][0]
         json_row.append(dict(en, value=value))
         
     #return en[1]
@@ -112,6 +112,7 @@ def get_user_menu():
     
 #......................................................#
 #### Обработка свойств\опций ####
+
 @app.route('/new_option/', methods=['GET', 'POST'])
 def new_option():
     test=""
@@ -139,18 +140,24 @@ def del_option(id):
 
 @app.route('/edit_option/', methods=['GET', 'POST'])
 def edit_option():
-    opt = db_session.query(Options).filter(Options.id==request.form['id']).one()
-    opt.name=request.form['name']
-    opt.description=request.form['description']
-    opt.user_visible=request.form['user_visible']
-    opt.front_page_visible=request.form['front_page_visible']
-    opt.required=request.form['required']
-    try:
-        opt.dict_id=request.form['dict_id']
+    try: # поле request.form['dict_id'] приходит не во всех случаях, поэтому специально инициализируем эту переменную
+        dict_id=request.form['dict_id']
     except:
-        pass
-    opt.option_type=request.form['option_type']
-    db_session.flush()
+        dict_id=None
+    if request.form['id'] == 'new':
+        new_option=Options(name=request.form['name'],description=request.form['description'],user_visible=request.form['user_visible'],front_page_visible=request.form['front_page_visible'],required=request.form['required'],option_type=request.form['option_type'], dict_id=dict_id )
+        db_session.add( new_option )
+        #db_session.commit()
+    else:
+        opt = db_session.query(Options).filter(Options.id==request.form['id']).one()
+        opt.name=request.form['name']
+        opt.description=request.form['description']
+        opt.user_visible=request.form['user_visible']
+        opt.front_page_visible=request.form['front_page_visible']
+        opt.required=request.form['required']
+        opt.dict_id=dict_id
+        opt.option_type=request.form['option_type']
+        db_session.flush()
 
     return redirect(url_for('control'))
 
@@ -175,7 +182,12 @@ def get_list_option():
     if type_id is not None:
         cur = engine.execute('select * from options where type_id = %s order by id desc', [type_id])
     elif opt_id is not None:
-        cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
+        if opt_id=='new':
+            #cur = engine.execute('select * from options where id = 1 order by id desc')
+            return '[{"front_page_visible": "", "description": "", "type_id": "", "required": "", "option_type": "", "user_visible": "", "dict_id": "", "name": ""}]'
+        else:
+            cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
+            
     else:
         cur = engine.execute('select * from options order by id desc')
         
@@ -218,8 +230,6 @@ def get_list_user():
         json_row.append(dict(en))
     
     return simplejson.dumps(json_row)
-
-
 
 @app.route('/get_list_user_ldap/', methods=['GET'])
 def get_list_user_ldap():
@@ -323,8 +333,8 @@ def del_res(itemid):
     id=r[0][1]
     typename=r[0][0]
 
-    engine.execute('delete from value where res_id in (SELECT id FROM resources Where hash=%s and type_id in (select id from types where name=%s))', [id, typename])
-    engine.execute('delete from resources where hash=%s and type_id in (select id from types where name=%s)', [id, typename])
+    engine.execute('delete from value where res_id in (SELECT id FROM items Where hash=%s and type_id in (select id from types where name=%s))', [id, typename])
+    engine.execute('delete from items where hash=%s and type_id in (select id from types where name=%s)', [id, typename])
     return redirect(url_for('index', typename=typename))
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -332,14 +342,14 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 
 # Создание..............................................
-def addres(type_id): # добавляем новый элемент в таблицу Resources
+def addres(type_id): # добавляем новый элемент в таблицу items
     score = db_session.query(Score).filter(Score.type_id==type_id).one()
     # увеличиваем количество итемов по данному ресурсы +1
     score.score = score.score+1
     db_session.flush()
     
-    engine.execute('insert into resources (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [score.score, type_id, session['login'], datetime.datetime.now() ])
-    res_id=engine.execute('select id from resources where hash=%s limit 1', [score.score]).fetchall()[0][0]
+    engine.execute('insert into items (hash, type_id, user, create_date) values (%s, %s, %s, %s)', [score.score, type_id, session['login'], datetime.datetime.now() ])
+    res_id=engine.execute('select id from items where hash=%s limit 1', [score.score]).fetchall()[0][0]
 
     return res_id
 
@@ -377,12 +387,12 @@ def editres():
                 
                 option_exist=None
                 try:
-                    option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from resources where hash=%s and type_id=%s)', [option_id, id, types.id]).fetchall()[0][0]
-                    engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from resources where hash=%s and type_id=%s)', [value, option_id, id, types.id] )
+                    option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from items where hash=%s and type_id=%s)', [option_id, id, types.id]).fetchall()[0][0]
+                    engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from items where hash=%s and type_id=%s)', [value, option_id, id, types.id] )
                 except IndexError:
-                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from resources where hash=%s and type_id=%s))', [option_id, value, id, types.id] )
+                    engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from items where hash=%s and type_id=%s))', [option_id, value, id, types.id] )
         try:
-            typename=engine.execute('select types.name from types, resources where resources.type_id=types.id and resources.hash=%s and resources.type_id=%s', [id, types.id]).fetchall()[0][0]
+            typename=engine.execute('select types.name from types, items where items.type_id=types.id and items.hash=%s and items.type_id=%s', [id, types.id]).fetchall()[0][0]
         except:
             typename=""
         return redirect(url_for('index', typename=typename)+'?id='+request.form['id'])
@@ -415,11 +425,11 @@ def index(typename, page):
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
         if uuid is not None:
-            resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
-            count=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+            items=engine.execute('select items.id, hash from items where BINARY items.hash=%s and items.type_id=%s', [uuid, typeid]).fetchall()
+            count=engine.execute('select count(id) from items where items.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         else:
             ROW_IN_PAGE=50 # Число строк на одну таблицу
-            COUNT_RES=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+            COUNT_RES=engine.execute('select count(id) from items where items.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
             
             if COUNT_RES != 0:
                 COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5, 0)
@@ -427,13 +437,13 @@ def index(typename, page):
                 COUNT_PAGE=0
             COUNT_PAGE=int(COUNT_PAGE)
                 
-            resources=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc LIMIT %s, %s',
+            items=engine.execute('select items.id, hash from items where items.type_id=%s order by id desc LIMIT %s, %s',
             [typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
 
             count=COUNT_RES-(page-1)*ROW_IN_PAGE
         
-        for res_id, hash in resources:
-            #creator=engine.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
+        for res_id, hash in items:
+            #creator=engine.execute('select items.user from items where items.id=%s',[res_id]).fetchall()[0][0]
             entries=engine.execute('select id,name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
             key=['Код']
             key_id=['UUID']
@@ -560,7 +570,7 @@ def control(action):
     type_count={}
     count = engine.execute('select id from types').fetchall()
     for val in count:
-        type_count[val[0]]=( engine.execute('select count(id) from resources where type_id=%s', val).fetchall()[0][0] )
+        type_count[val[0]]=( engine.execute('select count(id) from items where type_id=%s', val).fetchall()[0][0] )
         
     opt_count={}
     count = engine.execute('select id from options').fetchall()
@@ -635,7 +645,7 @@ def import_csv(type_id):
 def export_csv(typename):
     if typename is not None:
         try:
-            res_id = db_session.query(Resources.id).filter(Resources.type_id==db_session.query(Types.id).filter(Types.name==typename))
+            res_id = db_session.query(items.id).filter(items.type_id==db_session.query(Types.id).filter(Types.name==typename))
             opt_id = db_session.query(Options.id).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename))
         except:
             flash('Некорректный тип')
@@ -689,10 +699,10 @@ def export_json():
         #return str(typename)+"; "+str(id)+"; "+str(types.id)
         
         if id is not None and types.id is not None:
-            resources=engine.execute('select resources.id, hash, type_id from resources where BINARY resources.hash=%s and type_id=%s', [id, types.id]).fetchall()
+            items=engine.execute('select items.id, hash, type_id from items where BINARY items.hash=%s and type_id=%s', [id, types.id]).fetchall()
 
-        for res_id, hash, type_id in resources:
-            entries=engine.execute('select id, name, option_type, dict_id from options where type_id in (select type_id from resources where hash=%s and type_id=%s)',[id, types.id]).fetchall()
+        for res_id, hash, type_id in items:
+            entries=engine.execute('select id, name, option_type, dict_id from options where type_id in (select type_id from items where hash=%s and type_id=%s)',[id, types.id]).fetchall()
 
             for opt_id, v, option_type, dict_id in entries:
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
@@ -716,8 +726,8 @@ def search():
     str = request.args.get('term')
     if str != "":     
         JSON=[]
-        #t=db_session.query(Types.name,Options.id,Resources.hash,Value.value).filter(Value.value.like('%'+str+'%')).filter(Value.option_id==Options.id).filter(Value.res_id==Resources.id).filter(Types.id==Resources.type_id).limit(15)
-        for value in engine.execute( '''select types.name as type, value.value, options.name as opt, resources.hash from types, resources, value, options where value like %s and value.option_id=options.id and value.res_id=resources.id and types.id=resources.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():        
+        #t=db_session.query(Types.name,Options.id,items.hash,Value.value).filter(Value.value.like('%'+str+'%')).filter(Value.option_id==Options.id).filter(Value.res_id==items.id).filter(Types.id==items.type_id).limit(15)
+        for value in engine.execute( '''select types.name as type, value.value, options.name as opt, items.hash from types, items, value, options where value like %s and value.option_id=options.id and value.res_id=items.id and types.id=items.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():        
             JSON.append(dict(value))
         return simplejson.dumps(JSON,sort_keys=True,indent=4)
     return redirect(url_for('index'))

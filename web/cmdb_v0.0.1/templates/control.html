@@ -8,7 +8,7 @@
 		<span class="glyphicon glyphicon-plus"></span> Тип
 	</button>
 
-	<button class="btn btn btn-default" data-toggle="modal" data-target="#addOptions">
+	<button class="btn btn btn-default"  onClick="edit_option_view('new')">
 		<span class="glyphicon glyphicon-plus"></span> Добавить опцию
 	</button>
     
@@ -76,8 +76,8 @@
     <!-- Modal addType -->
     
     
-    <!-- Modal edit addOptions -->
-<div class="modal fade" id="addOptions" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- Modal edit addOption 
+<div class="modal fade" id="addOption" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -87,10 +87,13 @@
       <div class="modal-body">			
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
-				<form id="addOptionsForm" action="{{ url_for('new_option') }}" method="post">
-                    <select class="form-control" id="type_id" name="type_id">
+				<form id="addOptionForm" action="{{ url_for('new_option') }}" method="post">
+                    <div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="option_name" name="option_name"  placeholder="name" value="" required""></div>
+                    
+                    <select class="form-control" id="option_type" name="option_type">
 						<option disabled>Тип</option>
-                    </select><br>
+                    </select>
+                    
                     <div id="inputNewOption">
 				</form>
 			</div>
@@ -99,14 +102,14 @@
       <div class="modal-footer">
         <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionsForm').submit();"> Сохранить</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionForm').submit();"> Сохранить</button>
         
       </div>
     </div>
   </div>
 </div>
 </div>
-    <!-- Modal addoptions -->
+     Modal addOption -->
     
     
         <!-- Modal addUser -->
@@ -197,39 +200,15 @@ $(function() {
 
 
 <script> //окно редактирования и добавления опций
-$('#addOptions').on('show.bs.modal.bs.modal', function (e) {
-$(function(){
- $.getJSON('{{ url_for('get_list_type') }}', function(data) {
-  for (var i in data) {
-    $('#type_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-      };  
-        });
-            });
+$('#addOption').on('show.bs.modal', function (e) {
 
-$('#type_id').change(function(){                                //подгрузка опций для типа
-	var sellectedtype = $('#type_id option:selected').val();  // если выбран тип (изменён), то подгружаем нужные опции
-		$( "#inputNewOption" ).empty();                                 //очищаем контейнер от предыдущих объектов
-	$(function(){                                           //сама функция подгрузки опций
-	$.getJSON('{{ url_for('get_list_option') }}?type='+sellectedtype+'', function(data) {
-	for (var i in data) {
-		$('#inputNewOption').append('<div><input type="text" class="form-control" name="id' + data[i].id + '" placeholder="' + data[i].name + '" value="' + data[i].name + '" required=""/></div>');
-		};   }); });  }); //Конец функции выбора типа
-
-
-$(function() { //добавить поле ввода
-    var iditer=1; // Итератор id для нового newid
-    $('#addbtn').click(function() {
-    $('#inputNewOption').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новую опцию" required="" autocomplete="off" /></div>')
-    iditer=iditer+1;
-    });
-    });
     });
 </script>
 
 <script> //edit option view
 $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
    
-   $('#editoptionss').on('hidden.bs.modal', function (e) {
+  $('#editoptionss').on('hidden.bs.modal', function (e) {
   $( "#selecttypediv" ).empty();
   $( "#editoptionstype" ).empty();
   $( "#fields" ).empty();
@@ -297,7 +276,7 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
                         });
                     };  
             $("#editoptionstype").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
-       
+            
         }); //endChangefunction
     
     }); //endgetjson
