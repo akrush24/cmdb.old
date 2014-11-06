@@ -154,7 +154,7 @@
                     <div class="form-group">
 						<div class="input-group">
 							<div class="input-group-addon">Вид поля</div>
-							<select class="form-control" id="changeOptType" name="opttype">
+							<select class="form-control" id="changeoption_type" name="option_type">
 							<option disabled>Вид поля</option>
 							<option value="dict">Dict</option>
 							<option value="date">Date</option>
@@ -164,7 +164,7 @@
 							</select>
 						</div>
 					</div>
-					
+					<div id="fields"></div>
 					<div id="selecttypediv"></div> <!-- Рисуем динамические поля -->
                     <div id="editoptionstype"></div>
 				</form>
@@ -232,42 +232,40 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
    $('#editoptionss').on('hidden.bs.modal', function (e) {
   $( "#selecttypediv" ).empty();
   $( "#editoptionstype" ).empty();
+  $( "#fields" ).empty();
  // очищаем DOM дерево предыдущих полей ввода -->
 });
 
 
-    var c_name; <!-- Временные переменные -->
-    var c_type_id;
-    var c_description;
-    var c_optdict;
-    var c_user_visible;
-    var c_front_page;
-    var c_required;
-    var c_dict_id;
-	//var c_id; id опции
+	//var id; id опции
     var select_visible;
     var select_frontpage; <!-- Временные переменные -->
-    
 
     $(function(){
                 $.getJSON('{{ url_for('get_list_option') }}?&opt_id='+c_id+'', function(obji) {
-                for ( var i in obji) { jQuery.each(obji[i], function(key, val) {
-            if  (key == "name" ) { c_name = val }; // имя
-            if  (key == "type_id" ) { c_type_id = val }; // id типа
-            if  (key == "description" ) { c_description = val}; // описание опции
-            if  (key == "opttype" ) { c_opttype = val};  // Вид опции. dict, date, inputtext, email, note
-            if  (key == "user_visible" ) { c_user_visible = val}; //видно пользователю?
-            if  (key == "front_page" ) { c_front_page = val}; // показывать на главной? 
-			if  (key == "required" ) { c_required = val}; // обязательное поле?
-            if  (key == "dict_id" ) { c_dict_id = val}; //id справочника
-			});
-    $("#selecttypediv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+c_type_id+'" name="name"  placeholder="'+c_name+'" value="'+c_name+'" required=""></div><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="description" name="description" value="'+c_description+'" required=""></div>'); //name=name, description=description.
-    if (c_opttype == undefined) { // если в типе ничего не пришло то ...
-		c_opttype = "input"; // присвоить тип как Input
-		$("#changeOptType").val(c_opttype); // выбрать в меню input
-	} else { $("#changeOptType").val(c_opttype); }; //или если 
+                for ( var i in obji) { 
+                var dict_id_value = obji[i].dict_id;
+                drawoptionsview(obji[i].option_type,obji[i].dict_id); // выполняем функцию отрисовки
+    
+    $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+obji[i].type_id+'" name="name"  placeholder="'+obji[i].name+'" value="'+obji[i].name+'" required=""></div>'); //name=name
+    $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="description" name="description" value="'+obji[i].description+'" required=""></div>'); //description=description.
+    $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Показывать пользователю?</div><select class="form-control" id="user_visible" name="user_visible"><option disabled>Справочник</option><option value="1">Да</option><option value="0">Нет</option></select>');
+    $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Показывать на главной?</div><select class="form-control" id="front_page_visible" name="front_page_visible"><option disabled>Справочник</option><option value="1">Да</option><option value="0">Нет</option></select>');
+    $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Обязательно к заполнению?</div><select class="form-control" id="required" name="required"><option disabled>Справочник</option><option value="1">Да</option><option value="0">Нет</option></select>');
+        $("#user_visible").val(obji[i].user_visible);
+        $("#front_page_visible").val(obji[i].front_page_visible);
+        $("#required").val(obji[i].required);
+    }; //endFor
+
+    function drawoptionsview(opt_tp,dict_id_value) {
+    if (opt_tp == undefined || opt_tp == "input" ) { // ничего или input то установить как input
+		opt_tp = "input"; // присвоить тип как Input
+		$("#changeoption_type").val(opt_tp); // выбрать в меню input
+	} else { 
+            $("#changeoption_type").val(opt_tp); 
+                }; //или если 
 	
-    if (c_opttype == "dict") {
+    if (opt_tp == "dict") {
         $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>'); //name=dict_id, 
         $(function(){
             $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
@@ -279,37 +277,35 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
                 });
             
                 });
+        $('#dict_list_id').val(dict_id_value);
        };
-
-        $('#changeOptType').change(function(){  //выбор вида опции
+       }; //end func
+       
+       $('#changeoption_type').change(function(){  //выбор вида опции
         $( "#editoptionstype" ).empty(); //чистим контейнер
-        var sellectedtype = $('#changeOptType option:selected').val();  // если изменили вид опции то ...
+        var sellectedtype = $('#changeoption_type option:selected').val();  // если изменили вид опции то ...
         
         if (sellectedtype == "dict") {
-            $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>');
+            $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Выбрать</option></select>');
             $(function(){
                 $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
-                var i = -1;
-                $.each(data, function(id, name) { 
-                    i=i+1;
+                for(var i in data) { 
                     $('#dict_list_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-                    });  
-                    });
-                    //$("#dict_list_id").val(c_dict_id);
-                    });
-                    };
+                                                };  
+                                                                           });
+                    $("#dict_list_id").val(dict_id_value);
+                        });
+                    };  
             $("#editoptionstype").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
        
-        });
+        }); //endChangefunction
     
-    
-    
-    };
+    }); //endgetjson
 	$("#editoptionstype").append('<div><input type="hidden" name="id" value='+c_id+'></div>');
     });
     });
     
-   });         
+           
 </script>
 
 
@@ -383,11 +379,9 @@ $('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
         {% endfor %}
         
         {% if session.logged_in %}
-            
-            
             <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
-            <td><a class="glyphicon glyphicon-wrench" onClick="edit_option_view({{ entry.id }})" href="#"></a></td></td>
-            <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
+            <td nowrap="nowrap"><a class="glyphicon glyphicon-wrench" onClick="edit_option_view({{ entry.id }})" href="#"></a></td></td>
+            <td nowrap="nowrap"><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
         {% endif %}
 
     </tr>

@@ -142,11 +142,14 @@ def edit_option():
     opt = db_session.query(Options).filter(Options.id==request.form['id']).one()
     opt.name=request.form['name']
     opt.description=request.form['description']
+    opt.user_visible=request.form['user_visible']
+    opt.front_page_visible=request.form['front_page_visible']
+    opt.required=request.form['required']
     try:
         opt.dict_id=request.form['dict_id']
     except:
         pass
-    opt.opttype=request.form['opttype']
+    opt.option_type=request.form['option_type']
     db_session.flush()
 
     return redirect(url_for('control'))
@@ -183,9 +186,8 @@ def get_list_option():
     
     return simplejson.dumps(json_row)
 
-    
-    
-    
+
+
     
 #......................................................#
 #### Обработка пользователей ####
@@ -388,15 +390,22 @@ def editres():
 
 # ..........................................................................
 ##### Главная страница .................................................####
+@app.route('/browse/', defaults={'typename': None, 'page': 1})
 @app.route('/browse/<typename>/<int:page>/')
 @app.route('/browse/<typename>/', defaults={'page': 1})
 @app.route('/', defaults={'typename': None, 'page': 1})
 def index(typename, page):
     val2=[]
-    json_row=[]
-    json_col=[]
-    json_row2=[]
-
+    key=[]
+    
+    try: # если передается переменная id (прим: ?id=SERVER-2) то по ней вычисляется имя Типа
+        request.args.get('id')
+        r = re.findall(r"(^.+)-([\d]+)", request.args.get('id'))
+        id=r[0][1]
+        typename = r[0][0]
+    except:
+        pass
+    
     if typename is not None:
         uuid = request.args.get('uuid')
         try:
@@ -408,9 +417,6 @@ def index(typename, page):
         if uuid is not None:
             resources=engine.execute('select resources.id, hash from resources where BINARY resources.hash=%s and resources.type_id=%s', [uuid, typeid]).fetchall()
             count=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
-        elif request.args.get('save') is not None:
-            resources=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()
-            count=engine.execute('select resources.id, hash from resources where resources.type_id=%s order by id desc',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
         else:
             ROW_IN_PAGE=50 # Число строк на одну таблицу
             COUNT_RES=engine.execute('select count(id) from resources where resources.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
@@ -428,14 +434,12 @@ def index(typename, page):
         
         for res_id, hash in resources:
             #creator=engine.execute('select resources.user from resources where resources.id=%s',[res_id]).fetchall()[0][0]
-            entries=engine.execute('select id,name from options where type_id=%s',[typeid]).fetchall()
+            entries=engine.execute('select id,name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
             key=['Код']
             key_id=['UUID']
             g=typename+'-'+str(hash)
             val=[g]
             count=count-1
-            json_col=[]
-            json_col.append( dict(uuid=hash) )
             
             for opt_id, v in entries:
                 try:
@@ -448,29 +452,19 @@ def index(typename, page):
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
                     val.append(entries[0][0])
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=entries[0][0] ))
                 except:
                     val.append("")
-                    json_row.append( dict( uuid=hash, opt_id=opt_id, name=v, value=""))
             
             val2.append(val)
-            
-            json_row2.append( (json_row) )
-            json_row=[]
     
     else: # Если тип не задан, отдаем пустую страницу
         return render_template( 'index.html', entries="", cols_names="", page=0, COUNT_PAGE=0)
-        
-    ### Экспорт в JSON
-    if request.args.get('json') is not None:
-        return simplejson.dumps(json_row2)
          
     ### Отображение таблицы на главном экране
-    else:
-        try:
-            return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE)
-        except:
-            return render_template( 'index.html', entries="", cols_names="", typename=typename, type_id=typeid, page=0, COUNT_PAGE=0)
+    #try:
+    return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE)
+    #except:
+         #return render_template( 'index.html', entries="", cols_names="", typename=typename, type_id=typeid, page=0, COUNT_PAGE=0)
 
 
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
@@ -698,21 +692,18 @@ def export_json():
             resources=engine.execute('select resources.id, hash, type_id from resources where BINARY resources.hash=%s and type_id=%s', [id, types.id]).fetchall()
 
         for res_id, hash, type_id in resources:
-            entries=engine.execute('select id, name, opttype, dict_id from options where type_id in (select type_id from resources where hash=%s and type_id=%s)',[id, types.id]).fetchall()
+            entries=engine.execute('select id, name, option_type, dict_id from options where type_id in (select type_id from resources where hash=%s and type_id=%s)',[id, types.id]).fetchall()
 
-            for opt_id, v, opttype, dict_id in entries:
-                    
+            for opt_id, v, option_type, dict_id in entries:
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
                 try:
-                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
+                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, option_type=option_type, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, opttype=opttype, dict_id=dict_id, type_id=type_id, value="" ))
-            
+                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, option_type=option_type, dict_id=dict_id, type_id=type_id, value="" ))
             json_row2.append( (json_row) )
             json_row=[]
-            
+
             return simplejson.dumps(json_row2)
-    
     else: # Если id задан, отдаем пустую страницу
         return render_template( 'index.html', entries="", cols_names="", typename="", page=0, COUNT_PAGE=0)
 
@@ -725,7 +716,8 @@ def search():
     str = request.args.get('term')
     if str != "":     
         JSON=[]
-        for value in engine.execute( '''select types.name as type, value.value, options.name as opt, resources.hash from types, resources, value, options where value like %s and value.option_id=options.id and value.res_id=resources.id and types.id=resources.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():
+        #t=db_session.query(Types.name,Options.id,Resources.hash,Value.value).filter(Value.value.like('%'+str+'%')).filter(Value.option_id==Options.id).filter(Value.res_id==Resources.id).filter(Types.id==Resources.type_id).limit(15)
+        for value in engine.execute( '''select types.name as type, value.value, options.name as opt, resources.hash from types, resources, value, options where value like %s and value.option_id=options.id and value.res_id=resources.id and types.id=resources.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():        
             JSON.append(dict(value))
         return simplejson.dumps(JSON,sort_keys=True,indent=4)
     return redirect(url_for('index'))

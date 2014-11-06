@@ -36,9 +36,9 @@ class Options(db.Model):
     name = db.Column(db.String(100), unique = False)
     type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
     description = db.Column(db.String(100), unique = False)
-    opttype = db.Column(db.String(10), unique = False)
+    option_type = db.Column(db.String(10), unique = False)
     user_visible = db.Column(db.Integer)
-    front_page = db.Column(db.Integer)
+    front_page_visible = db.Column(db.Integer)
     required = db.Column(db.Integer)
     dict_id = db.Column(db.Integer, db.ForeignKey('dict.id'))
 

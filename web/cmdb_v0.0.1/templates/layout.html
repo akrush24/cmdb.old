@@ -184,25 +184,25 @@ $('#editItem').on('show.bs.modal', function (e) {
                 obj = objj[0]; // в каждом массиве приходит ещё один массив, данные лежат в массиве с индексом 0 -->
                 for ( var i in obj) { 
 
-	if (obj[i].opttype == undefined || obj[i].opttype == "input" ) {
+	if (obj[i].option_type == undefined || obj[i].option_type == "input" ) {
 		$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
 		};
 		
-	if (obj[i].opttype == "textarea") { 
+	if (obj[i].option_type == "textarea") { 
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><textarea class="form-control" rows="3" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'">'+obj[i].value+'</textarea></div></div>'); 
     };
 	
-	if (obj[i].opttype == "date") { 
+	if (obj[i].option_type == "date") { 
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="date" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
     };
 	
-	if (obj[i].opttype == "login") {
+	if (obj[i].option_type == "login") {
     $("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control login" id="i'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" autocomplete="off" required=""></div></div>'); 
     };
 	
 	
-	if (obj[i].opttype == "dict") {
-	drawselectlist(obj[i].opt_id,obj[i].name,obj[i].opttype,obj[i].value); //вызываем функцию отрисовки drawselectlist
+	if (obj[i].option_type == "dict") {
+	drawselectlist(obj[i].opt_id,obj[i].name,obj[i].option_type,obj[i].value); //вызываем функцию отрисовки drawselectlist
 
     function drawselectlist(optid,nm,opt,vlm){ //функция отрисовки selectlist
 			$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="selid'+optid+'" name="id'+optid+'"></select>'); 
@@ -220,7 +220,7 @@ $('#editItem').on('show.bs.modal', function (e) {
 	
     };
 	$("#itemOption").append('<div><input type="hidden" name="id" value='+val_param_id+'></div>');
-    $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/?id='+val_param_id+'"></div>');
+    $("#itemOption").prepend('<div class="form-group"><div class="input-group"><div class="input-group-addon">Ссылка</div><input type="text" class="form-control" value="http://cmdb.at-consulting.ru/browse/?id='+val_param_id+'"></div>');
     loginAutoComplite(); // Подгружает автодополнение login для классов .login
 	});
     });
@@ -265,25 +265,25 @@ $('#type_id_ticket').on('change',function(){
     $.getJSON('{{ url_for('get_list_option') }}?type='+select+'', function(data) {
          for (var i in data) {
 		  
-    if (data[i].opttype == "input" || data[i].opttype == undefined ) {
+    if (data[i].option_type == "input" || data[i].option_type == undefined ) {
 	$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
            };
 			
-	if (data[i].opttype == "textarea") { 
+	if (data[i].option_type == "textarea") { 
     $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><textarea class="form-control" rows="3" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'"></textarea></div></div>'); 
     };
 	
-	if (data[i].opttype == "date") { 
+	if (data[i].option_type == "date") { 
     $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="date" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
     };
 	
-	if (data[i].opttype == "login") {
+	if (data[i].option_type == "login") {
     $("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control login" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" autocomplete="off" required=""></div></div>'); 
     loginAutoComplite(); //Добавим полю живой поиск пользователя
 	};
 	
-	if (data[i].opttype == "dict") {
-	drawnewitem(data[i].id,data[i].name,data[i].opttype,0); //вызываем функцию отрисовки selectlist
+	if (data[i].option_type == "dict") {
+	drawnewitem(data[i].id,data[i].name,data[i].option_type,0); //вызываем функцию отрисовки selectlist
 
     function drawnewitem(optid,nm,opt,vlm){ //функция отрисовки selectlist
 			$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+nm+'</div><select class="form-control" id="sel'+optid+'" name="id'+optid+'"></select>'); 
@@ -333,8 +333,8 @@ $( "#name" ).autocomplete({
         });
       },
       select: function (event, ui) {
-              var thisuuid = ui.item.value;
-              edit_item(thisuuid);        //  магия! если нажать на элемент меню откроется редактирование элемента
+              var itemid = ui.item.value;
+              edit_item(itemid);        //  магия! если нажать на элемент меню откроется редактирование элемента
     },
       
       
