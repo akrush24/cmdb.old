@@ -22,7 +22,7 @@
     
     <!-- Modal addDict -->
 <div class="modal fade" id="addDict" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -32,8 +32,9 @@
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				<form id="adddictform" action="{{ url_for('new_dict') }}" method="post">
-				    <input type="text" class="form-control" placeholder="Введите имя справочника" name="name" autocomplete="off" /> <br>
-                    <div id="dictline"></div>
+				    <input type="text" class="form-control" placeholder="Введите имя справочника" id="enterdictname" name="name" autocomplete="off" /> <br>
+                    <div id="dictllist"></div>
+                    <div id="dictfields"></div>
 				</form>
 			</div>	
     	</div> 
@@ -48,6 +49,42 @@
 </div>
     <!-- Modal addType -->
 
+    <script>// Добавление справочника
+$('#addDict').on('hidden.bs.modal', function (e) {
+$("#dictfields").empty();
+$("#dictllist").empty();
+ });
+    
+$('#addDict').on('show.bs.modal', function (e) {
+$(function(){   
+                $("#dictllist").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dicts" name="dicts"><option>None</option></select></div>');
+                $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
+                for ( var i in data) { 
+                $("#dicts").append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                $("#dicts").val(data[i].name);
+                }
+          });
+          $('#dicts').change(function(){ 
+          $("#dictfields").empty();
+          var dictidsellected = $('#dicts option:selected').val();
+          $("#enterdictname").val($('#dicts option:selected').text());
+          $.getJSON('{{ url_for('get_list_dict') }}?dict_id='+dictidsellected+'', function(data) {
+                for ( var i in data) { 
+                $("#dictfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="description" name="id'+data[i].val_id+'" value="'+data[i].value+'" required=""></div>');
+                }
+          });
+          }); //endchange
+
+$(function() { //Добавить новое поле
+	$('#adddictlineBtn').click(function() {
+	$('#dictfields').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="description" name="new" value="" required=""></div>')
+	});
+	});
+    
+    });
+    });
+</script>
+
 
     <!-- Modal addType -->
 <div class="modal " id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -61,8 +98,7 @@
       	 <div class="container-fluid" >
       	 	<div class="col-lg-6" >
 				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
-				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" /> <br>
-				
+				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" />
 				<div id="selectoption"></div>
 				<div id="availableloption"></div>
                 </form>
@@ -192,15 +228,7 @@ $('#addType').on('show.bs.modal', function (e) {
 </script> 
 
 
-<script>// Добавление справочника
-$(function() { 
-		var iditer=1; // Итератор для нового newid
-	$('#adddictlineBtn').click(function() {
-	$('#dictline').append('<div><input type="text" class="form-control" name="newid'+iditer+'" placeholder="Введите новое значение" required="" autocomplete="off" /></div>')
-		iditer=iditer+1;
-	});
-	});
-</script>
+
 
 
 

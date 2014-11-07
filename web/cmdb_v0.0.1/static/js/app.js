@@ -35,8 +35,12 @@ if (byuuid !== undefined ) {edit_item(byuuid);}
             { c_id = clicked_opt_id;
              $('#editoptionss').modal("show");
             };
-			
-			
+            
+        var clicked_dict_id;
+            function edit_dict(clicked_dict)
+            {  clicked_dict_id = clicked_dict;
+              $('#addDict').modal("show");
+            };
 
 
 

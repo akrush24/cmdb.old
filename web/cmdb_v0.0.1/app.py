@@ -312,15 +312,33 @@ def get_list_user_ldap():
 #### Обработка Словарей ####
 @app.route('/new_dict/', methods=['POST'])
 def new_dict():
+
+        
     if request.form['name'] != "":
+        
+        for new_dict in request.values.getlist('new'): # Добавляем новые значение к словарю
+            if new_dict!="":
+                db_session.add( Dict( dict_id=request.form['dicts'], value=new_dict ) )
+            
         try:
-            engine.execute('insert into dict_s (name) values (%s)', request.form['name'])
-            for data in request.form.keys():
-                value=request.form[data]
-                if data != "name" and data[:5] == "newid" and value != "":
-                    engine.execute('insert into dict (dict_id, value) values ((select id from dict_s where name=%s), %s)', [request.form['name'],value])
+            request.form['dicts']
+            dict_s = db_session.query(Dict_s).filter(Dict_s.id==request.form['dicts']).one()
+            dict_s.name = request.form['name']
+            db_session.flush()
         except:
-            flash ("Ошибка при добавлении словаря")
+            engine.execute('insert into dict_s (name) values (%s)', request.form['name'])
+        test=""
+        for data in request.form.keys():
+            if data != "new" and data != "name" and data != "dicts":
+                dict_id = data[2:]
+                dict = db_session.query(Dict).filter(Dict.id==dict_id).one()
+                dict.value = request.form[data]
+                db_session.flush()
+                
+                #test=test+"; "+dict_id+":"+request.form[data]
+                #est=test+"; "+str(dict.name)
+        #return test
+        #flash ("Ошибка при добавлении словаря")
 
     return redirect(url_for('control'))
 
@@ -498,7 +516,7 @@ def index(typename, page):
                     val.append(entries[0][0])
                 except:
                     val.append("")
-            
+            key.append('')
             val2.append(val)
         
         if key==[]:
