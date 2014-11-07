@@ -50,8 +50,8 @@
 
 
     <!-- Modal addType -->
-<div class="modal fade" id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal " id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -62,54 +62,25 @@
       	 	<div class="col-lg-6" >
 				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
 				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" /> <br>
-				</form>
+				
+				<div id="selectoption"></div>
+				<div id="availableloption"></div>
+                </form>
 			</div>	
     	</div> 
       </div>
       <div class="modal-footer">
+		<button type="button" class="btn btn-default" id="addoptiontotypebtn" >Добавить опцию к типу</button>
         <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
         <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Добавить и сохранить</button>
+		
       </div>
     </div>
   </div>
 </div>
     <!-- Modal addType -->
     
-    
-    <!-- Modal edit addOption 
-<div class="modal fade" id="addOption" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Добавление опции</h4>
-      </div>
-      <div class="modal-body">			
-      	 <div class="container-fluid" >
-      	 	<div class="col-lg-6" >
-				<form id="addOptionForm" action="{{ url_for('new_option') }}" method="post">
-                    <div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="option_name" name="option_name"  placeholder="name" value="" required""></div>
-                    
-                    <select class="form-control" id="option_type" name="option_type">
-						<option disabled>Тип</option>
-                    </select>
-                    
-                    <div id="inputNewOption">
-				</form>
-			</div>
-    	</div> 
-      </div>
-      <div class="modal-footer">
-        <button type="button"  class="btn btn-success" id="addbtn"> Добавить поле </button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addOptionForm').submit();"> Сохранить</button>
-        
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-     Modal addOption -->
+
     
     
         <!-- Modal addUser -->
@@ -188,6 +159,39 @@
   </div>
 </div>
 
+<script> //addtype
+$('#addType').on('hidden.bs.modal', function (e) {
+$('#selectoption').empty();
+$('#availableloption').empty();
+});
+
+$('#addType').on('show.bs.modal', function (e) {
+ $(function(){
+                $.getJSON('{{ url_for('get_list_option') }}', function(data) {
+				$('#selectoption').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Опции</div><select class="form-control" id="list_of_options" name="list_of_options"></select>');
+                $('#availableloption').append('<select multiple class="form-control" id="listofavailableloption" name="options"></select>');
+				for(var i in data) { 
+                    $('#list_of_options').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                                                };  
+                                                                           });
+				$('#list_of_options').change(function(){ 
+				//
+				});
+                
+				$('#addoptiontotypebtn').click(function() {
+				var sellectedoption = $('#list_of_options option:selected').val();
+				var sellectedoptiontext = $('#list_of_options option:selected').text();
+				$('#listofavailableloption').append('<option value='+sellectedoption+'>'+sellectedoptiontext+'</option></select>');
+				})
+				function addoptiontotype(val){
+				
+				}; 
+                        });
+
+});
+</script> 
+
+
 <script>// Добавление справочника
 $(function() { 
 		var iditer=1; // Итератор для нового newid
@@ -199,14 +203,9 @@ $(function() {
 </script>
 
 
-<script> //окно редактирования и добавления опций
-$('#addOption').on('show.bs.modal', function (e) {
-
-    });
-</script>
 
 <script> //edit option view
-$('#editoptionss').on('show.bs.modal.bs.modal', function (e) {
+$('#editoptionss').on('show.bs.modal', function (e) {
    
   $('#editoptionss').on('hidden.bs.modal', function (e) {
   $( "#selecttypediv" ).empty();

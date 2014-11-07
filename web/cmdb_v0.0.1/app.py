@@ -52,21 +52,43 @@ def cols_name(query):
 
 #......................................................#
 #### Обработка Типов ####
+
+''' Добавление нового типа '''
 @app.route('/new_type/', methods=['POST'])
 def new_type():
     try:
-        engine.execute('insert into types (name) values (%s)', request.form['name'].upper())
+        type_name=request.form['name'].upper()
+        new = Types( name=request.form['name'].upper() )
+        db_session.add( new )
+        db_session.commit()
         
-    except:
-        flash('Ошибка, проверьте что имена типов не совпадают')
+        types=db_session.query(Types.id).filter(Types.name==request.form['name'].upper()).one()
+        type_id=types.id
+        
+        db_session.add( Score( type_id=type_id, score=0 ) ) # добавляем счетчик Итемов, начинается с 0
+    except Exception as e: 
+        flash('Ошибка, проверьте что имена типов:'+request.form['name'].upper()+' не совпадают. \n '+str(e) )
+        return redirect(url_for('control'))
     
-    engine.execute('insert into score (type_id, score) values ( (select id from types where name=%s), 0 )', request.form['name'].upper())
+    try:
+        sort=0
+        for option_id in request.values.getlist('options'):
+            new=Relation( type_id=type_id, option_id=option_id, sort=sort )
+            sort=sort+1
+            db_session.add( new )
+    except Exception as e:
+        flash('Ошибка добавления опций к типу:'+request.form['name'].upper())
+        flash(str(e))
+    
     return redirect(url_for('control'))
 
+''' Удаление типа '''
 @app.route('/del_type/<int:id>', methods=['GET'])
 def del_type(id):
     try:
         engine.execute('delete from types where id=%s', [id])
+        engine.execute('delete from score where type_id=%s', [id])
+        engine.execute('delete from relation where type_id=%s', [id])
     except:
        flash('This parameter is used!') 
         
@@ -93,6 +115,7 @@ def get_list_type():
 
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
+# по данному JSON стоится выпадающая меню "Мои ресурсы"
 @app.route('/get_user_menu/')
 def get_user_menu():
     cur = engine.execute('select id, name from types order by id desc')
@@ -103,7 +126,6 @@ def get_user_menu():
         value=engine.execute('select count(id) from items where type_id=%s', [en[0]]).fetchall()[0][0]
         json_row.append(dict(en, value=value))
         
-    #return en[1]
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
     
@@ -144,14 +166,24 @@ def edit_option():
         dict_id=request.form['dict_id']
     except:
         dict_id=None
+        
+    try:
+        description = request.form['description']
+    except:
+        description = None
+        
+    try:
+        name = request.form['name']
+    except:
+        name = None
+        
     if request.form['id'] == 'new':
-        new_option=Options(name=request.form['name'],description=request.form['description'],user_visible=request.form['user_visible'],front_page_visible=request.form['front_page_visible'],required=request.form['required'],option_type=request.form['option_type'], dict_id=dict_id )
+        new_option=Options(name=request.form['name'],description=description,user_visible=request.form['user_visible'],front_page_visible=request.form['front_page_visible'],required=request.form['required'],option_type=request.form['option_type'], dict_id=dict_id )
         db_session.add( new_option )
-        #db_session.commit()
     else:
         opt = db_session.query(Options).filter(Options.id==request.form['id']).one()
-        opt.name=request.form['name']
-        opt.description=request.form['description']
+        opt.name=name
+        opt.description=description
         opt.user_visible=request.form['user_visible']
         opt.front_page_visible=request.form['front_page_visible']
         opt.required=request.form['required']
@@ -180,11 +212,12 @@ def get_list_option():
     opt_id = request.args.get('opt_id')
 
     if type_id is not None:
-        cur = engine.execute('select * from options where type_id = %s order by id desc', [type_id])
+        cur = engine.execute('select * from options where id in (select option_id from relation where type_id=%s order by sort)', [type_id])
+        cur = engine.execute('select options.* from relation, options where relation.type_id=%s and options.id=relation.option_id order by relation.sort', [type_id])
+        
     elif opt_id is not None:
         if opt_id=='new':
-            #cur = engine.execute('select * from options where id = 1 order by id desc')
-            return '[{"front_page_visible": "", "description": "", "type_id": "", "required": "", "option_type": "", "user_visible": "", "dict_id": "", "name": ""}]'
+            return '[{"name": "", "front_page_visible": "0", "description": "", "required": "0", "option_type": "", "user_visible": "1", "dict_id": ""}]'
         else:
             cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
             
@@ -444,16 +477,17 @@ def index(typename, page):
         
         for res_id, hash in items:
             #creator=engine.execute('select items.user from items where items.id=%s',[res_id]).fetchall()[0][0]
-            entries=engine.execute('select id,name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
+            #entries=engine.execute('select id, name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
+            entries=engine.execute('select option_id, options.name as option_name from relation, options where relation.type_id=%s and options.id=relation.option_id and options.front_page_visible=1 order by relation.sort',[typeid]).fetchall()
             key=['Код']
             key_id=['UUID']
             g=typename+'-'+str(hash)
             val=[g]
             count=count-1
             
-            for opt_id, v in entries:
+            for opt_id, option_name in entries:
                 try:
-                    key.append(v)
+                    key.append(option_name)
                     key_id.append(opt_id)
                 except:
                     key.append("")
@@ -466,15 +500,21 @@ def index(typename, page):
                     val.append("")
             
             val2.append(val)
-    
+        
+        if key==[]:
+            keys = db_session.query(Options.name, Relation.option_id).filter(Relation.type_id==typeid).filter(Options.id==Relation.option_id)
+            key=['Код']
+            for k,v in keys:
+                key.append(k)
+        
     else: # Если тип не задан, отдаем пустую страницу
-        return render_template( 'index.html', entries="", cols_names="", page=0, COUNT_PAGE=0)
+        return render_template( 'index.html', entries="", cols_names="", page=0, COUNT_PAGE=0 )
          
     ### Отображение таблицы на главном экране
-    #try:
+
+        
     return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE)
-    #except:
-         #return render_template( 'index.html', entries="", cols_names="", typename=typename, type_id=typeid, page=0, COUNT_PAGE=0)
+
 
 
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
@@ -688,7 +728,6 @@ def export_json():
     json_row=[]
     json_row2=[]
 
-    
     if request.args.get('id') is not None:
         r = re.findall(r"(^.+)-([\d]+)", request.args.get('id'))
         typename = r[0][0]
@@ -696,20 +735,18 @@ def export_json():
         
         types = db_session.query(Types).filter(Types.name==typename).one()
         
-        #return str(typename)+"; "+str(id)+"; "+str(types.id)
-        
         if id is not None and types.id is not None:
             items=engine.execute('select items.id, hash, type_id from items where BINARY items.hash=%s and type_id=%s', [id, types.id]).fetchall()
 
         for res_id, hash, type_id in items:
-            entries=engine.execute('select id, name, option_type, dict_id from options where type_id in (select type_id from items where hash=%s and type_id=%s)',[id, types.id]).fetchall()
+            entries=engine.execute('select option_id, options.name as option_name, option_type, dict_id from relation, options where relation.type_id=%s and options.id=relation.option_id',[types.id]).fetchall()
 
-            for opt_id, v, option_type, dict_id in entries:
-                entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, opt_id]).fetchall()
+            for option_id, option_name, option_type, dict_id in entries:
+                entries=engine.execute('select value from value where res_id=%s and option_id=%s order by value', [res_id, option_id]).fetchall()
                 try:
-                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, option_type=option_type, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
+                    json_row.append( dict( id=hash, opt_id=option_id, name=option_name, option_type=option_type, dict_id=dict_id, type_id=type_id, value=entries[0][0] ))
                 except:
-                    json_row.append( dict( id=hash, opt_id=opt_id, name=v, option_type=option_type, dict_id=dict_id, type_id=type_id, value="" ))
+                    json_row.append( dict( id=hash, opt_id=option_id, name=option_name, option_type=option_type, dict_id=dict_id, type_id=type_id, value="" ))
             json_row2.append( (json_row) )
             json_row=[]
 
@@ -726,7 +763,6 @@ def search():
     str = request.args.get('term')
     if str != "":     
         JSON=[]
-        #t=db_session.query(Types.name,Options.id,items.hash,Value.value).filter(Value.value.like('%'+str+'%')).filter(Value.option_id==Options.id).filter(Value.res_id==items.id).filter(Types.id==items.type_id).limit(15)
         for value in engine.execute( '''select types.name as type, value.value, options.name as opt, items.hash from types, items, value, options where value like %s and value.option_id=options.id and value.res_id=items.id and types.id=items.type_id LIMIT 15''', ['%'+str+'%'] ).fetchall():        
             JSON.append(dict(value))
         return simplejson.dumps(JSON,sort_keys=True,indent=4)

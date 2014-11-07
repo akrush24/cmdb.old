@@ -35,7 +35,7 @@ class Options(db.Model):
     __tablename__ = 'options'
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(100), unique = False)
-    type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
+    #type_id = db.Column(db.Integer, db.ForeignKey('types.id'))
     description = db.Column(db.String(100), unique = False)
     option_type = db.Column(db.String(10), unique = False)
     user_visible = db.Column(db.Integer)
@@ -93,6 +93,7 @@ class Relation(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     type_id = db.Column(db.Integer, db.ForeignKey('types.id'), unique = True)
     option_id = db.Column(db.Integer, db.ForeignKey('options.id'), unique = True)
+    sort = db.Column(db.Integer)
 
 
 

@@ -35,6 +35,8 @@ if (byuuid !== undefined ) {edit_item(byuuid);}
             { c_id = clicked_opt_id;
              $('#editoptionss').modal("show");
             };
+			
+			
 
 
 
