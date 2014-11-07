@@ -217,7 +217,7 @@ def get_list_option():
         
     elif opt_id is not None:
         if opt_id=='new':
-            return '[{"name": "", "front_page_visible": "0", "description": "", "required": "0", "option_type": "", "user_visible": "1", "dict_id": ""}]'
+            return '[{"name": "", "front_page_visible": "0", "description": "", "required": "0", "option_type": "input", "user_visible": "1", "dict_id": ""}]'
         else:
             cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
             
