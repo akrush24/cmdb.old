@@ -84,7 +84,7 @@
 </div>
     <!-- Modal addType -->
 
-    <script>// редактировать тип
+    <script>// edit type and options
 $('#editType').on('hidden.bs.modal', function (e) {
 $("#typelistfields").empty();
 $("#divwf").empty();
@@ -120,7 +120,7 @@ $(function(){
                 drawpossibleoptions ()
                 function drawpossibleoptions () {
                 $("#drawpos").empty();
-                 $.getJSON('{{ url_for('get_list_option') }}', function(data) {
+                 $.getJSON('{{ url_for('get_list_option') }}?filter='+clicked_type_id+'', function(data) {
 				$('#drawpos').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Доступны к добавлению</div><select  class="form-control" id="possible_options" ></select>');
                 for(var i in data) { 
                     $('#possible_options').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');

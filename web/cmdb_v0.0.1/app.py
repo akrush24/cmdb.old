@@ -82,7 +82,7 @@ def new_type():
     
     return redirect(url_for('control'))
     
-#http://cmdb.at-consulting.ru:5000/edit_type?action=del_opt&id=54&option_id=885
+
 
 ''' Редактирование типа '''
 @app.route('/edit_type/', methods=['POST', 'GET'])
@@ -276,9 +276,10 @@ def clear_option(id):
 def get_list_option():
     type_id = request.args.get('type')
     opt_id = request.args.get('opt_id')
+    filter = request.args.get('filter')
 
     if type_id is not None:
-        cur = engine.execute('select * from options where id in (select option_id from relation where type_id=%s order by sort)', [type_id])
+        #cur = engine.execute('select * from options where id in (select option_id from relation where type_id=%s order by sort)', [type_id])
         cur = engine.execute('select options.* from relation, options where relation.type_id=%s and options.id=relation.option_id order by relation.sort', [type_id])
         
     elif opt_id is not None:
@@ -287,6 +288,9 @@ def get_list_option():
         else:
             cur = engine.execute('select * from options where id = %s order by id desc', [opt_id])
             
+    elif filter is not None:
+        cur = engine.execute('select * from options where options.id NOT IN (select option_id from relation where type_id=%s) order by id desc', [filter])
+    
     else:
         cur = engine.execute('select * from options order by id desc')
         
