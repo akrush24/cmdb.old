@@ -81,15 +81,27 @@ def new_type():
         flash(str(e))
     
     return redirect(url_for('control'))
-
+    
+#http://cmdb.at-consulting.ru:5000/edit_type?action=del_opt&id=54&option_id=885
 
 ''' Редактирование типа '''
-@app.route('/edit_type/', methods=['POST'])
+@app.route('/edit_type/', methods=['POST', 'GET'])
 def edit_type():
-    
-    types=db_session.query(Types).filter(Types.id==request.form['id']).one()
-    #return str(types.name)
-    
+    if request.environ['REQUEST_METHOD']=='POST':
+        types=db_session.query(Types).filter(Types.id==request.form['id']).one()
+    else:
+        action = request.args.get('action')
+        
+        types=db_session.query(Types).filter(Types.id==request.args.get('id')).one()
+        
+        if action == 'add_opt':
+            new = Relation( type_id=types.id, option_id=request.args.get('option_id'), sort=99 )
+            db_session.add( new )
+        elif action == 'del_opt':
+            new = db_session.query(Relation).filter( Relation.type_id==types.id, Relation.option_id==request.args.get('option_id') ).delete()
+            #db_session.delete( new )
+            
+        
     try:
         name = request.form['name']
         if name != "":
@@ -110,6 +122,7 @@ def edit_type():
             types.workflow = None
 
         db_session.flush()
+    
     return redirect(url_for('control'))
 
 ''' Удаление типа '''
