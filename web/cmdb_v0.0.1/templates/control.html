@@ -128,15 +128,16 @@ $(function(){
                                                                            });
                 }
 
-                $("#addOption").click(function() { //добавить опцию
+                $("#addOption").click(function() { //add option
                 var selvar=$('#possible_options option:selected').val();
                     $.get( '{{ url_for('edit_type') }}?action=add_opt&id='+clicked_type_id+'&option_id='+selvar+'', function( data ) {
                     $("#drawoptions").empty(); //clear
                     drawavailableoptions(); //draw
+					drawpossibleoptions (); //redraw possible options
                     });
                 });
                 
-                $("#delOption").click(function() { //добавить опцию
+                $("#delOption").click(function() { //del option
                 var availvar=$('#available_options option:selected').val();
                     $.get( '{{ url_for('edit_type') }}?action=del_opt&id='+clicked_type_id+'&option_id='+availvar+'', function( data ) {
                     $("#drawoptions").empty(); //clear
@@ -146,7 +147,7 @@ $(function(){
 
                 $("#typelistfields").append('<input class="hidden" name="id" value="'+clicked_type_id+'">');
                 });
-                }); //endchange
+                }); //end edit type
 </script>
     
     
@@ -447,7 +448,7 @@ $('#editoptionss').on('show.bs.modal', function (e) {
               <button class="glyphicon glyphicon-upload" type="submit" value="Загрузить"> CSV</button>
               <i><b>формат CSV</b>: Unix Format, UTF-8, разделитель ","</i>
             </form>
-            <td><a class="glyphicon glyphicon-open" href="{{ url_for('export_csv', typename=entry.name) }}"  target="_blank"> Экспорт данных</a></td>
+            <td><a class="glyphicon glyphicon-save" href="{{ url_for('export_csv', typename=entry.name) }}"  target="_blank"> Экспорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_type', id=entry.id) }}"></a><span class="badge pull-right">{{ type_count[entry.id] }}</span></td></td>
         {% endif %}
 

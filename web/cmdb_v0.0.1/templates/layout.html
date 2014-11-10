@@ -43,7 +43,7 @@ ul.ui-autocomplete {
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
         <ul class="nav navbar-nav navbar-left">
             <li class="navbar-brand" >CMDB</li>
-        <li class="dropdown" style="width:300px;" >
+        <li class="dropdown">
           {% if typename %}
             <a href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; <b >Мои ресурсы: {{ typename }}</b>&nbsp;<span class="badge pull-right"></span></a>
           {% else %}
@@ -53,6 +53,9 @@ ul.ui-autocomplete {
           </ul>
         </li>
         </ul>
+        
+        
+        
         <form class="navbar-form navbar-left" role="search">
             <div class="form-group">
               <input id="name" type="search" class="form-control " placeholder="Поиск" > <!-- http://forum.jquery.com/topic/pasrsing-json-data-for-autocomplete -->
@@ -61,6 +64,8 @@ ul.ui-autocomplete {
         </form>
         
         <ul class="nav navbar-nav navbar-right">
+        
+        
             <a class="btn btn-success navbar-btn" role="button" data-toggle="modal" data-target="#addTicket"><span class="glyphicon glyphicon-plus"></span>&nbsp;Новый item</a>
             <a href="{{ url_for('control') }}" class="btn btn-info navbar-btn" role="button"><span class="glyphicon glyphicon-wrench"></span>&nbsp;Панель управления</a>
             &nbsp;

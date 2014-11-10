@@ -766,19 +766,32 @@ def import_csv(type_id):
 @app.route('/export/', defaults={'typename': None})
 def export_csv(typename):
     if typename is not None:
-        try:
-            res_id = db_session.query(items.id).filter(items.type_id==db_session.query(Types.id).filter(Types.name==typename))
-            opt_id = db_session.query(Options.id).filter(Options.type_id==db_session.query(Types.id).filter(Types.name==typename))
-        except:
-            flash('Некорректный тип')
-            return redirect(url_for('control'))
+        #try:
+        res_id = db_session.query(Items.id).filter(Items.type_id==db_session.query(Types.id).filter(Types.name==typename))
+        opt_id = db_session.query(Relation.option_id).filter(Relation.type_id==db_session.query(Types.id).filter(Types.name==typename))
+        #except:
+        #    flash('Некорректный тип')
+        #    return redirect(url_for('control'))
+            
         CSV=""
+        count=0
+        # названия столбцов
+        for optid in opt_id:            
+            opt = db_session.query(Options).filter(Options.id==optid[0]).one()
+            CSV=CSV+'"'+opt.name+'"'
+            count=count+1
+            if count < opt_id.count():
+                CSV=CSV+','
+            else:
+                CSV=CSV+"\n"            
+        
+        # итемы
         for resid in res_id:
             count=0
             for optid in opt_id:
                 count=count+1
                 try:
-                    CSV=CSV+'"'+db_session.query(Value.value).filter(Value.res_id==resid[0], Value.option_id==optid[0])[0][0]
+                    CSV=CSV+'"'+db_session.query(Value.value).filter(Value.res_id==resid[0], Value.option_id==optid[0])[0][0]+'"'
                 except:
                     CSV=CSV+'""'
                 if count < opt_id.count():
