@@ -20,6 +20,10 @@
 		<span class="glyphicon glyphicon-plus"></span> Пользователь
 	</button> 
     
+    <button class="btn btn btn-default" data-toggle="modal" data-target="#editType">
+		<span class="glyphicon glyphicon-plus"></span> тип редактировать
+	</button>
+    
     <!-- Modal addDict -->
 <div class="modal fade" id="addDict" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -48,8 +52,68 @@
   </div>
 </div>
     <!-- Modal addType -->
+    
+    <!-- Modal edittype -->
+<div class="modal " id="editType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Редактирование типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="edittypeForm" action="{{ url_for('edit_type') }}" method="post">
+				<div id="typelistfields"></div>
+                <div id="divwf"></div>
+                </form>
+			</div>	
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('edittypeForm').submit();">Добавить и сохранить</button>
+		
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addType -->
 
-    <script>// Добавление справочника
+    <script>// редактировать тип
+$('#editType').on('hidden.bs.modal', function (e) {
+$("#typelistfields").empty();
+$("#divwf").empty();
+ });
+
+ var wf_val;
+$('#editType').on('show.bs.modal', function (e) {
+$(function(){
+                
+                $.getJSON('{{ url_for('get_list_type') }}'+clicked_type_id+'', function(data) {
+                
+                
+                $("#typelistfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Имя</div><input type="text" class="form-control" id="description" name="name" value="'+data[0].name+'" required=""></div>');
+                $("#typelistfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="description" name="desc" value="'+data[0].desc+'" required=""></div>');
+                wf_val = data[0].workflow;
+          });
+          $("#divwf").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">WorkFlow</div><select class="form-control" id="workflow" name="workflow"><option>None</option></select></div>');
+          $.getJSON('{{ url_for('get_list_wf') }}', function(data) {
+                for ( var i in data) {
+                $('#workflow').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+          }
+          $('#workflow').val(wf_val);
+          });
+          
+          $("#typelistfields").append('<input class="hidden" name="id" value="'+clicked_type_id+'">');
+          });
+          }); //endchange
+</script>
+    
+    
+    
+<script>// Добавление справочника
 $('#addDict').on('hidden.bs.modal', function (e) {
 $("#dictfields").empty();
 $("#dictllist").empty();
@@ -332,17 +396,9 @@ $('#editoptionss').on('show.bs.modal', function (e) {
     </tr>
     {% for entry in type_cols %}
         <tr>
-        {% set k=0 %}
         {% for cell in entry %}
             <td>
-            {% if k==1 %} 
-                <a href="{{ url_for('index', typename=cell) }}"> 
-            {% endif %} 
-                {{ cell }}
-            {% if k==0 %} 
-                </a>
-            {% endif %}
-            {% set k=k+1 %}
+                <a href="#" id="{{ entry.id }}" onclick=edit_type(id)>{{ cell }}</a>
             </td>
         {% endfor %}
         {% if session.logged_in %}

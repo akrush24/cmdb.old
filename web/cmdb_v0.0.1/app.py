@@ -82,6 +82,36 @@ def new_type():
     
     return redirect(url_for('control'))
 
+
+''' Редактирование типа '''
+@app.route('/edit_type/', methods=['POST'])
+def edit_type():
+    
+    types=db_session.query(Types).filter(Types.id==request.form['id']).one()
+    #return str(types.name)
+    
+    try:
+        name = request.form['name']
+        if name != "":
+            types.name = name
+        else:
+            name = None
+    except:
+        name = None
+
+    if name is not None:
+        try:
+            types.desc = request.form['desc']
+        except:
+            types.desc = None
+        try:
+            types.workflow = request.form['workflow']
+        except:
+            types.workflow = None
+
+        db_session.flush()
+    return redirect(url_for('control'))
+
 ''' Удаление типа '''
 @app.route('/del_type/<int:id>', methods=['GET'])
 def del_type(id):
@@ -104,16 +134,22 @@ def clear_type(id):
        flash('This parameter is used!')
         
     return redirect(url_for('control'))
-    
-@app.route('/get_list_type/')
-def get_list_type():
-    cur = engine.execute('select * from types order by id desc')
+
+@app.route('/get_list_type/', defaults={'id': None})
+@app.route('/get_list_type/<int:id>')
+def get_list_type(id):
+    if id is not None:
+        cur = engine.execute('select * from types where id=%s', [id])
+    else:
+        cur = engine.execute('select * from types order by id desc')
+        
     entries = cur.fetchall()
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
 
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
 
 # по данному JSON стоится выпадающая меню "Мои ресурсы"
 @app.route('/get_user_menu/')
@@ -128,10 +164,27 @@ def get_user_menu():
         
     return simplejson.dumps(json_row,sort_keys=True,indent=4)
 
-    
-    
-    
-    
+
+''' ################################################################### '''
+# WorkFlow
+''' ################################################################### '''
+
+@app.route('/get_list_wf/', defaults={'id': None})
+@app.route('/get_list_wf/<int:id>')
+def get_list_wf(id):
+    if id is not None:
+        cur = engine.execute('select * from workflow_s where id=%s', [id])
+    else:
+        cur = engine.execute('select * from workflow_s order by id desc')
+        
+    entries = cur.fetchall()
+    json_row=[]
+    for en in entries:
+        json_row.append(dict(en))
+
+    return simplejson.dumps(json_row,sort_keys=True,indent=4)
+
+
 #......................................................#
 #### Обработка свойств\опций ####
 
@@ -470,35 +523,32 @@ def index(typename, page):
     if typename is not None:
         uuid = request.args.get('uuid')
         try:
-            typeid=engine.execute('select id from types where name=%s',[typename]).fetchall()[0][0]
+            types = db_session.query(Types).filter(Types.name==typename).one()
+            typeid = types.id
         except IndexError:
             typeid=None
             return render_template( 'index.html', entries="", cols_names="", typename=typename)
 
-        if uuid is not None:
-            items=engine.execute('select items.id, hash from items where BINARY items.hash=%s and items.type_id=%s', [uuid, typeid]).fetchall()
-            count=engine.execute('select count(id) from items where items.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
-        else:
-            ROW_IN_PAGE=50 # Число строк на одну таблицу
-            COUNT_RES=engine.execute('select count(id) from items where items.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
-            
-            if COUNT_RES != 0:
-                COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5, 0)
-            else:
-                COUNT_PAGE=0
-            COUNT_PAGE=int(COUNT_PAGE)
-                
-            items=engine.execute('select items.id, hash from items where items.type_id=%s order by id desc LIMIT %s, %s',
-            [typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
 
-            count=COUNT_RES-(page-1)*ROW_IN_PAGE
+        ROW_IN_PAGE=50 # Число строк на одну таблицу
+        #COUNT_RES = engine.execute('select count(id) from items where items.type_id=%s',[typeid]).fetchall()[0][0] # число ресурсов по выбранному типу
+        COUNT_RES = db_session.query(Items).filter(Items.type_id==typeid).count()
+        
+        if COUNT_RES != 0:
+            COUNT_PAGE=round(COUNT_RES/ROW_IN_PAGE+0.5, 0)
+        else:
+            COUNT_PAGE=0
+        COUNT_PAGE=int(COUNT_PAGE)
+                
+        items=engine.execute('select items.id, hash from items where items.type_id=%s order by id desc LIMIT %s, %s',[typeid, (page-1)*ROW_IN_PAGE, ROW_IN_PAGE ] ).fetchall()
+
+        count=COUNT_RES-(page-1)*ROW_IN_PAGE
         
         for res_id, hash in items:
             #creator=engine.execute('select items.user from items where items.id=%s',[res_id]).fetchall()[0][0]
             #entries=engine.execute('select id, name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
             entries=engine.execute('select option_id, options.name as option_name from relation, options where relation.type_id=%s and options.id=relation.option_id and options.front_page_visible=1 order by relation.sort',[typeid]).fetchall()
             key=['Код']
-            key_id=['UUID']
             g=typename+'-'+str(hash)
             val=[g]
             count=count-1
@@ -506,10 +556,8 @@ def index(typename, page):
             for opt_id, option_name in entries:
                 try:
                     key.append(option_name)
-                    key_id.append(opt_id)
                 except:
                     key.append("")
-                    key_id.append("")
                 
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
                 try:
@@ -530,8 +578,7 @@ def index(typename, page):
          
     ### Отображение таблицы на главном экране
 
-        
-    return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE)
+    return render_template( 'index.html', entries=val2, cols_names=key, typename=typename, type_id=typeid, page=page, COUNT_PAGE=COUNT_PAGE, desc=types.desc)
 
 
 

@@ -78,6 +78,7 @@ class WorkFlow(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(250))
     step =  db.Column(db.Integer, db.ForeignKey('workflow.id'))
+    wf_id = db.Column(db.Integer, db.ForeignKey('workflow_s.id'))
 
 # score - таблица содержит последний номер Итема по определенному Типу
 class Score(db.Model):
