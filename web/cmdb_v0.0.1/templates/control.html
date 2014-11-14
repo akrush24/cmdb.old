@@ -4,26 +4,6 @@
 <div class="container-fluid">
 	<div class="row"> <div class="col-xs-12 col-sm-6 col-md-8">
 
-	<button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
-		<span class="glyphicon glyphicon-plus"></span> Тип
-	</button>
-
-	<button class="btn btn btn-default"  onClick="edit_option_view('new')">
-		<span class="glyphicon glyphicon-plus"></span> Добавить опцию
-	</button>
-    
-    <button class="btn btn btn-default" data-toggle="modal" data-target="#addDict">
-		<span class="glyphicon glyphicon-plus"></span> Справочник
-	</button> 
- 
-	<button class="btn btn btn-default" data-toggle="modal" data-target="#addUser">
-		<span class="glyphicon glyphicon-plus"></span> Пользователь
-	</button> 
-    
-    <button class="btn btn btn-default" data-toggle="modal" data-target="#editType">
-		<span class="glyphicon glyphicon-plus"></span> тип редактировать
-	</button>
-    
     <!-- Modal addDict -->
 <div class="modal fade" id="addDict" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -37,8 +17,6 @@
       	 	<div class="col-lg-6" >
 				<form id="adddictform" action="{{ url_for('new_dict') }}" method="post">
 				    <input type="text" class="form-control" placeholder="Введите имя справочника" id="enterdictname" name="name" autocomplete="off" /> <br>
-                    <div id="dictllist"></div>
-                    <div id="dictfields"></div>
 				</form>
 			</div>	
     	</div> 
@@ -51,6 +29,39 @@
   </div>
 </div>
     <!-- Modal addType -->
+
+        <!-- Modal editDict -->
+<div class="modal fade" id="editDict" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Редактирование справочника</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="editdictform" action="{{ url_for('new_dict') }}" method="post">
+				    <div id="dictname"></div>
+                    
+                    <div id="dictfields"></div>
+				</form>
+			</div>	
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"  id="add_new_dict_val" >Добавить поле</button>
+        <button type="button" class="btn btn-default"  data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editdictform').submit();">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal editDict -->
+    
+    
+    
+    
     
     <!-- Modal edittype -->
 <div class="modal " id="editType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -76,15 +87,176 @@
         <button type="button"  class="btn" id="delOption"> Del </button>
         <button type="button"  class="btn btn-error" id="addOption"> Add </button>
         <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('edittypeForm').submit();">Добавить и сохранить</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('edittypeForm').submit();">Сохранить</button>
+		
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal edittype -->
+
+    <!-- Modal addType -->
+<div class="modal " id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавление нового типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
+				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" />
+                </form>
+			</div>	
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Добавить и сохранить</button>
 		
       </div>
     </div>
   </div>
 </div>
     <!-- Modal addType -->
+    
+        <!-- Modal addUser -->
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+				<form id="addUserForm" action="{{ url_for('new_user') }}" method="post">
+                    <input type="text" class="form-control" placeholder="Введите login" name="login" autocomplete="off" /> 
+                    <input type="text" class="form-control" placeholder="Введите ФИО" name="full_name" autocomplete="off" /> 
+                    <input type="email" class="form-control" placeholder="Введите e-mail" name="email" autocomplete="off" /> 
+                    <input type="password" class="form-control" placeholder="Введите пароль" name="password" autocomplete="off" />
+                    <button type="submit"  class="btn hide" />
+				</form>
+			</div>
+    	</div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addUserForm').submit();"> Добавить и сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Modal addUser -->
 
-    <script>// edit type and options
+	<!-- Modal edit optionss -->
+<div class="modal fade" id="editoptionss" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Редактирование свойств опций</h4>
+      </div>
+      <div class="modal-body">			
+      	 <div class="container-fluid" >
+      	 	<div class="col-lg-6" >
+                <form id="editoptionsForm" class="form-horizontal span8" action="{{ url_for('edit_option') }}" method="post">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon">Вид поля</div>
+                            <select class="form-control" id="changeoption_type" name="option_type">
+                            <option disabled>Вид поля</option>
+                            <option value="dict">Dict</option>
+                            <option value="date">Date</option>
+                            <option value="input">Input</option>
+                            <option value="login">Login</option>
+                            <option value="textarea">Textarea</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="fields"></div>
+                    <div id="selecttypediv"></div> <!-- Рисуем динамические поля -->
+                    <div id="editoptionstype"></div>
+                </form>
+            </div>
+        </div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editoptionsForm').submit();"> Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+     <!-- Modal edit optionss-->
+
+
+  </div>
+</div>
+
+<script> //editDict
+    $('#editDict').on('hidden.bs.modal', function (e) {
+    $("#dictname").empty();
+    $("#dictfields").empty();
+    });
+    
+    $('#editDict').on('show.bs.modal', function (e) {
+    
+    $.getJSON('{{ url_for('get_list_dict') }}?dict_id='+clicked_dict_id+'', function(data) {
+                $("#dictname").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Имя справочника</div><input type="text" class="form-control" name="name" value="'+data[0].name+'" required=""></div>')
+                $("#dictname").append('<input type="text" class="hidden" name="dicts" value="'+data[0].id+'" required=""></div>')
+                for (var i in data) { 
+                $("#enterdictname").val(data[i].name);
+                if (data[i].value !== undefined) { 
+                $("#dictfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Значение</div><input type="text" class="form-control" id="'+data[i].val_id+'" name="id'+data[i].val_id+'" value="'+data[i].value+'" required=""></div>');
+                }
+    }
+    });
+    
+    });
+    
+    $("#add_new_dict_val").click(function() {
+    $("#dictfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Значение</div><input type="text" class="form-control"  name="new" value="" required=""></div>');
+    });
+    </script>
+
+<script> //addtype
+$('#addType').on('hidden.bs.modal', function (e) {
+$('#selectoption').empty();
+$('#availableloption').empty();
+});
+
+$('#addType').on('show.bs.modal', function (e) {
+ $(function(){
+                $.getJSON('{{ url_for('get_list_option') }}', function(data) {
+				$('#selectoption').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Опции</div><select class="form-control" id="list_of_options" name="list_of_options"></select>');
+                $('#availableloption').append('<select multiple class="form-control" id="listofavailableloption" name="options"></select>');
+				for(var i in data) { 
+                    $('#list_of_options').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                                                };  
+                                                                           });
+				$('#list_of_options').change(function(){ 
+				//
+				});
+                
+				$('#addoptiontotypebtn').click(function() {
+				var sellectedoption = $('#list_of_options option:selected').val();
+				var sellectedoptiontext = $('#list_of_options option:selected').text();
+				$('#listofavailableloption').append('<option value='+sellectedoption+'>'+sellectedoptiontext+'</option></select>');
+				})
+				function addoptiontotype(val){
+				
+				}; 
+                        });
+
+});
+</script> 
+
+<script>// edit type and options
 $('#editType').on('hidden.bs.modal', function (e) {
 $("#typelistfields").empty();
 $("#divwf").empty();
@@ -149,190 +321,6 @@ $(function(){
                 });
                 }); //end edit type
 </script>
-    
-    
-    
-<script>// Добавление справочника
-$('#addDict').on('hidden.bs.modal', function (e) {
-$("#dictfields").empty();
-$("#dictllist").empty();
- });
-    
-$('#addDict').on('show.bs.modal', function (e) {
-$(function(){   
-                $("#dictllist").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dicts" name="dicts"><option>None</option></select></div>');
-                $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
-                for ( var i in data) { 
-                $("#dicts").append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-                $("#dicts").val(data[i].name);
-                }
-          });
-          $('#dicts').change(function(){ 
-          $("#dictfields").empty();
-          var dictidsellected = $('#dicts option:selected').val();
-          $("#enterdictname").val($('#dicts option:selected').text());
-          $.getJSON('{{ url_for('get_list_dict') }}?dict_id='+dictidsellected+'', function(data) {
-                for ( var i in data) { 
-                $("#dictfields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="description" name="id'+data[i].val_id+'" value="'+data[i].value+'" required=""></div>');
-                }
-          });
-          }); //endchange
-
-$(function() { //Добавить новое поле
-	$('#adddictlineBtn').click(function() {
-	$('#dictfields').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="description" name="new" value="" required=""></div>')
-	});
-	});
-    
-    });
-    });
-</script>
-
-
-    <!-- Modal addType -->
-<div class="modal " id="addType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Добавление нового типа</h4>
-      </div>
-      <div class="modal-body">			
-      	 <div class="container-fluid" >
-      	 	<div class="col-lg-6" >
-				<form id="addtypeform" action="{{ url_for('new_type') }}" method="post">
-				    <input type="text" class="form-control" placeholder="Введите новый тип" name="name" autocomplete="off" />
-				<div id="selectoption"></div>
-				<div id="availableloption"></div>
-                </form>
-			</div>	
-    	</div> 
-      </div>
-      <div class="modal-footer">
-		<button type="button" class="btn btn-default" id="addoptiontotypebtn" >Добавить опцию к типу</button>
-        <button type="button" class="btn btn-default"  data-dismiss="modal" >Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addtypeform').submit();">Добавить и сохранить</button>
-		
-      </div>
-    </div>
-  </div>
-</div>
-    <!-- Modal addType -->
-    
-
-    
-    
-        <!-- Modal addUser -->
-<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Добавить новую опцию у типа</h4>
-      </div>
-      <div class="modal-body">			
-      	 <div class="container-fluid" >
-      	 	<div class="col-lg-6" >
-				<form id="addUserForm" action="{{ url_for('new_user') }}" method="post">
-                    <input type="text" class="form-control" placeholder="Введите login" name="login" autocomplete="off" /> 
-                    <input type="text" class="form-control" placeholder="Введите ФИО" name="full_name" autocomplete="off" /> 
-                    <input type="email" class="form-control" placeholder="Введите e-mail" name="email" autocomplete="off" /> 
-                    <input type="password" class="form-control" placeholder="Введите пароль" name="password" autocomplete="off" />
-                    <button type="submit"  class="btn hide" />
-				</form>
-			</div>
-    	</div> 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('addUserForm').submit();"> Добавить и сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-    <!-- Modal addUser -->
-
-	<!-- Modal edit optionss -->
-<div class="modal fade" id="editoptionss" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Редактирование свойств опций</h4>
-      </div>
-      <div class="modal-body">			
-      	 <div class="container-fluid" >
-      	 	<div class="col-lg-6" >
-				<form id="editoptionsForm" class="form-horizontal span8" action="{{ url_for('edit_option') }}" method="post">
-                    <div class="form-group">
-						<div class="input-group">
-							<div class="input-group-addon">Вид поля</div>
-							<select class="form-control" id="changeoption_type" name="option_type">
-							<option disabled>Вид поля</option>
-							<option value="dict">Dict</option>
-							<option value="date">Date</option>
-							<option value="input">Input</option>
-							<option value="login">Login</option>
-							<option value="textarea">Textarea</option>
-							</select>
-						</div>
-					</div>
-					<div id="fields"></div>
-					<div id="selecttypediv"></div> <!-- Рисуем динамические поля -->
-                    <div id="editoptionstype"></div>
-				</form>
-			</div>
-    	</div> 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-        <button type="submit"  class="btn btn-primary" onclick="document.getElementById('editoptionsForm').submit();"> Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-     <!-- Modal edit optionss-->
-
-
-  </div>
-</div>
-
-<script> //addtype
-$('#addType').on('hidden.bs.modal', function (e) {
-$('#selectoption').empty();
-$('#availableloption').empty();
-});
-
-$('#addType').on('show.bs.modal', function (e) {
- $(function(){
-                $.getJSON('{{ url_for('get_list_option') }}', function(data) {
-				$('#selectoption').append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Опции</div><select class="form-control" id="list_of_options" name="list_of_options"></select>');
-                $('#availableloption').append('<select multiple class="form-control" id="listofavailableloption" name="options"></select>');
-				for(var i in data) { 
-                    $('#list_of_options').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-                                                };  
-                                                                           });
-				$('#list_of_options').change(function(){ 
-				//
-				});
-                
-				$('#addoptiontotypebtn').click(function() {
-				var sellectedoption = $('#list_of_options option:selected').val();
-				var sellectedoptiontext = $('#list_of_options option:selected').text();
-				$('#listofavailableloption').append('<option value='+sellectedoption+'>'+sellectedoptiontext+'</option></select>');
-				})
-				function addoptiontotype(val){
-				
-				}; 
-                        });
-
-});
-</script> 
-
-
-
-
 
 
 <script> //edit option view
@@ -378,11 +366,9 @@ $('#editoptionss').on('show.bs.modal', function (e) {
         $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>'); //name=dict_id, 
         $(function(){
             $.getJSON('{{ url_for('get_list_dict') }}', function(data) {
-            var i = -1;
-            $.each(data, function(id, name) { 
-                i=i+1;
+            for (var i in data){ 
                 $('#dict_list_id').append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
-                });  
+                } 
                 });
             
                 });
@@ -419,14 +405,26 @@ $('#editoptionss').on('show.bs.modal', function (e) {
 
 
 
- 
-<br>
-<!-- отрисовываем табличку-->
-<div class="container-fluid">
-    <div class="row">
-    <div class="col-md-10">
+<div role="tabpanel">
 
-    <table class="table table-bordered table-hover table-condensed">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#typetab" aria-controls="typetab" role="tab" data-toggle="tab">Типы ресурсов</a></li>
+    <li role="presentation"><a href="#opttab" aria-controls="opttab" role="tab" data-toggle="tab">Опции типов</a></li>
+    <li role="presentation"><a href="#dicttab" aria-controls="dicttab" role="tab" data-toggle="tab">Справочники</a></li>
+    <li role="presentation"><a href="#users" aria-controls="users" role="tab" data-toggle="tab">Пользователи</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="typetab">
+    
+    <button class="btn btn btn-default" data-toggle="modal" data-target="#addType">
+		<span class="glyphicon glyphicon-plus"></span> Тип
+	</button>
+    
+    
+<table class="table table-bordered table-hover table-condensed">
     <caption><h3>Типы ресурсов</h3></caption>    
     <tr class="active">
     {% for cols_name in type_cols_names %}
@@ -451,46 +449,45 @@ $('#editoptionss').on('show.bs.modal', function (e) {
             <td><a class="glyphicon glyphicon-save" href="{{ url_for('export_csv', typename=entry.name) }}"  target="_blank"> Экспорт данных</a></td>
             <td><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_type', id=entry.id) }}"></a><span class="badge pull-right">{{ type_count[entry.id] }}</span></td></td>
         {% endif %}
-
     </tr>
     {% endfor %}
     </table>
-<br>
+    </div>
     
+<div role="tabpanel" class="tab-pane" id="opttab">
+    <button class="btn btn btn-default"  onClick="edit_option_view('new')">
+		<span class="glyphicon glyphicon-plus"></span> Добавить опцию
+	</button>
     
-    <table class="table table-bordered table-hover table-condensed">
-    <caption><h3>Опции типов</h3></caption>
-    <tr class="active">
-    {% for cols_name in option_cols_names %}
-        <th><center><b>{{ cols_name }}</b></center></th>
-    {% endfor %}
-
-    </tr>
-        
-    {% for entry in option_cols %}
-        <tr>
-        {% set k=0 %}
-
-        {% for cell in entry %}
-
-                <td>
-                    {{ cell }}
-                </td>
-
+        <table class="table table-bordered table-hover table-condensed">
+        <caption><h3>Опции типов</h3></caption>
+        <tr class="active">
+        {% for cols_name in option_cols_names %}
+            <th><center><b>{{ cols_name }}</b></center></th>
         {% endfor %}
-        
-        {% if session.logged_in %}
-            <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
-            <td nowrap="nowrap"><a class="glyphicon glyphicon-wrench" onClick="edit_option_view({{ entry.id }})" href="#"></a></td></td>
-            <td nowrap="nowrap"><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
-        {% endif %}
-
-    </tr>
-    {% endfor %}
-    </table>
+        </tr>
+        {% for entry in option_cols %}
+            <tr>
+            {% set k=0 %}
+            {% for cell in entry %}
+                    <td>
+                        <a onClick="edit_option_view({{ entry.id }})" href="#">{{ cell }}</a>
+                    </td>
+            {% endfor %}
+            {% if session.logged_in %}
+                <td><a class="glyphicon glyphicon-remove" href="/del_option/{{ entry.id }}"></a></td>
+                <td nowrap="nowrap"><a class="glyphicon glyphicon-wrench" onClick="edit_option_view({{ entry.id }})" href="#"></a></td></td>
+                <td nowrap="nowrap"><a class="glyphicon glyphicon-fire" href="{{ url_for('clear_option', id=entry.id) }}"></a><span class="badge pull-right">{{ opt_count[entry.id] }}</span></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
     
-<br>
-
+<div role="tabpanel" class="tab-pane" id="dicttab">
+    <button class="btn btn btn-default" data-toggle="modal" data-target="#addDict">
+        <span class="glyphicon glyphicon-plus"></span> Справочник
+    </button>
     <table class="table table-bordered table-hover table-condensed">
     <caption><h3>Справочники (схема)</h3></caption>
     <tr class="active">
@@ -502,7 +499,7 @@ $('#editoptionss').on('show.bs.modal', function (e) {
         <tr>
         {% for cell in entry %}
                 <td>
-                    {{ cell }}
+                    <a href="#" onClick="edit_dict({{entry.id}});">{{ cell }}</a>
                 </td>
         {% endfor %}
         {% if session.logged_in %}
@@ -541,42 +538,41 @@ $('#editoptionss').on('show.bs.modal', function (e) {
     </tr>
     {% endfor %}
     </table>
+    </div>
     
-<br>
+    
+<div role="tabpanel" class="tab-pane" id="users">
+    <button class="btn btn btn-default" data-toggle="modal" data-target="#addUser">
+        <span class="glyphicon glyphicon-plus"></span> Пользователь
+    </button>
     <table class="table table-bordered table-hover table-condensed">
     <caption><h3>Пользователи</h3></caption>
     <tr class="active">
     {% for cols_name in user_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
     {% endfor %}
-
-    </tr>
-        
+    </tr>  
     {% for entry in user_cols %}
         <tr>
         {% set k=0 %}
-
         {% for cell in entry %}
-
                 <td>
                     {{ cell }}
                 </td>
-
         {% endfor %}
-        
-        {% if session.logged_in %}
+            {% if session.logged_in %}
             <td><a class="glyphicon glyphicon-remove" href="/del_user/{{ entry.id }}"></a></td>
         {% endif %}
-
     </tr>
     {% endfor %}
     </table>
-    
-    
-        </div>
     </div>
+  </div>
+
 </div>
-<!-- отрисовываем табличку-->
+
+
+
 
 
 </body>

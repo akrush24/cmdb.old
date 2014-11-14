@@ -56,7 +56,8 @@
 <tr>
     {% set k=0 %}
     {% for cell in entrie %}
-    <td nowrap="nowrap"><a id="{{ entrie[0] }}" onClick="edit_item(this.id)" href="#">{% if k==0 %}<b>{{ cell }}</b>{% else %}{{ cell }}{% endif %}</a></td>
+    {% if k==0 %}<td  nowrap="nowrap"><a id="{{ entrie[0] }}" onClick="edit_item(this.id)" href="#"><b>{{ cell }}</b></a></td>
+    {% else %}<td><a id="{{ entrie[0] }}" onClick="edit_item(this.id)" href="#">{{ cell }}</a></td>{% endif %}
     {% set k=k+1 %}
     {% endfor %}
     <td><a class="glyphicon glyphicon-remove" href="/del/{{ entrie[0] }}"></a></td>

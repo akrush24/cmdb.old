@@ -16,7 +16,7 @@ import string, random
 from functools import wraps
 import hashlib, uuid
 import cgitb, csv, math
-
+import subprocess
 from werkzeug import secure_filename
 
 now = datetime.datetime.now()
@@ -80,7 +80,7 @@ def new_type():
         flash('Ошибка добавления опций к типу:'+request.form['name'].upper())
         flash(str(e))
     
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#typetab')
     
 
 
@@ -123,7 +123,7 @@ def edit_type():
 
         db_session.flush()
     
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#typetab')
 
 ''' Удаление типа '''
 @app.route('/del_type/<int:id>', methods=['GET'])
@@ -146,7 +146,7 @@ def clear_type(id):
     except:
        flash('This parameter is used!')
         
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#typetab')
 
 @app.route('/get_list_type/', defaults={'id': None})
 @app.route('/get_list_type/<int:id>')
@@ -214,7 +214,7 @@ def new_option():
         if data[:5] == "newid" and value != "":
             engine.execute('insert into options (name, type_id) values (%s, %s)', [value, request.form['type_id']])
             test=test+'NEWID: '+data[:5]+'='+value+'; '
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#opttab')
 
 
 @app.route('/del_option/<int:id>')
@@ -224,7 +224,7 @@ def del_option(id):
     except:
        flash('This parameter is used!', 'error') 
             
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#opttab')
 
 @app.route('/edit_option/', methods=['GET', 'POST'])
 def edit_option():
@@ -257,7 +257,7 @@ def edit_option():
         opt.option_type=request.form['option_type']
         db_session.flush()
 
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#opttab')
 
 
 @app.route('/clear_option/<int:id>')
@@ -269,7 +269,7 @@ def clear_option(id):
     except:
        flash('This parameter is used!')
         
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#opttab')
 
 
 @app.route('/get_list_option/', methods=['GET'])
@@ -382,14 +382,10 @@ def get_list_user_ldap():
 #### Обработка Словарей ####
 @app.route('/new_dict/', methods=['POST'])
 def new_dict():
-
-        
     if request.form['name'] != "":
-        
         for new_dict in request.values.getlist('new'): # Добавляем новые значение к словарю
             if new_dict!="":
                 db_session.add( Dict( dict_id=request.form['dicts'], value=new_dict ) )
-            
         try:
             request.form['dicts']
             dict_s = db_session.query(Dict_s).filter(Dict_s.id==request.form['dicts']).one()
@@ -397,20 +393,16 @@ def new_dict():
             db_session.flush()
         except:
             engine.execute('insert into dict_s (name) values (%s)', request.form['name'])
-        test=""
+
         for data in request.form.keys():
             if data != "new" and data != "name" and data != "dicts":
                 dict_id = data[2:]
                 dict = db_session.query(Dict).filter(Dict.id==dict_id).one()
                 dict.value = request.form[data]
                 db_session.flush()
-                
-                #test=test+"; "+dict_id+":"+request.form[data]
-                #est=test+"; "+str(dict.name)
-        #return test
         #flash ("Ошибка при добавлении словаря")
 
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#dicttab')
 
 
 @app.route('/del_dict/<int:id>')
@@ -423,13 +415,16 @@ def get_list_dict():
     dict_id = request.args.get('dict_id')
 
     if dict_id is not None:
-        entries = engine.execute('select dict.id as val_id, dict_s.id, dict_s.name, dict.value from dict_s, dict where  dict_s.id=dict.dict_id and dict_s.id=%s', dict_id).fetchall()
+        entries = engine.execute('select dict.id as val_id, dict_s.id, dict_s.name, dict.value from dict_s, dict where dict_s.id=dict.dict_id and dict_s.id=%s', dict_id).fetchall()
+        
     else:
         entries = engine.execute('select id, name from dict_s').fetchall()
 
     json_row=[]
     for en in entries:
         json_row.append(dict(en))
+    if entries == []:
+        json_row.append(db_session.query(Dict_s.name, Dict_s.id).filter(Dict_s.id==dict_id).one())
     
     return simplejson.dumps(json_row,sort_keys=True, indent=4)
 
@@ -440,12 +435,12 @@ def del_dict_s(id):
         engine.execute('delete from dict_s where id=%s', [id])
     except:
         flash('Схема используется')
-    return redirect(url_for('control'))
+    return redirect(url_for('control')+'#dicttab')
 
     
     
 #......................................................#
-#### Обработка Ресурсов ####
+#### Обработка Итемов ####
 
 # Удаление..............................................
 @app.route('/del/<itemid>')
@@ -490,6 +485,20 @@ def new_item():
                 cur = engine.execute('insert into value (option_id, value, res_id) values (%s, %s, %s)', [option_id, value, res_id])
     except:
         flash('Unexpected ERROR')
+
+    # меняем номер в интранете
+    try:
+        request.form['id889']
+        request.form['id895']
+        request.form['id896']
+        if request.form['id889'] is not None and request.form['id895'] is not None and request.form['id896'] is not None:
+            prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
+            pref = re.findall(r"(\d+)", prefix.value)[0]
+            set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
+            
+    except:
+        pass
+    
     return redirect(url_for('index', typename=typename))
 
 
@@ -510,8 +519,18 @@ def editres():
                 try:
                     option_exist=engine.execute('select id from value where option_id=%s and res_id in (select id from items where hash=%s and type_id=%s)', [option_id, id, types.id]).fetchall()[0][0]
                     engine.execute( 'update value SET value=%s where option_id=%s and res_id in (select id from items where hash=%s and type_id=%s)', [value, option_id, id, types.id] )
+                    # меняем номер в интранете
+                    if option_id == "895" and request.form['id889'] is not None and request.form['id895'] is not None:
+                        prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
+                        pref = re.findall(r"(\d+)", prefix.value)[0]
+                        set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
                 except IndexError:
                     engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from items where hash=%s and type_id=%s))', [option_id, value, id, types.id] )
+                    # меняем номер в интранете
+                    if option_id == "895" and request.form['id889'] is not None and request.form['id895'] is not None:
+                        prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
+                        pref = re.findall(r"(\d+)", prefix.value)[0]
+                        set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
         try:
             typename=engine.execute('select types.name from types, items where items.type_id=types.id and items.hash=%s and items.type_id=%s', [id, types.id]).fetchall()[0][0]
         except:
@@ -564,21 +583,26 @@ def index(typename, page):
         for res_id, hash in items:
             #creator=engine.execute('select items.user from items where items.id=%s',[res_id]).fetchall()[0][0]
             #entries=engine.execute('select id, name from options where type_id=%s and front_page_visible=1',[typeid]).fetchall()
-            entries=engine.execute('select option_id, options.name as option_name from relation, options where relation.type_id=%s and options.id=relation.option_id and options.front_page_visible=1 order by relation.sort',[typeid]).fetchall()
+            entries=engine.execute('select option_id, options.name as option_name, option_type from relation, options where relation.type_id=%s and options.id=relation.option_id and options.front_page_visible=1 order by relation.sort',[typeid]).fetchall()
             key=['Код']
             g=typename+'-'+str(hash)
             val=[g]
             count=count-1
             
-            for opt_id, option_name in entries:
+            for opt_id, option_name, option_type in entries:
                 try:
                     key.append(option_name)
                 except:
                     key.append("")
                 
                 entries=engine.execute('select value from value where res_id=%s and option_id=%s', [res_id, opt_id]).fetchall()
+                
                 try:
-                    val.append(entries[0][0])
+                    if option_type == 'dict':
+                        v = db_session.query(Dict.value).filter(Dict.id==entries[0][0]).one()
+                        val.append(v.value)
+                    else:
+                        val.append(entries[0][0])
                 except:
                     val.append("")
             key.append('')
@@ -905,9 +929,17 @@ def s():
     db_session.add(Users(login='test299'))
     return "OK"
     
-    
-    
-    
+@app.route('/set_num/', defaults={'num': None, 'login': None})
+@app.route('/set_num/<login>/<num>')
+def set_num(login, num):
+    if num is not None and login is not None:
+        #return 'curl -D- -X GET -H "Authorization: Basic dm10ZXN0OnF3ZXJ0eSQ0"  https://intranet.at-consulting.ru/api/?action=setPhone&login=vkarmanov&phone='+num
+        subprocess.call("curl -D- -X GET -H 'Authorization: Basic dm10ZXN0OnF3ZXJ0eSQ0'  'https://intranet.at-consulting.ru/api/?action=setPhone&login="+login+"&phone=%2b7'"+num, shell=True)
+        return 'OK'
+    else:
+        return 'Number nit set'
+
+        
 
 #############################################
 # App RUN

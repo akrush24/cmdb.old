@@ -30,7 +30,7 @@ if (byuuid !== undefined ) {edit_item(byuuid);}
                 $('#editItem').modal("show"); //Показать модальное окно для редактирвоания итема
             };
             
-            var c_id;
+        var c_id;
             function edit_option_view(clicked_opt_id)
             { c_id = clicked_opt_id;
              $('#editoptionss').modal("show");
@@ -46,6 +46,12 @@ if (byuuid !== undefined ) {edit_item(byuuid);}
             function edit_type(clicked_type)
             {  clicked_type_id = clicked_type;
               $('#editType').modal("show");
+            };
+            
+        var clicked_dict_id;
+            function edit_dict(clicked_dictid)
+            {  clicked_dict_id = clicked_dictid;
+              $('#editDict').modal("show");
             };
 
 

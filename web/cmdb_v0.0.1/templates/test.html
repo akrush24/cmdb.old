@@ -1,14 +1,27 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<button class="btn btn btn-default" data-toggle="modal" data-target="#editoptionss">
-		<span class="glyphicon glyphicon-plus"></span> Редактировать опции
-	</button> 
+<div role="tabpanel">
 
-	
-	<script>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#typetab" aria-controls="typetab" role="tab" data-toggle="tab">Типы ресурсов</a></li>
+    <li role="presentation"><a href="#opttab" aria-controls="opttab" role="tab" data-toggle="tab">Опции типов</a></li>
+    <li role="presentation"><a href="#dicttab" aria-controls="dicttab" role="tab" data-toggle="tab">Справочники</a></li>
+    <li role="presentation"><a href="#users" aria-controls="users" role="tab" data-toggle="tab">Пользователи</a></li>
+  </ul>
 
-	</script>
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="typetab"></div>
+    <div role="tabpanel" class="tab-pane" id="opttab"></div>
+    <div role="tabpanel" class="tab-pane" id="dicttab"></div>
+    <div role="tabpanel" class="tab-pane" id="users"></div>
+  </div>
+
+</div>
+
+
 	
 
 	

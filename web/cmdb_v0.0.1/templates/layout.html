@@ -91,6 +91,7 @@ ul.ui-autocomplete {
       	 	<div class="col-lg-6" >
 				<form name="Ticketform" id="addNewTicket" action="{{ url_for('new_item') }}" method="post">
                     <select class="form-control" id="type_id_ticket" name="type_id"><option disabled>Выбрать</option></select>
+                    <br>
                     <div id="FrmFieldsDiv"></div> <!--Динамические поля ввода -->
                     <button type="submit"  class="btn hide"></button>
 				</form>
@@ -190,7 +191,7 @@ $('#editItem').on('show.bs.modal', function (e) {
                 for ( var i in obj) { 
 
 	if (obj[i].option_type == undefined || obj[i].option_type == "input" ) {
-		$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required=""></div></div>'); 
+		$("#itemOption").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+obj[i].name+'</div><input type="text" class="form-control" id="'+obj[i].opt_id+'" name="id'+obj[i].opt_id+'"  placeholder="'+obj[i].name+'" value="'+obj[i].value+'" required="" autocomplete="off"></div></div>'); 
 		};
 		
 	if (obj[i].option_type == "textarea") { 
@@ -271,7 +272,7 @@ $('#type_id_ticket').on('change',function(){
          for (var i in data) {
 		  
     if (data[i].option_type == "input" || data[i].option_type == undefined ) {
-	$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required=""></div></div>'); 
+	$("#FrmFieldsDiv").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">'+data[i].name+'</div><input type="text" class="form-control" id="i'+data[i].id+'" name="id'+data[i].id+'"  placeholder="'+data[i].name+'" value="" required="" autocomplete="off" ></div></div>'); 
            };
 			
 	if (data[i].option_type == "textarea") { 
@@ -365,7 +366,7 @@ $('.login').autocomplete({
             response($.map(data, function(item){ // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
               return{
                 label: item.fio+'| '+item.email+' '+item.jobtitle+' '+item.telephoneNumber, // label это надпись в списке, ей присваиваем параметр из name.
-                value: item.email+'('+item.fio+')'  // value значение которое присвоится полю ввода из ключа hash в json.
+                value: item.login  // value значение которое присвоится полю ввода из ключа hash в json.
               }
             }));
           }
