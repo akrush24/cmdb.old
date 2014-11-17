@@ -706,9 +706,8 @@ def before_request():
 ### -----------------------------------------------------------------
 ### Панель управления ............................................###
 """..............................................................."""
-@app.route('/control/', defaults={'action': "0"})
-@app.route('/control/<action>')
-def control(action):
+@app.route('/control')
+def control():
     type_cols = engine.execute('select * from types order by id desc').fetchall()
     option_cols = engine.execute('select * from options').fetchall()
     user_cols = engine.execute('select id, login, full_name, email from users order by id desc').fetchall()

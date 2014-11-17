@@ -330,19 +330,18 @@ $('#editoptionss').on('show.bs.modal', function (e) {
   $( "#selecttypediv" ).empty();
   $( "#editoptionstype" ).empty();
   $( "#fields" ).empty();
- // очищаем DOM дерево предыдущих полей ввода -->
 });
 
 
-	//var id; id опции
+
     var select_visible;
-    var select_frontpage; <!-- Временные переменные -->
+    var select_frontpage;
 
     $(function(){
                 $.getJSON('{{ url_for('get_list_option') }}?&opt_id='+c_id+'', function(obji) {
                 for ( var i in obji) { 
                 var dict_id_value = obji[i].dict_id;
-                drawoptionsview(obji[i].option_type,obji[i].dict_id); // выполняем функцию отрисовки
+                drawoptionsview(obji[i].option_type,obji[i].dict_id);
     
     $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Название</div><input type="text" class="form-control" id="'+obji[i].type_id+'" name="name"  placeholder="'+obji[i].name+'" value="'+obji[i].name+'" required=""></div>'); //name=name
     $("#fields").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Описание</div><input type="text" class="form-control" id="description" name="description" value="'+obji[i].description+'" required=""></div>'); //description=description.
@@ -355,12 +354,12 @@ $('#editoptionss').on('show.bs.modal', function (e) {
     }; //endFor
 
     function drawoptionsview(opt_tp,dict_id_value) {
-    if (opt_tp == undefined || opt_tp == "input" ) { // ничего или input то установить как input
-		opt_tp = "input"; // присвоить тип как Input
-		$("#changeoption_type").val(opt_tp); // выбрать в меню input
+    if (opt_tp == undefined || opt_tp == "input" ) { // is nothing or input set input
+		opt_tp = "input"; 
+		$("#changeoption_type").val(opt_tp);
 	} else { 
             $("#changeoption_type").val(opt_tp); 
-                }; //или если 
+                };
 	
     if (opt_tp == "dict") {
         $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Справочник</option></select>'); //name=dict_id, 
@@ -376,9 +375,9 @@ $('#editoptionss').on('show.bs.modal', function (e) {
        };
        }; //end func
        
-       $('#changeoption_type').change(function(){  //выбор вида опции
-        $( "#editoptionstype" ).empty(); //чистим контейнер
-        var sellectedtype = $('#changeoption_type option:selected').val();  // если изменили вид опции то ...
+       $('#changeoption_type').change(function(){  //on change option
+        $( "#editoptionstype" ).empty();
+        var sellectedtype = $('#changeoption_type option:selected').val();  //on change
         
         if (sellectedtype == "dict") {
             $("#editoptionstype").append('<div class="form-group"><div class="input-group"><div class="input-group-addon">Справочник</div><select class="form-control" id="dict_list_id" name="dict_id"><option disabled>Выбрать</option></select>');
@@ -403,6 +402,19 @@ $('#editoptionss').on('show.bs.modal', function (e) {
            
 </script>
 
+<script> //подставляет якорь в адрес, работают вкладки tab
+$(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+});
+</script>
 
 
 <div role="tabpanel">
