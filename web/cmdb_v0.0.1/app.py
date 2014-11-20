@@ -377,6 +377,114 @@ def get_list_user_ldap():
     return simplejson.dumps(ldap_users)
 
 
+def show_entry(dn):
+    ad = ldap.initialize("ldap://192.168.10.2")
+    ad.protocol_version = ldap.VERSION3
+    ad.set_option(ldap.OPT_REFERRALS, 0)
+    ad.simple_bind_s('vmtest', 'qwerty$4')
+    
+    results = ad.search_s(dn, ldap.SCOPE_SUBTREE)
+    
+    count=0
+    ldap_entry=[]
+
+    for result in results:
+        if count <20:
+            try:
+                result[1]["mail"][0]
+                try:
+                    JobTitle=result[1]["title"][0]
+                except:
+                    JobTitle="NONE"
+                try:
+                    telephoneNumber=result[1]["telephoneNumber"][0]
+                except:
+                    telephoneNumber="NONE"                    
+                ldap_entry.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber))
+            except: #If No MAIL...
+                pass
+        count=count+1
+    ad.unbind_s()
+    
+    return ldap_entry
+
+    
+def show_dn(user):
+    ad = ldap.initialize("ldap://192.168.10.2")
+    ad.protocol_version = ldap.VERSION3
+    ad.set_option(ldap.OPT_REFERRALS, 0)
+    ad.simple_bind_s('vmtest', 'qwerty$4')
+    
+    search_filter = '(&(sAMAccountName=%s))' % user
+    results = ad.search_s("DC=at-consulting,DC=ru", ldap.SCOPE_SUBTREE, search_filter)
+    
+    count=0
+    ldap_entry=[]
+
+    for result in results:
+        if count < 1:
+            try:
+                result[1]["mail"][0]
+                try:
+                    JobTitle=result[1]["title"][0]
+                except:
+                    JobTitle="NONE"
+                try:
+                    telephoneNumber=result[1]["telephoneNumber"][0]
+                except:
+                    telephoneNumber="NONE"                    
+                #ldap_entry.append(dict(login=result[1]["sAMAccountName"][0], OU=result[1]["manager"], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber))
+                ldap_entry.append(result[0])
+            except: #If No MAIL...
+                pass
+        count=count+1
+    ad.unbind_s()
+    
+    return ldap_entry
+
+import ldap.modlist
+
+@app.route('/l/', methods=['GET'])
+def l():
+    username = 'ndvorchenko' #3250
+    num = b'3250'
+    flash (ldap_change_num(username, num))
+    dn = ''.join(str(e) for e in show_dn(username))
+    return str(show_entry(dn))
+
+
+def ldap_change_num(username, num):
+    if username is not None and num is not None:
+        num = str(num)
+        ad = ldap.initialize("ldap://192.168.10.2")
+        ad.protocol_version = ldap.VERSION3
+        ad.set_option(ldap.OPT_REFERRALS, 0)
+        ad.simple_bind_s('cmdb', 'S78nlwUtkHGa')
+           
+        try:
+            modlist = [(ldap.MOD_REPLACE, "telephoneNumber", num)]
+            dn = ''.join(str(e) for e in show_dn(username))
+            ad.modify_s(dn, modlist)
+            ad.unbind_s()
+            return 'Successful'
+        except ldap.INSUFFICIENT_ACCESS:
+            flash('Ошибка при изменении номера в LDAP, недостаточно прав')
+            ad.unbind_s()
+            return 'Ошибка при изменении номера в LDAP, недостаточно прав'
+        except ldap.UNWILLING_TO_PERFORM:
+            flash('Ошибка при изменении номера в LDAP, некорректное имя пользователя')
+            ad.unbind_s()
+            return 'Ошибка при изменении номера в LDAP, некорректное имя пользователя'
+        except Exception as e: 
+            flash('Ошибка при изменении номера в LDAP')
+            ad.unbind_s()
+            return str(e)
+    else:
+        ad.unbind_s()
+        return 'unSuccessful: user or num is not defined'
+        
+    
+        
 
 #......................................................#
 #### Обработка Словарей ####
@@ -495,6 +603,7 @@ def new_item():
             prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
             pref = re.findall(r"(\d+)", prefix.value)[0]
             set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
+            ldap_change_num(request.form['id889'], request.form['id895'])
             
     except:
         pass
@@ -524,6 +633,7 @@ def editres():
                         prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
                         pref = re.findall(r"(\d+)", prefix.value)[0]
                         set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
+                        ldap_change_num(request.form['id889'], request.form['id895'])
                 except IndexError:
                     engine.execute( 'insert into value (option_id, value, res_id) values (%s, %s, (select id from items where hash=%s and type_id=%s))', [option_id, value, id, types.id] )
                     # меняем номер в интранете
@@ -531,6 +641,7 @@ def editres():
                         prefix = db_session.query(Dict.value).filter(Dict.id==request.form['id896']).one()
                         pref = re.findall(r"(\d+)", prefix.value)[0]
                         set_num(login=request.form['id889'],num=pref+'P'+request.form['id895'])
+                        ldap_change_num(request.form['id889'], request.form['id895'])
         try:
             typename=engine.execute('select types.name from types, items where items.type_id=types.id and items.hash=%s and items.type_id=%s', [id, types.id]).fetchall()[0][0]
         except:

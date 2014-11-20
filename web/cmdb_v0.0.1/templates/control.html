@@ -436,8 +436,7 @@ $(function(){
 	</button>
     
     
-<table class="table table-bordered table-hover table-condensed">
-    <caption><h3>Типы ресурсов</h3></caption>    
+<table class="table table-bordered table-hover table-condensed">  
     <tr class="active">
     {% for cols_name in type_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
@@ -472,7 +471,6 @@ $(function(){
 	</button>
     
         <table class="table table-bordered table-hover table-condensed">
-        <caption><h3>Опции типов</h3></caption>
         <tr class="active">
         {% for cols_name in option_cols_names %}
             <th><center><b>{{ cols_name }}</b></center></th>
@@ -501,7 +499,6 @@ $(function(){
         <span class="glyphicon glyphicon-plus"></span> Справочник
     </button>
     <table class="table table-bordered table-hover table-condensed">
-    <caption><h3>Справочники (схема)</h3></caption>
     <tr class="active">
     {% for cols_name in dict_s_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
@@ -522,7 +519,6 @@ $(function(){
     </table>
     
     <table class="table table-bordered table-hover table-condensed">
-    <caption><h3>Справочники</h3></caption>
     <tr class="active">
     {% for cols_name in dict_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
@@ -558,7 +554,6 @@ $(function(){
         <span class="glyphicon glyphicon-plus"></span> Пользователь
     </button>
     <table class="table table-bordered table-hover table-condensed">
-    <caption><h3>Пользователи</h3></caption>
     <tr class="active">
     {% for cols_name in user_cols_names %}
         <th><center><b>{{ cols_name }}</b></center></th>
