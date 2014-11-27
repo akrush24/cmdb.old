@@ -444,13 +444,6 @@ def show_dn(user):
 
 import ldap.modlist
 
-@app.route('/l/', methods=['GET'])
-def l():
-    username = 'ndvorchenko' #3250
-    num = b'3250'
-    flash (ldap_change_num(username, num))
-    dn = ''.join(str(e) for e in show_dn(username))
-    return str(show_entry(dn))
 
 
 def ldap_change_num(username, num):
@@ -712,6 +705,11 @@ def index(typename, page):
                     if option_type == 'dict':
                         v = db_session.query(Dict.value).filter(Dict.id==entries[0][0]).one()
                         val.append(v.value)
+                    elif option_type == 'login':
+                        if show_dn(entries[0][0]) == []:
+                            val.append(entries[0][0]+' [USER NOT EXIST IN LDAP!!]')
+                        else:
+                            val.append(entries[0][0])
                     else:
                         val.append(entries[0][0])
                 except:
