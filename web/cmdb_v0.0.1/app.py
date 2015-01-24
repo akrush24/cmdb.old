@@ -341,7 +341,7 @@ def get_list_user_ldap():
     ad = ldap.initialize("ldap://192.168.10.2")
     ad.protocol_version = ldap.VERSION3
     ad.set_option(ldap.OPT_REFERRALS, 0)
-    ad.simple_bind_s('vmtest', 'qwerty$4')
+    ad.simple_bind_s('cmdb', 'S78nlwUtkHGa')
 
     basedn = 'DC=at-consulting,DC=ru'
     scope = ldap.SCOPE_SUBTREE
@@ -369,7 +369,12 @@ def get_list_user_ldap():
                     telephoneNumber=result[1]["telephoneNumber"][0]
                 except:
                     telephoneNumber="NONE"                    
-                ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber))
+                #ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber))
+                try:
+                    ou=re.findall(r'OU=([a-zA-Z0-9]*),',result[0])
+                except:
+                    ou=[]
+                ldap_users.append(dict(login=result[1]["sAMAccountName"][0], email=result[1]["mail"][0], fio=result[1]["cn"][0], jobtitle=JobTitle, telephoneNumber=telephoneNumber, ou=ou[0]))
             except: #If No MAIL...
                 pass
         count=count+1
@@ -381,7 +386,7 @@ def show_entry(dn):
     ad = ldap.initialize("ldap://192.168.10.2")
     ad.protocol_version = ldap.VERSION3
     ad.set_option(ldap.OPT_REFERRALS, 0)
-    ad.simple_bind_s('vmtest', 'qwerty$4')
+    ad.simple_bind_s('cmdb', 'S78nlwUtkHGa')
     
     results = ad.search_s(dn, ldap.SCOPE_SUBTREE)
     
@@ -413,7 +418,7 @@ def show_dn(user):
     ad = ldap.initialize("ldap://192.168.10.2")
     ad.protocol_version = ldap.VERSION3
     ad.set_option(ldap.OPT_REFERRALS, 0)
-    ad.simple_bind_s('vmtest', 'qwerty$4')
+    ad.simple_bind_s('cmdb', 'S78nlwUtkHGa')
     
     search_filter = '(&(sAMAccountName=%s))' % user
     results = ad.search_s("DC=at-consulting,DC=ru", ldap.SCOPE_SUBTREE, search_filter)
@@ -1042,7 +1047,7 @@ def s():
 def set_num(login, num):
     if num is not None and login is not None:
         #return 'curl -D- -X GET -H "Authorization: Basic dm10ZXN0OnF3ZXJ0eSQ0"  https://intranet.at-consulting.ru/api/?action=setPhone&login=vkarmanov&phone='+num
-        subprocess.call("curl -D- -X GET -H 'Authorization: Basic dm10ZXN0OnF3ZXJ0eSQ0'  'https://intranet.at-consulting.ru/api/?action=setPhone&login="+login+"&phone=%2b7'"+num, shell=True)
+        subprocess.call("curl -D- -X GET -H 'Authorization: Basic dm10ZXN0OkttciQ1TmZ2Rw=='  'https://intranet.at-consulting.ru/api/?action=setPhone&login="+login+"&phone=%2b7'"+num, shell=True)
         return 'OK'
     else:
         return 'Number nit set'

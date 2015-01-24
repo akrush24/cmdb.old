@@ -365,7 +365,7 @@ $('.login').autocomplete({
           success: function(data){ // обработка успешного выполнение запроса
             response($.map(data, function(item){ // приведем полученные данные к необходимому формату и передадим в предоставленную функцию response.
               return{
-                label: item.fio+'| '+item.email+' '+item.jobtitle+' '+item.telephoneNumber, // label это надпись в списке, ей присваиваем параметр из name.
+                label: item.fio+', '+item.email+', '+item.jobtitle+', '+item.ou+', '+item.telephoneNumber, // label это надпись в списке, ей присваиваем параметр из name.
                 value: item.login  // value значение которое присвоится полю ввода из ключа hash в json.
               }
             }));
