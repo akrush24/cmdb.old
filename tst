@@ -1,9 +1,0 @@
-conf
-db
-git_push.sh
-inotifywait.sh
-README.md
-test
-TODO.md
-tst
-web
